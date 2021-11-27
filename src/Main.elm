@@ -30,13 +30,12 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { entities =
             emptyEntityTable
-                |> addEntityAndDiscard initComponentSet
+                |> addEntityAndDiscard emptyComponentSet
                 |> addEntityAndDiscard exampleComponentSet
       , pause = False
       }
     , Cmd.none
     )
-
 
 
 
@@ -60,7 +59,6 @@ update msg model =
             ( { model | pause = not model.pause }
             , Cmd.none
             )
-
 
 
 
@@ -88,6 +86,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     if model.pause then
         Sub.none
+
     else
         Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
 
@@ -119,9 +118,11 @@ addEntity entity (Table nextId dict) =
     , Id nextId
     )
 
+
 addEntityAndDiscard : a -> Table a -> Table a
 addEntityAndDiscard entity (Table nextId dict) =
     Table (nextId + 1) (Dict.insert nextId entity dict)
+
 
 getEntity : Id -> Table a -> Maybe a
 getEntity (Id id) (Table _ dict) =
@@ -144,21 +145,16 @@ type alias ComponentSet =
     }
 
 
-type LifeComponent =
-    LifeComponent Int
-
---type alias LifeComponent =
---    { healPoints : Int
---    }
+type LifeComponent
+    = LifeComponent Int
 
 
-type alias PositionComponent =
-    { x : Int
-    }
+type PositionComponent
+    = PositionComponent Int
 
 
-initComponentSet : ComponentSet
-initComponentSet =
+emptyComponentSet : ComponentSet
+emptyComponentSet =
     { lifeComponent = Nothing
     , positionComponent = Nothing
     }
@@ -167,84 +163,31 @@ initComponentSet =
 exampleComponentSet : ComponentSet
 exampleComponentSet =
     { lifeComponent = Just (LifeComponent 0)
-    , positionComponent = Just { x = 0 }
+    , positionComponent = Just (PositionComponent 0)
     }
 
 
-
--- System
-
-
---fellSystem : Float -> EntityTable -> EntityTable
---fellSystem dt entityTable =
---    mapComponentSet
---        (\componentSet ->
---            let
---                updatedComponents =
---                     Maybe.map
---                        updateFellComponents
---                        (extractFellSystemComponents componentSet)
---            in
---                case updatedComponents of
---                    Nothing ->
---                        componentSet
---
---                    Just ( life, pos ) ->
---                        { lifeComponent = Just life
---                        , positionComponent = Just pos
---                        }
---        )
---        entityTable
---    -- updateFellComponents
-
-
---updateFellComponentSet : ComponentSet -> ComponentSet
---updateFellComponentSet componentSet =
---    case tryUpdateFellSystem componentSet of
---        Nothing ->
---            componentSet
---
---        Just ( life, pos ) ->
---            { lifeComponent = Just life
---            , positionComponent = Just pos
---            }
---
---
---tryUpdateFellSystem : ComponentSet -> Maybe ( LifeComponent, PositionComponent )
---tryUpdateFellSystem componentSet =
---    componentSet
---        |> extractFellSystemComponents
---        |> Maybe.map updateFellComponents
---
---
---extractFellSystemComponents : ComponentSet -> Maybe ( LifeComponent, PositionComponent )
---extractFellSystemComponents componentSet =
---    Maybe.map2
---        Tuple.pair
---        componentSet.lifeComponent
---        componentSet.positionComponent
-
-
-
-type alias Type a =
+type alias ComponentType a =
     { get : ComponentSet -> Maybe a
     , set : a -> ComponentSet -> ComponentSet
     }
 
-lifeComponentType : Type LifeComponent
+
+lifeComponentType : ComponentType LifeComponent
 lifeComponentType =
-    { get = (\set -> set.lifeComponent)
-    , set = (\life set -> { set | lifeComponent = Just life })
+    { get = \set -> set.lifeComponent
+    , set = \life set -> { set | lifeComponent = Just life }
     }
 
-positionComponentType : Type PositionComponent
+
+positionComponentType : ComponentType PositionComponent
 positionComponentType =
-    { get = (\set -> set.positionComponent)
-    , set = (\pos set -> { set | positionComponent = Just pos })
+    { get = \set -> set.positionComponent
+    , set = \pos set -> { set | positionComponent = Just pos }
     }
 
 
-mapType : (a -> a) -> Type a -> ComponentSet -> ComponentSet
+mapType : (a -> a) -> ComponentType a -> ComponentSet -> ComponentSet
 mapType f typeA set =
     let
         maybeA =
@@ -259,8 +202,9 @@ mapType f typeA set =
             Nothing ->
                 set
 
-map2Type : (a -> b -> (a, b)) -> (Type a, Type b) -> ComponentSet -> ComponentSet
-map2Type f (typeA, typeB) set =
+
+map2Type : (a -> b -> ( a, b )) -> ( ComponentType a, ComponentType b ) -> ComponentSet -> ComponentSet
+map2Type f ( typeA, typeB ) set =
     let
         maybeAB =
             Maybe.map2
@@ -269,7 +213,7 @@ map2Type f (typeA, typeB) set =
                 (typeB.get set)
     in
         case maybeAB of
-            Just (a, b) ->
+            Just ( a, b ) ->
                 set
                     |> typeA.set a
                     |> typeB.set b
@@ -278,32 +222,20 @@ map2Type f (typeA, typeB) set =
                 set
 
 
-mapMatchingComponents
-    : (Type a, Type b)
-    -> (a -> b -> (a, b))
-    -> EntityTable
-    -> EntityTable
-
-mapMatchingComponents components f table =
-    mapComponentSet
-        (\ componentSet ->
-            map2Type
-                f
-                components
-                componentSet
-        )
-        table
-
-
 fellSystem : Float -> EntityTable -> EntityTable
 fellSystem dt entityTable =
-    mapMatchingComponents (lifeComponentType, positionComponentType) updateFellComponents entityTable
+    mapComponentSet
+        (\componentSet ->
+            map2Type
+                updateFellComponents
+                ( lifeComponentType, positionComponentType )
+                componentSet
+        )
+        entityTable
 
 
 updateFellComponents : LifeComponent -> PositionComponent -> ( LifeComponent, PositionComponent )
-updateFellComponents (LifeComponent hp) position =
-    ( LifeComponent ( hp - 1 )
-    , { x = position.x - 1 }
+updateFellComponents (LifeComponent hp) (PositionComponent x) =
+    ( LifeComponent (hp - 1)
+    , PositionComponent (x - 1)
     )
-
-
