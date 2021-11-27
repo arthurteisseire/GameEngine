@@ -6,14 +6,16 @@ import Dict exposing (Dict)
 import Html
 import Html.Events
 
+import ECS
 
-main =
-    Browser.document
-        { init = init
-        , update = update
-        , view = view
-        , subscriptions = subscriptions
-        }
+main = ECS.main
+--main =
+--    Browser.document
+--        { init = init
+--        , update = update
+--        , view = view
+--        , subscriptions = subscriptions
+--        }
 
 
 type alias Model =
