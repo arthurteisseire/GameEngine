@@ -5,6 +5,9 @@ import Browser.Events
 import Dict exposing (Dict)
 import Html exposing (Html)
 
+import ComponentPosition exposing (ComponentPosition)
+import ComponentLife exposing (ComponentLife)
+
 
 main =
     Browser.document
@@ -16,8 +19,8 @@ main =
 
 
 type alias Model =
-    { positions : Table PositionComponent
-    , lifes : Table LifeComponent
+    { positionComponents : Table ComponentPosition
+    , lifeComponents : Table ComponentLife
     }
 
 
@@ -26,13 +29,18 @@ init _ =
     let
         entity =
             EntityId 0
+
+        positionComponents =
+            emptyComponentTable
+                |> setComponent entity ComponentPosition.identity
+
+        lifeComponents =
+            emptyComponentTable
+                |> setComponent entity ComponentLife.identity
+
     in
-    ( { positions =
-            emptyComponentTable
-                |> setComponent entity (PositionComponent 0)
-      , lifes =
-            emptyComponentTable
-                |> setComponent entity (LifeComponent 100)
+    ( { positionComponents = positionComponents
+      , lifeComponents = lifeComponents
       }
     , Cmd.none
     )
@@ -51,12 +59,12 @@ update msg model =
                     EntityId 0
 
                 maybe =
-                    Maybe.map2 damageSystem (getComponent entity model.positions) (getComponent entity model.lifes)
+                    map2Component damageSystem entity model.positionComponents model.lifeComponents
             in
             case maybe of
                 Just ( position, life ) ->
-                    ( { positions = model.positions |> setComponent entity position
-                      , lifes = model.lifes |> setComponent entity life
+                    ( { positionComponents = model.positionComponents |> setComponent entity position
+                      , lifeComponents = model.lifeComponents |> setComponent entity life
                       }
                     , Cmd.none
                     )
@@ -65,9 +73,9 @@ update msg model =
                     ( model, Cmd.none )
 
 
-damageSystem : PositionComponent -> LifeComponent -> ( PositionComponent, LifeComponent )
+damageSystem : ComponentPosition -> ComponentLife -> ( ComponentPosition, ComponentLife )
 damageSystem position life =
-    ( position, life )
+    ( position, ComponentLife.mapHp (\hp -> hp - 1) life )
 
 
 view : Model -> Browser.Document Msg
@@ -87,19 +95,8 @@ subscriptions model =
 
 
 
--- Components
 
-
-type PositionComponent
-    = PositionComponent Int
-
-
-type LifeComponent
-    = LifeComponent Int
-
-
-
--- Table
+-- Component Table
 
 
 type Table a
@@ -114,12 +111,18 @@ emptyComponentTable : Table a
 emptyComponentTable =
     Table Dict.empty
 
-
 setComponent : EntityId -> a -> Table a -> Table a
 setComponent (EntityId entityId) component (Table dict) =
     Table (Dict.insert entityId component dict)
 
-
 getComponent : EntityId -> Table a -> Maybe a
 getComponent (EntityId id) (Table dict) =
     Dict.get id dict
+
+map2Component : (a -> b -> (a, b)) -> EntityId -> Table a -> Table b -> Maybe (a, b)
+map2Component f entityId tableA tableB =
+    Maybe.map2
+        f
+        (getComponent entityId tableA)
+        (getComponent entityId tableB)
+
