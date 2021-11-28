@@ -65,7 +65,7 @@ update msg model =
         Tick dt ->
             let
                 ( newPositionComponents, newLifeComponents ) =
-                    damageSystem model.entities model.positionComponents model.lifeComponents
+                    damageSystem model.entities ( model.positionComponents, model.lifeComponents )
 
                 finalPositionComponents =
                     moveSystem model.entities newPositionComponents
@@ -78,11 +78,11 @@ update msg model =
             )
 
 
-damageSystem : EntityTable -> Table ComponentPosition -> Table ComponentLife -> ( Table ComponentPosition, Table ComponentLife )
-damageSystem entityTable positionComponents lifeComponents =
+damageSystem : EntityTable -> ( Table ComponentPosition, Table ComponentLife ) -> ( Table ComponentPosition, Table ComponentLife )
+damageSystem entityTable componentTables =
     foldlEntityTable
         (mapTable2 updateDamageSystem)
-        ( positionComponents, lifeComponents )
+        componentTables
         entityTable
 
 
