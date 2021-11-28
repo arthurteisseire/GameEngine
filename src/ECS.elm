@@ -67,11 +67,11 @@ update msg model =
                 ( newPositionComponents, newLifeComponents ) =
                     damageSystem model.entities model.positionComponents model.lifeComponents
 
-                newPosComponents =
+                finalPositionComponents =
                     moveSystem model.entities newPositionComponents
             in
             ( { entities = model.entities
-              , positionComponents = newPosComponents
+              , positionComponents = finalPositionComponents
               , lifeComponents = newLifeComponents
               }
             , Cmd.none
@@ -121,13 +121,25 @@ view model =
             , SA.height "300"
             , SA.viewBox "0 0 10 10"
             ]
-            (List.filterMap identity [ mapComponent systemDraw (EntityId 0) model.positionComponents ])
+            (systemDraw model.entities model.positionComponents)
         ]
     }
 
 
-systemDraw : ComponentPosition -> Svg Msg
-systemDraw position =
+systemDraw : EntityTable -> Table ComponentPosition -> List (Svg Msg)
+systemDraw entityTable positionComponents =
+    List.filterMap
+        identity
+        (mapEntityTable
+            (\entityId ->
+                mapComponent toSvg entityId positionComponents
+            )
+            entityTable
+        )
+
+
+toSvg : ComponentPosition -> Svg Msg
+toSvg position =
     Svg.rect
         [ SA.x <| String.fromInt (ComponentPosition.getX position)
         , SA.y <| String.fromInt (ComponentPosition.getY position)
@@ -148,7 +160,11 @@ subscriptions model =
 
 
 
--- Entity List
+-- Entity Table
+
+
+type EntityId
+    = EntityId Int
 
 
 type EntityTable
@@ -172,16 +188,17 @@ foldlEntityTable f b (EntityTable _ entities) =
     List.foldl f b entities
 
 
+mapEntityTable : (EntityId -> b) -> EntityTable -> List b
+mapEntityTable f (EntityTable _ entities) =
+    List.map f entities
+
+
 
 -- Component Table
 
 
 type Table a
     = Table (Dict Int a)
-
-
-type EntityId
-    = EntityId Int
 
 
 emptyComponentTable : Table a
