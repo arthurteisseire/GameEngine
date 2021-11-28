@@ -19,7 +19,8 @@ main =
 
 
 type alias Model =
-    { positionComponents : Table ComponentPosition
+    { entities : EntityTable
+    , positionComponents : Table ComponentPosition
     , lifeComponents : Table ComponentLife
     }
 
@@ -31,18 +32,19 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     let
-        entity =
-            EntityId 0
+        ( entities, entityId ) =
+            addEntity emptyEntityTable
 
         positionComponents =
             emptyComponentTable
-                |> setComponent entity ComponentPosition.identity
+                |> setComponent entityId ComponentPosition.identity
 
         lifeComponents =
             emptyComponentTable
-                |> setComponent entity ComponentLife.identity
+                |> setComponent entityId ComponentLife.identity
     in
-    ( { positionComponents = positionComponents
+    ( { entities = entities
+      , positionComponents = positionComponents
       , lifeComponents = lifeComponents
       }
     , Cmd.none
@@ -62,29 +64,47 @@ update msg model =
     case msg of
         Tick dt ->
             let
-                entity =
-                    EntityId 0
-
                 ( newPositionComponents, newLifeComponents ) =
-                    mapTable2 damageSystem entity model.positionComponents model.lifeComponents
+                    damageSystem model.entities model.positionComponents model.lifeComponents
 
                 newPosComponents =
-                    mapTable moveSystem entity newPositionComponents
+                    moveSystem model.entities newPositionComponents
             in
-            ( { positionComponents = newPosComponents
+            ( { entities = model.entities
+              , positionComponents = newPosComponents
               , lifeComponents = newLifeComponents
               }
             , Cmd.none
             )
 
 
-damageSystem : ComponentPosition -> ComponentLife -> ( ComponentPosition, ComponentLife )
-damageSystem position life =
+damageSystem : EntityTable -> Table ComponentPosition -> Table ComponentLife -> ( Table ComponentPosition, Table ComponentLife )
+damageSystem entityTable positionComponents lifeComponents =
+    foldlEntityTable
+        (\entityId ( actualPositionComponents, actualLifeComponents ) ->
+            mapTable2 updateDamageSystem entityId actualPositionComponents actualLifeComponents
+        )
+        ( positionComponents, lifeComponents )
+        entityTable
+
+
+updateDamageSystem : ComponentPosition -> ComponentLife -> ( ComponentPosition, ComponentLife )
+updateDamageSystem position life =
     ( position, ComponentLife.mapHp (\hp -> hp - 1) life )
 
 
-moveSystem : ComponentPosition -> ComponentPosition
-moveSystem position =
+moveSystem : EntityTable -> Table ComponentPosition -> Table ComponentPosition
+moveSystem entityTable positionComponents =
+    foldlEntityTable
+        (\entityId accPositionComponents ->
+            mapTable updateMoveSystem entityId accPositionComponents
+        )
+        positionComponents
+        entityTable
+
+
+updateMoveSystem : ComponentPosition -> ComponentPosition
+updateMoveSystem position =
     ComponentPosition.mapX (\x -> x + 1) position
 
 
@@ -125,6 +145,31 @@ systemDraw position =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
+
+
+
+-- Entity List
+
+
+type EntityTable
+    = EntityTable Int (List EntityId)
+
+
+emptyEntityTable : EntityTable
+emptyEntityTable =
+    EntityTable 0 []
+
+
+addEntity : EntityTable -> ( EntityTable, EntityId )
+addEntity (EntityTable nextId entities) =
+    ( EntityTable (nextId + 1) (EntityId nextId :: entities)
+    , EntityId nextId
+    )
+
+
+foldlEntityTable : (EntityId -> b -> b) -> b -> EntityTable -> b
+foldlEntityTable f b (EntityTable _ entities) =
+    List.foldl f b entities
 
 
 
