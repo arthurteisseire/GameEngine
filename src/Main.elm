@@ -81,9 +81,7 @@ update msg model =
 damageSystem : EntityTable -> Table ComponentPosition -> Table ComponentLife -> ( Table ComponentPosition, Table ComponentLife )
 damageSystem entityTable positionComponents lifeComponents =
     foldlEntityTable
-        (\entityId ( actualPositionComponents, actualLifeComponents ) ->
-            mapTable2 updateDamageSystem entityId actualPositionComponents actualLifeComponents
-        )
+        (mapTable2 updateDamageSystem)
         ( positionComponents, lifeComponents )
         entityTable
 
@@ -96,9 +94,7 @@ updateDamageSystem position life =
 moveSystem : EntityTable -> Table ComponentPosition -> Table ComponentPosition
 moveSystem entityTable positionComponents =
     foldlEntityTable
-        (\entityId accPositionComponents ->
-            mapTable updateMoveSystem entityId accPositionComponents
-        )
+        (mapTable updateMoveSystem)
         positionComponents
         entityTable
 
@@ -241,8 +237,8 @@ mapTable f entityId tableA =
             tableA
 
 
-mapTable2 : (a -> b -> ( a, b )) -> EntityId -> Table a -> Table b -> ( Table a, Table b )
-mapTable2 f entityId tableA tableB =
+mapTable2 : (a -> b -> ( a, b )) -> EntityId -> ( Table a, Table b ) -> ( Table a, Table b )
+mapTable2 f entityId ( tableA, tableB ) =
     case map2Component f entityId tableA tableB of
         Just ( a, b ) ->
             ( setComponent entityId a tableA, setComponent entityId b tableB )
