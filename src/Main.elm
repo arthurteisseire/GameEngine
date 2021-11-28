@@ -2,25 +2,26 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events
+import ComponentLife exposing (ComponentLife)
+import ComponentPosition exposing (ComponentPosition)
 import Dict exposing (Dict)
-import Html
-import Html.Events
+import Svg exposing (Svg)
+import Svg.Attributes as SA
 
-import ECS
 
-main = ECS.main
---main =
---    Browser.document
---        { init = init
---        , update = update
---        , view = view
---        , subscriptions = subscriptions
---        }
+main =
+    Browser.document
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
 
 
 type alias Model =
     { entities : EntityTable
-    , pause : Bool
+    , positionComponents : Table ComponentPosition
+    , lifeComponents : Table ComponentLife
     }
 
 
@@ -30,11 +31,21 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { entities =
-            emptyEntityTable
-                |> addEntityAndDiscard emptyComponentSet
-                |> addEntityAndDiscard exampleComponentSet
-      , pause = False
+    let
+        ( entities, entityId ) =
+            addEntity emptyEntityTable
+
+        positionComponents =
+            emptyComponentTable
+                |> setComponent entityId ComponentPosition.identity
+
+        lifeComponents =
+            emptyComponentTable
+                |> setComponent entityId ComponentLife.identity
+    in
+    ( { entities = entities
+      , positionComponents = positionComponents
+      , lifeComponents = lifeComponents
       }
     , Cmd.none
     )
@@ -46,21 +57,55 @@ init _ =
 
 type Msg
     = Tick Float
-    | TogglePause
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick dt ->
-            ( { model | entities = Debug.log "Entities" <| fellSystem dt model.entities }
+            let
+                ( newPositionComponents, newLifeComponents ) =
+                    damageSystem model.entities model.positionComponents model.lifeComponents
+
+                finalPositionComponents =
+                    moveSystem model.entities newPositionComponents
+            in
+            ( { entities = model.entities
+              , positionComponents = finalPositionComponents
+              , lifeComponents = newLifeComponents
+              }
             , Cmd.none
             )
 
-        TogglePause ->
-            ( { model | pause = not model.pause }
-            , Cmd.none
-            )
+
+damageSystem : EntityTable -> Table ComponentPosition -> Table ComponentLife -> ( Table ComponentPosition, Table ComponentLife )
+damageSystem entityTable positionComponents lifeComponents =
+    foldlEntityTable
+        (\entityId ( actualPositionComponents, actualLifeComponents ) ->
+            mapTable2 updateDamageSystem entityId actualPositionComponents actualLifeComponents
+        )
+        ( positionComponents, lifeComponents )
+        entityTable
+
+
+updateDamageSystem : ComponentPosition -> ComponentLife -> ( ComponentPosition, ComponentLife )
+updateDamageSystem position life =
+    ( position, ComponentLife.mapHp (\hp -> hp - 1) life )
+
+
+moveSystem : EntityTable -> Table ComponentPosition -> Table ComponentPosition
+moveSystem entityTable positionComponents =
+    foldlEntityTable
+        (\entityId accPositionComponents ->
+            mapTable updateMoveSystem entityId accPositionComponents
+        )
+        positionComponents
+        entityTable
+
+
+updateMoveSystem : ComponentPosition -> ComponentPosition
+updateMoveSystem position =
+    ComponentPosition.mapX (\x -> x + 1) position
 
 
 
@@ -68,16 +113,41 @@ update msg model =
 
 
 view : Model -> Browser.Document Msg
-view _ =
-    { title = "GameEngine"
+view model =
+    { title = "ECS"
     , body =
-        [ Html.div
-            [ Html.Events.onClick TogglePause
+        [ Svg.svg
+            [ SA.width "300"
+            , SA.height "300"
+            , SA.viewBox "0 0 10 10"
             ]
-            [ Html.text "coucou"
-            ]
+            (systemDraw model.entities model.positionComponents)
         ]
     }
+
+
+systemDraw : EntityTable -> Table ComponentPosition -> List (Svg Msg)
+systemDraw entityTable positionComponents =
+    List.filterMap
+        identity
+        (mapEntityTable
+            (\entityId ->
+                mapComponent toSvg entityId positionComponents
+            )
+            entityTable
+        )
+
+
+toSvg : ComponentPosition -> Svg Msg
+toSvg position =
+    Svg.rect
+        [ SA.x <| String.fromInt (ComponentPosition.getX position)
+        , SA.y <| String.fromInt (ComponentPosition.getY position)
+        , SA.width "1"
+        , SA.height "1"
+        , SA.fill "black"
+        ]
+        []
 
 
 
@@ -86,158 +156,96 @@ view _ =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    if model.pause then
-        Sub.none
-
-    else
-        Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
+    Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
 
 
 
--- Entity
+-- Entity Table
 
 
-type alias EntityTable =
-    Table ComponentSet
+type EntityId
+    = EntityId Int
+
+
+type EntityTable
+    = EntityTable Int (List EntityId)
+
+
+emptyEntityTable : EntityTable
+emptyEntityTable =
+    EntityTable 0 []
+
+
+addEntity : EntityTable -> ( EntityTable, EntityId )
+addEntity (EntityTable nextId entities) =
+    ( EntityTable (nextId + 1) (EntityId nextId :: entities)
+    , EntityId nextId
+    )
+
+
+foldlEntityTable : (EntityId -> b -> b) -> b -> EntityTable -> b
+foldlEntityTable f b (EntityTable _ entities) =
+    List.foldl f b entities
+
+
+mapEntityTable : (EntityId -> b) -> EntityTable -> List b
+mapEntityTable f (EntityTable _ entities) =
+    List.map f entities
+
+
+
+-- Component Table
 
 
 type Table a
-    = Table Int (Dict Int a)
+    = Table (Dict Int a)
 
 
-type Id
-    = Id Int
+emptyComponentTable : Table a
+emptyComponentTable =
+    Table Dict.empty
 
 
-emptyEntityTable : Table a
-emptyEntityTable =
-    Table 0 Dict.empty
+setComponent : EntityId -> a -> Table a -> Table a
+setComponent (EntityId entityId) component (Table dict) =
+    Table (Dict.insert entityId component dict)
 
 
-addEntity : a -> Table a -> ( Table a, Id )
-addEntity entity (Table nextId dict) =
-    ( Table (nextId + 1) (Dict.insert nextId entity dict)
-    , Id nextId
-    )
-
-
-addEntityAndDiscard : a -> Table a -> Table a
-addEntityAndDiscard entity (Table nextId dict) =
-    Table (nextId + 1) (Dict.insert nextId entity dict)
-
-
-getEntity : Id -> Table a -> Maybe a
-getEntity (Id id) (Table _ dict) =
+getComponent : EntityId -> Table a -> Maybe a
+getComponent (EntityId id) (Table dict) =
     Dict.get id dict
 
 
-mapComponentSet : (a -> a) -> Table a -> Table a
-mapComponentSet f (Table size dict) =
-    Table size <|
-        Dict.map (\_ a -> f a) dict
+mapComponent : (a -> res) -> EntityId -> Table a -> Maybe res
+mapComponent f entityId tableA =
+    Maybe.map
+        f
+        (getComponent entityId tableA)
 
 
-
--- Components
-
-
-type alias ComponentSet =
-    { lifeComponent : Maybe LifeComponent
-    , positionComponent : Maybe PositionComponent
-    }
+map2Component : (a -> b -> ( resA, resB )) -> EntityId -> Table a -> Table b -> Maybe ( resA, resB )
+map2Component f entityId tableA tableB =
+    Maybe.map2
+        f
+        (getComponent entityId tableA)
+        (getComponent entityId tableB)
 
 
-type LifeComponent
-    = LifeComponent Int
+mapTable : (a -> a) -> EntityId -> Table a -> Table a
+mapTable f entityId tableA =
+    case mapComponent f entityId tableA of
+        Just a ->
+            setComponent entityId a tableA
+
+        Nothing ->
+            tableA
 
 
-type PositionComponent
-    = PositionComponent Int
+mapTable2 : (a -> b -> ( a, b )) -> EntityId -> Table a -> Table b -> ( Table a, Table b )
+mapTable2 f entityId tableA tableB =
+    case map2Component f entityId tableA tableB of
+        Just ( a, b ) ->
+            ( setComponent entityId a tableA, setComponent entityId b tableB )
 
-
-emptyComponentSet : ComponentSet
-emptyComponentSet =
-    { lifeComponent = Nothing
-    , positionComponent = Nothing
-    }
-
-
-exampleComponentSet : ComponentSet
-exampleComponentSet =
-    { lifeComponent = Just (LifeComponent 0)
-    , positionComponent = Just (PositionComponent 0)
-    }
-
-
-type alias ComponentType a =
-    { get : ComponentSet -> Maybe a
-    , set : a -> ComponentSet -> ComponentSet
-    }
-
-
-lifeComponentType : ComponentType LifeComponent
-lifeComponentType =
-    { get = \set -> set.lifeComponent
-    , set = \life set -> { set | lifeComponent = Just life }
-    }
-
-
-positionComponentType : ComponentType PositionComponent
-positionComponentType =
-    { get = \set -> set.positionComponent
-    , set = \pos set -> { set | positionComponent = Just pos }
-    }
-
-
-mapType : (a -> a) -> ComponentType a -> ComponentSet -> ComponentSet
-mapType f typeA set =
-    let
-        maybeA =
-            Maybe.map
-                f
-                (typeA.get set)
-    in
-        case maybeA of
-            Just a ->
-                typeA.set a set
-
-            Nothing ->
-                set
-
-
-map2Type : (a -> b -> ( a, b )) -> ( ComponentType a, ComponentType b ) -> ComponentSet -> ComponentSet
-map2Type f ( typeA, typeB ) set =
-    let
-        maybeAB =
-            Maybe.map2
-                f
-                (typeA.get set)
-                (typeB.get set)
-    in
-        case maybeAB of
-            Just ( a, b ) ->
-                set
-                    |> typeA.set a
-                    |> typeB.set b
-
-            Nothing ->
-                set
-
-
-fellSystem : Float -> EntityTable -> EntityTable
-fellSystem dt entityTable =
-    mapComponentSet
-        (\componentSet ->
-            map2Type
-                updateFellComponents
-                ( lifeComponentType, positionComponentType )
-                componentSet
-        )
-        entityTable
-
-
-updateFellComponents : LifeComponent -> PositionComponent -> ( LifeComponent, PositionComponent )
-updateFellComponents (LifeComponent hp) (PositionComponent x) =
-    ( LifeComponent (hp - 1)
-    , PositionComponent (x - 1)
-    )
+        Nothing ->
+            ( tableA, tableB )
