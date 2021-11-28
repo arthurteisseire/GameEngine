@@ -127,9 +127,7 @@ systemDraw entityTable positionComponents =
     List.filterMap
         identity
         (mapEntityTable
-            (\entityId ->
-                mapComponent toSvg entityId positionComponents
-            )
+            (mapComponent toSvg positionComponents)
             entityTable
         )
 
@@ -207,29 +205,29 @@ setComponent (EntityId entityId) component (Table dict) =
     Table (Dict.insert entityId component dict)
 
 
-getComponent : EntityId -> Table a -> Maybe a
-getComponent (EntityId id) (Table dict) =
+getComponent : Table a -> EntityId -> Maybe a
+getComponent (Table dict) (EntityId id) =
     Dict.get id dict
 
 
-mapComponent : (a -> res) -> EntityId -> Table a -> Maybe res
-mapComponent f entityId tableA =
+mapComponent : (a -> res) -> Table a -> EntityId -> Maybe res
+mapComponent f tableA entityId =
     Maybe.map
         f
-        (getComponent entityId tableA)
+        (getComponent tableA entityId)
 
 
-map2Component : (a -> b -> ( resA, resB )) -> EntityId -> Table a -> Table b -> Maybe ( resA, resB )
-map2Component f entityId tableA tableB =
+map2Component : (a -> b -> ( resA, resB )) -> Table a -> Table b -> EntityId -> Maybe ( resA, resB )
+map2Component f tableA tableB entityId =
     Maybe.map2
         f
-        (getComponent entityId tableA)
-        (getComponent entityId tableB)
+        (getComponent tableA entityId)
+        (getComponent tableB entityId)
 
 
 mapTable : (a -> a) -> EntityId -> Table a -> Table a
 mapTable f entityId tableA =
-    case mapComponent f entityId tableA of
+    case mapComponent f tableA entityId of
         Just a ->
             setComponent entityId a tableA
 
@@ -239,7 +237,7 @@ mapTable f entityId tableA =
 
 mapTable2 : (a -> b -> ( a, b )) -> EntityId -> ( Table a, Table b ) -> ( Table a, Table b )
 mapTable2 f entityId ( tableA, tableB ) =
-    case map2Component f entityId tableA tableB of
+    case map2Component f tableA tableB entityId of
         Just ( a, b ) ->
             ( setComponent entityId a tableA, setComponent entityId b tableB )
 
