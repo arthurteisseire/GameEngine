@@ -65,10 +65,10 @@ update msg model =
         Tick dt ->
             let
                 ( newPositionComponents, newLifeComponents ) =
-                    damageSystem model.entities ( model.positionComponents, model.lifeComponents )
+                    damageSystem dt model.entities ( model.positionComponents, model.lifeComponents )
 
                 finalPositionComponents =
-                    moveSystem model.entities newPositionComponents
+                    moveSystem dt model.entities newPositionComponents
             in
             ( { entities = model.entities
               , positionComponents = finalPositionComponents
@@ -78,29 +78,29 @@ update msg model =
             )
 
 
-damageSystem : EntityTable -> ( Table ComponentPosition, Table ComponentLife ) -> ( Table ComponentPosition, Table ComponentLife )
-damageSystem entityTable componentTables =
+damageSystem : Float -> EntityTable -> ( Table ComponentPosition, Table ComponentLife ) -> ( Table ComponentPosition, Table ComponentLife )
+damageSystem dt entityTable componentTables =
     foldlEntityTable
-        (mapTable2 updateDamageSystem)
+        (mapTable2 (updateDamageSystem dt))
         componentTables
         entityTable
 
 
-updateDamageSystem : ComponentPosition -> ComponentLife -> ( ComponentPosition, ComponentLife )
-updateDamageSystem position life =
+updateDamageSystem : Float -> ComponentPosition -> ComponentLife -> ( ComponentPosition, ComponentLife )
+updateDamageSystem dt position life =
     ( position, ComponentLife.mapHp (\hp -> hp - 1) life )
 
 
-moveSystem : EntityTable -> Table ComponentPosition -> Table ComponentPosition
-moveSystem entityTable positionComponents =
+moveSystem : Float -> EntityTable -> Table ComponentPosition -> Table ComponentPosition
+moveSystem dt entityTable positionComponents =
     foldlEntityTable
-        (mapTable updateMoveSystem)
+        (mapTable (updateMoveSystem dt))
         positionComponents
         entityTable
 
 
-updateMoveSystem : ComponentPosition -> ComponentPosition
-updateMoveSystem position =
+updateMoveSystem : Float -> ComponentPosition -> ComponentPosition
+updateMoveSystem dt position =
     ComponentPosition.mapX (\x -> x + 1) position
 
 
