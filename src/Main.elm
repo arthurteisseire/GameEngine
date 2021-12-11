@@ -4,6 +4,7 @@ import Browser
 import Browser.Events
 import ComponentLife exposing (ComponentLife)
 import ComponentPosition exposing (ComponentPosition)
+import ComponentVisual exposing (ComponentVisual)
 import Dict exposing (Dict)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
@@ -22,6 +23,7 @@ type alias Model =
     { entities : EntityTable
     , positionComponents : Table ComponentPosition
     , lifeComponents : Table ComponentLife
+    , visualComponents : Table ComponentVisual
     }
 
 
@@ -32,20 +34,31 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     let
-        ( entities, entityId ) =
+        ( entities, playerId ) =
             addEntity emptyEntityTable
+
+        ( entities2, enemyId ) =
+            addEntity entities
 
         positionComponents =
             emptyComponentTable
-                |> setComponent entityId ComponentPosition.identity
+                |> setComponent playerId (ComponentPosition.mapX (\_ -> 4) ComponentPosition.identity)
+                |> setComponent enemyId (ComponentPosition.mapX (\_ -> 5) ComponentPosition.identity)
 
         lifeComponents =
             emptyComponentTable
-                |> setComponent entityId ComponentLife.identity
+                |> setComponent playerId ComponentLife.identity
+                |> setComponent enemyId ComponentLife.identity
+
+        visualComponents =
+            emptyComponentTable
+                |> setComponent playerId (ComponentVisual.init "blue")
+                |> setComponent enemyId (ComponentVisual.init "red")
     in
-    ( { entities = entities
+    ( { entities = entities2
       , positionComponents = positionComponents
       , lifeComponents = lifeComponents
+      , visualComponents = visualComponents
       }
     , Cmd.none
     )
@@ -70,9 +83,10 @@ update msg model =
                 finalPositionComponents =
                     moveSystem dt model.entities newPositionComponents
             in
-            ( { entities = model.entities
-              , positionComponents = finalPositionComponents
-              , lifeComponents = newLifeComponents
+            ( { model
+                | entities = model.entities
+                , positionComponents = finalPositionComponents
+                , lifeComponents = newLifeComponents
               }
             , Cmd.none
             )
@@ -101,7 +115,7 @@ moveSystem dt entityTable positionComponents =
 
 updateMoveSystem : Float -> ComponentPosition -> ComponentPosition
 updateMoveSystem dt position =
-    ComponentPosition.mapX (\x -> x + 1) position
+    ComponentPosition.mapX (\x -> x) position
 
 
 
@@ -117,29 +131,29 @@ view model =
             , SA.height "300"
             , SA.viewBox "0 0 10 10"
             ]
-            (systemDraw model.entities model.positionComponents)
+            (systemDraw model.entities (model.visualComponents, model.positionComponents))
         ]
     }
 
 
-systemDraw : EntityTable -> Table ComponentPosition -> List (Svg Msg)
-systemDraw entityTable positionComponents =
+systemDraw : EntityTable -> ( Table ComponentVisual, Table ComponentPosition ) -> List (Svg Msg)
+systemDraw entityTable componentTables =
     List.filterMap
         identity
         (mapEntityTable
-            (mapComponent toSvg positionComponents)
+            (map2ComponentView toSvg componentTables)
             entityTable
         )
 
 
-toSvg : ComponentPosition -> Svg Msg
-toSvg position =
+toSvg : ComponentVisual -> ComponentPosition -> Svg Msg
+toSvg visual position =
     Svg.rect
         [ SA.x <| String.fromInt (ComponentPosition.getX position)
         , SA.y <| String.fromInt (ComponentPosition.getY position)
         , SA.width "1"
         , SA.height "1"
-        , SA.fill "black"
+        , SA.fill (ComponentVisual.getColor visual)
         ]
         []
 
@@ -217,8 +231,15 @@ mapComponent f tableA entityId =
         (getComponent tableA entityId)
 
 
-map2Component : (a -> b -> ( resA, resB )) -> Table a -> Table b -> EntityId -> Maybe ( resA, resB )
-map2Component f tableA tableB entityId =
+map2ComponentView : (a -> b -> Svg Msg) -> ( Table a, Table b ) -> EntityId -> Maybe (Svg Msg)
+map2ComponentView f (tableA, tableB) entityId =
+    Maybe.map2
+        f
+        (getComponent tableA entityId)
+        (getComponent tableB entityId)
+
+map2Component : (a -> b -> ( resA, resB )) -> ( Table a, Table b ) -> EntityId -> Maybe ( resA, resB )
+map2Component f (tableA, tableB) entityId =
     Maybe.map2
         f
         (getComponent tableA entityId)
@@ -237,7 +258,7 @@ mapTable f entityId tableA =
 
 mapTable2 : (a -> b -> ( a, b )) -> EntityId -> ( Table a, Table b ) -> ( Table a, Table b )
 mapTable2 f entityId ( tableA, tableB ) =
-    case map2Component f tableA tableB entityId of
+    case map2Component f (tableA, tableB) entityId of
         Just ( a, b ) ->
             ( setComponent entityId a tableA, setComponent entityId b tableB )
 
