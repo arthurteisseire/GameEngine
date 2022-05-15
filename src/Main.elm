@@ -6,8 +6,12 @@ import ComponentLife exposing (ComponentLife)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVisual exposing (ComponentVisual)
 import Dict exposing (Dict)
+
+import Html exposing (Html)
+
 import Svg exposing (Svg)
 import Svg.Attributes as SA
+import Svg.Events as SE
 
 
 main =
@@ -24,6 +28,7 @@ type alias Model =
     , positionComponents : Table ComponentPosition
     , lifeComponents : Table ComponentLife
     , visualComponents : Table ComponentVisual
+    , entityIdDebug : Maybe EntityId
     }
 
 
@@ -59,6 +64,7 @@ init _ =
       , positionComponents = positionComponents
       , lifeComponents = lifeComponents
       , visualComponents = visualComponents
+      , entityIdDebug = Nothing
       }
     , Cmd.none
     )
@@ -70,6 +76,9 @@ init _ =
 
 type Msg
     = Tick Float
+    | Clicked -- TODO: Move Clicked Msg to VisualComponent
+    | DisplayDebug EntityId
+    | HideDebug
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -90,6 +99,19 @@ update msg model =
               }
             , Cmd.none
             )
+
+        DisplayDebug entityId ->
+            ( { model | entityIdDebug = Just entityId }
+            , Cmd.none
+            )
+
+        HideDebug ->
+            ( { model | entityIdDebug = Nothing }
+            , Cmd.none
+            )
+
+        Clicked ->
+            ( model, Cmd.none )
 
 
 damageSystem : Float -> EntityTable -> ( Table ComponentPosition, Table ComponentLife ) -> ( Table ComponentPosition, Table ComponentLife )
@@ -133,7 +155,20 @@ view model =
             ]
             (systemDraw model.entities (model.visualComponents, model.positionComponents))
         ]
+        ++
+        [ systemDisplayDebug model.entityIdDebug
+        ]
     }
+
+
+systemDisplayDebug : Maybe EntityId -> Html Msg
+systemDisplayDebug maybeEntityId =
+    case maybeEntityId of
+        Just (EntityId id) ->
+            Html.text ("Display debug: " ++ String.fromInt id)
+
+        Nothing ->
+            Html.text ""
 
 
 systemDraw : EntityTable -> ( Table ComponentVisual, Table ComponentPosition ) -> List (Svg Msg)
@@ -141,9 +176,19 @@ systemDraw entityTable componentTables =
     List.filterMap
         identity
         (mapEntityTable
-            (map2ComponentView toSvg componentTables)
+            (\entityId -> map2Component (\visual position -> Svg.map (clickedToDisplayDebug entityId) (toSvg visual position)) componentTables entityId)
             entityTable
         )
+
+
+clickedToDisplayDebug : EntityId -> Msg -> Msg
+clickedToDisplayDebug entityId msg =
+    case msg of
+        Clicked ->
+            DisplayDebug entityId
+
+        _ ->
+            msg
 
 
 toSvg : ComponentVisual -> ComponentPosition -> Svg Msg
@@ -154,6 +199,7 @@ toSvg visual position =
         , SA.width "1"
         , SA.height "1"
         , SA.fill (ComponentVisual.getColor visual)
+        , SE.onClick Clicked
         ]
         []
 
@@ -191,12 +237,12 @@ addEntity (EntityTable nextId entities) =
     )
 
 
-foldlEntityTable : (EntityId -> b -> b) -> b -> EntityTable -> b
-foldlEntityTable f b (EntityTable _ entities) =
-    List.foldl f b entities
+foldlEntityTable : (EntityId -> a -> a) -> a -> EntityTable -> a
+foldlEntityTable f a (EntityTable _ entities) =
+    List.foldl f a entities
 
 
-mapEntityTable : (EntityId -> b) -> EntityTable -> List b
+mapEntityTable : (EntityId -> a) -> EntityTable -> List a
 mapEntityTable f (EntityTable _ entities) =
     List.map f entities
 
@@ -231,14 +277,7 @@ mapComponent f tableA entityId =
         (getComponent tableA entityId)
 
 
-map2ComponentView : (a -> b -> Svg Msg) -> ( Table a, Table b ) -> EntityId -> Maybe (Svg Msg)
-map2ComponentView f (tableA, tableB) entityId =
-    Maybe.map2
-        f
-        (getComponent tableA entityId)
-        (getComponent tableB entityId)
-
-map2Component : (a -> b -> ( resA, resB )) -> ( Table a, Table b ) -> EntityId -> Maybe ( resA, resB )
+map2Component : (a -> b -> c) -> ( Table a, Table b ) -> EntityId -> Maybe c
 map2Component f (tableA, tableB) entityId =
     Maybe.map2
         f
