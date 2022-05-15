@@ -159,32 +159,37 @@ view model =
 
 systemDisplayDebug : Model -> Maybe EntityId -> List (Html Msg)
 systemDisplayDebug model maybeEntityId =
+    case maybeEntityId of
+        Just entityId ->
+            displayDebug model entityId
+
+        Nothing ->
+            []
+
+
+displayDebug : Model -> EntityId -> List (Html Msg)
+displayDebug model entityId =
     let
         componentsDebug =
-            case maybeEntityId of
-                Just entityId ->
-                    [ Html.button
-                        [ SE.onClick HideDebug
-                        , SA.fill "blue"
-                        ]
-                        [ Html.text "Hide" ]
-                    ]
-                        ++ [ case getComponent model.visualComponents entityId of
-                                Just visual ->
-                                    Html.text ("Visual(color = " ++ ComponentVisual.getColor visual ++ ")")
+            [ Html.button
+                [ SE.onClick HideDebug
+                , SA.fill "blue"
+                ]
+                [ Html.text "Hide" ]
+            ]
+                ++ [ case getComponent model.visualComponents entityId of
+                        Just visual ->
+                            Html.text ("Visual(color = " ++ ComponentVisual.getColor visual ++ ")")
 
-                                Nothing ->
-                                    Html.text ""
-                           , case getComponent model.positionComponents entityId of
-                                Just position ->
-                                    Html.text ("Position(x = " ++ String.fromInt (ComponentPosition.getX position) ++ ", y = " ++ String.fromInt (ComponentPosition.getY position) ++ ")")
+                        Nothing ->
+                            Html.text ""
+                   , case getComponent model.positionComponents entityId of
+                        Just position ->
+                            Html.text ("Position(x = " ++ String.fromInt (ComponentPosition.getX position) ++ ", y = " ++ String.fromInt (ComponentPosition.getY position) ++ ")")
 
-                                Nothing ->
-                                    Html.text ""
-                           ]
-
-                Nothing ->
-                    []
+                        Nothing ->
+                            Html.text ""
+                   ]
     in
     List.map (\componentDebug -> Html.section [] [ componentDebug ]) componentsDebug
 
