@@ -6,9 +6,7 @@ import ComponentLife exposing (ComponentLife)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVisual exposing (ComponentVisual)
 import Dict exposing (Dict)
-
 import Html exposing (Html)
-
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
@@ -153,22 +151,36 @@ view model =
             , SA.height "300"
             , SA.viewBox "0 0 10 10"
             ]
-            (systemDraw model.entities (model.visualComponents, model.positionComponents))
+            (systemDraw model.entities ( model.visualComponents, model.positionComponents ))
         ]
-        ++
-        [ systemDisplayDebug model.entityIdDebug
-        ]
+            ++ systemDisplayDebug model model.entityIdDebug
     }
 
 
-systemDisplayDebug : Maybe EntityId -> Html Msg
-systemDisplayDebug maybeEntityId =
-    case maybeEntityId of
-        Just (EntityId id) ->
-            Html.text ("Display debug: " ++ String.fromInt id)
+systemDisplayDebug : Model -> Maybe EntityId -> List (Html Msg)
+systemDisplayDebug model maybeEntityId =
+    let
+        componentsDebug =
+            case maybeEntityId of
+                Just entityId ->
+                    [ case getComponent model.visualComponents entityId of
+                        Just visual ->
+                            Html.text ("Visual(color = " ++ ComponentVisual.getColor visual ++ ")")
 
-        Nothing ->
-            Html.text ""
+                        Nothing ->
+                            Html.text ""
+                    , case getComponent model.positionComponents entityId of
+                        Just position ->
+                            Html.text ("Position(x = " ++ String.fromInt (ComponentPosition.getX position) ++ ", y = " ++ String.fromInt (ComponentPosition.getY position) ++ ")")
+
+                        Nothing ->
+                            Html.text ""
+                    ]
+
+                Nothing ->
+                    []
+    in
+    List.map (\componentDebug -> Html.section [] [ componentDebug ]) componentsDebug
 
 
 systemDraw : EntityTable -> ( Table ComponentVisual, Table ComponentPosition ) -> List (Svg Msg)
@@ -278,7 +290,7 @@ mapComponent f tableA entityId =
 
 
 map2Component : (a -> b -> c) -> ( Table a, Table b ) -> EntityId -> Maybe c
-map2Component f (tableA, tableB) entityId =
+map2Component f ( tableA, tableB ) entityId =
     Maybe.map2
         f
         (getComponent tableA entityId)
@@ -297,7 +309,7 @@ mapTable f entityId tableA =
 
 mapTable2 : (a -> b -> ( a, b )) -> EntityId -> ( Table a, Table b ) -> ( Table a, Table b )
 mapTable2 f entityId ( tableA, tableB ) =
-    case map2Component f (tableA, tableB) entityId of
+    case map2Component f ( tableA, tableB ) entityId of
         Just ( a, b ) ->
             ( setComponent entityId a tableA, setComponent entityId b tableB )
 
