@@ -163,19 +163,25 @@ systemDisplayDebug model maybeEntityId =
         componentsDebug =
             case maybeEntityId of
                 Just entityId ->
-                    [ case getComponent model.visualComponents entityId of
-                        Just visual ->
-                            Html.text ("Visual(color = " ++ ComponentVisual.getColor visual ++ ")")
-
-                        Nothing ->
-                            Html.text ""
-                    , case getComponent model.positionComponents entityId of
-                        Just position ->
-                            Html.text ("Position(x = " ++ String.fromInt (ComponentPosition.getX position) ++ ", y = " ++ String.fromInt (ComponentPosition.getY position) ++ ")")
-
-                        Nothing ->
-                            Html.text ""
+                    [ Html.button
+                        [ SE.onClick HideDebug
+                        , SA.fill "blue"
+                        ]
+                        [ Html.text "Hide" ]
                     ]
+                        ++ [ case getComponent model.visualComponents entityId of
+                                Just visual ->
+                                    Html.text ("Visual(color = " ++ ComponentVisual.getColor visual ++ ")")
+
+                                Nothing ->
+                                    Html.text ""
+                           , case getComponent model.positionComponents entityId of
+                                Just position ->
+                                    Html.text ("Position(x = " ++ String.fromInt (ComponentPosition.getX position) ++ ", y = " ++ String.fromInt (ComponentPosition.getY position) ++ ")")
+
+                                Nothing ->
+                                    Html.text ""
+                           ]
 
                 Nothing ->
                     []
