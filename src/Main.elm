@@ -170,27 +170,29 @@ systemDisplayDebug model maybeEntityId =
 displayDebug : Model -> EntityId -> List (Html Msg)
 displayDebug model entityId =
     let
-        componentsDebug =
+        hideButton =
             [ Html.button
                 [ SE.onClick HideDebug
                 , SA.fill "blue"
                 ]
                 [ Html.text "Hide" ]
             ]
-                ++ [ case getComponent model.visualComponents entityId of
-                        Just visual ->
-                            Html.text ("Visual(color = " ++ ComponentVisual.getColor visual ++ ")")
+        componentsDebug =
+         [ case getComponent model.visualComponents entityId of
+                Just visual ->
+                    Html.text ("Visual(color = " ++ ComponentVisual.getColor visual ++ ")")
 
-                        Nothing ->
-                            Html.text ""
-                   , case getComponent model.positionComponents entityId of
-                        Just position ->
-                            Html.text ("Position(x = " ++ String.fromInt (ComponentPosition.getX position) ++ ", y = " ++ String.fromInt (ComponentPosition.getY position) ++ ")")
+                Nothing ->
+                    Html.text ""
+           , case getComponent model.positionComponents entityId of
+                Just position ->
+                    Html.text ("Position(x = " ++ String.fromInt (ComponentPosition.getX position) ++ ", y = " ++ String.fromInt (ComponentPosition.getY position) ++ ")")
 
-                        Nothing ->
-                            Html.text ""
-                   ]
+                Nothing ->
+                    Html.text ""
+           ]
     in
+    hideButton ++
     List.map (\componentDebug -> Html.section [] [ componentDebug ]) componentsDebug
 
 
