@@ -7,6 +7,7 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentVisual exposing (ComponentVisual)
 import Dict exposing (Dict)
 import Html exposing (Html)
+import Html.Attributes as HA
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
@@ -146,54 +147,111 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "ECS"
     , body =
-        [ Svg.svg
-            [ SA.width "300"
-            , SA.height "300"
-            , SA.viewBox "0 0 10 10"
+        [ Html.div
+            [ HA.id "MainWindow"
+            , HA.style "width" "100%"
+            , HA.style "height" "600px"
             ]
-            (systemDraw model.entities ( model.visualComponents, model.positionComponents ))
+            [ Html.div
+                [ HA.id "Game"
+                , HA.style "float" "left"
+                ]
+                [ Svg.svg
+                    [ SA.width "300"
+                    , SA.height "300"
+                    , SA.viewBox "0 0 10 10"
+                    ]
+                    (systemDraw model.entities ( model.visualComponents, model.positionComponents ))
+                ]
+            , systemDisplayDebug model model.entityIdDebug
+            ]
         ]
-            ++ systemDisplayDebug model model.entityIdDebug
     }
 
 
-systemDisplayDebug : Model -> Maybe EntityId -> List (Html Msg)
+systemDisplayDebug : Model -> Maybe EntityId -> Html Msg
 systemDisplayDebug model maybeEntityId =
     case maybeEntityId of
         Just entityId ->
             displayDebug model entityId
 
         Nothing ->
-            []
+            Html.text ""
 
 
-displayDebug : Model -> EntityId -> List (Html Msg)
+displayDebug : Model -> EntityId -> Html Msg
 displayDebug model entityId =
     let
         hideButton =
-            [ Html.button
+            Html.button
                 [ SE.onClick HideDebug
                 , SA.fill "blue"
                 ]
                 [ Html.text "Hide" ]
-            ]
+
         componentsDebug =
-         [ case getComponent model.visualComponents entityId of
+            [ case getComponent model.visualComponents entityId of
                 Just visual ->
-                    Html.text ("Visual(color = " ++ ComponentVisual.getColor visual ++ ")")
+                    Html.text
+                        ("Visual(color = "
+                            ++ visual.color
+                            ++ ")"
+                        )
 
                 Nothing ->
                     Html.text ""
-           , case getComponent model.positionComponents entityId of
+            , case getComponent model.positionComponents entityId of
                 Just position ->
-                    Html.text ("Position(x = " ++ String.fromInt (ComponentPosition.getX position) ++ ", y = " ++ String.fromInt (ComponentPosition.getY position) ++ ")")
+                    Html.text
+                        ("Position(x = "
+                            ++ String.fromInt position.x
+                            ++ ", y = "
+                            ++ String.fromInt position.y
+                            ++ ")"
+                        )
 
                 Nothing ->
                     Html.text ""
-           ]
+            , case getComponent model.lifeComponents entityId of
+                Just life ->
+                    Html.text
+                        ("Life(healPoints = "
+                            ++ String.fromInt life.healPoints
+                            ++ ")"
+                        )
+
+                Nothing ->
+                    Html.text ""
+            ]
     in
-    hideButton ++
-    List.map (\componentDebug -> Html.section [] [ componentDebug ]) componentsDebug
+    Html.div
+        [ HA.id "DisplayDebug"
+        , HA.style "width" "30%"
+        , HA.style "height" "100%"
+        , HA.style "float" "right"
+        , HA.style "border-style" "solid"
+        , HA.style "border-width" "1px"
+        ]
+        [ hideButton
+        , Html.div
+            [ HA.id "ComponentsDebug"
+            , HA.style "height" "100%"
+            , HA.style "display" "flex"
+            , HA.style "flex-direction" "column"
+            , HA.style "justify-content" "start"
+            ]
+            (List.map
+                (\componentDebug ->
+                    Html.section
+                        [ HA.style "border-style" "solid"
+                        , HA.style "border-width" "1px"
+                        --, HA.style "height" "10%"
+                        ]
+                        [ componentDebug ]
+                )
+                componentsDebug
+            )
+        ]
 
 
 systemDraw : EntityTable -> ( Table ComponentVisual, Table ComponentPosition ) -> List (Svg Msg)
@@ -219,11 +277,11 @@ clickedToDisplayDebug entityId msg =
 toSvg : ComponentVisual -> ComponentPosition -> Svg Msg
 toSvg visual position =
     Svg.rect
-        [ SA.x <| String.fromInt (ComponentPosition.getX position)
-        , SA.y <| String.fromInt (ComponentPosition.getY position)
+        [ SA.x <| String.fromInt position.x
+        , SA.y <| String.fromInt position.y
         , SA.width "1"
         , SA.height "1"
-        , SA.fill (ComponentVisual.getColor visual)
+        , SA.fill visual.color
         , SE.onClick Clicked
         ]
         []

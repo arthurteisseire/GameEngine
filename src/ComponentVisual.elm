@@ -1,22 +1,12 @@
-module ComponentVisual exposing (ComponentVisual, init, getColor)
-
-type ComponentVisual =
-    ComponentVisual Internals
+module ComponentVisual exposing (ComponentVisual, init)
 
 
-type alias Internals =
+type alias ComponentVisual =
     { color : String
     }
 
 
-
 init : String -> ComponentVisual
 init color =
-    ComponentVisual
-        { color = color
-        }
-
-
-getColor : ComponentVisual -> String
-getColor (ComponentVisual internals) =
-    internals.color
+    { color = color
+    }

@@ -1,11 +1,7 @@
-module ComponentPosition exposing (ComponentPosition, identity, getX, getY, mapX)
+module ComponentPosition exposing (ComponentPosition, identity, mapX)
 
 
-type ComponentPosition
-    = ComponentPosition Internals
-
-
-type alias Internals =
+type alias ComponentPosition =
     { x : Int
     , y : Int
     }
@@ -13,21 +9,11 @@ type alias Internals =
 
 identity : ComponentPosition
 identity =
-    ComponentPosition
-        { x = 0
-        , y = 0
-        }
+    { x = 0
+    , y = 0
+    }
+
 
 mapX : (Int -> Int) -> ComponentPosition -> ComponentPosition
-mapX f (ComponentPosition internals) =
-    ComponentPosition { internals | x = f internals.x }
-
-
-getX : ComponentPosition -> Int
-getX (ComponentPosition internals) =
-    internals.x
-
-
-getY : ComponentPosition -> Int
-getY (ComponentPosition internals) =
-    internals.y
+mapX f position =
+    { position | x = f position.x }
