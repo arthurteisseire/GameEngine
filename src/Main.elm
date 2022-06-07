@@ -5,6 +5,7 @@ import Browser.Events
 import ComponentLife exposing (ComponentLife)
 import ComponentPlayer exposing (ComponentPlayer)
 import ComponentPosition exposing (ComponentPosition)
+import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
 import EntityTable exposing (..)
 import Html exposing (Html)
@@ -13,7 +14,8 @@ import KeyboardInput exposing (Key, keyDecoder)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
-import SystemMovePlayer exposing (movePlayerSystem)
+import SystemPlayerVelocity exposing (systemUpdatePlayerVelocity)
+import SytemMove exposing (systemMove)
 
 
 main =
@@ -29,6 +31,7 @@ type alias Model =
     { entities : EntityTable
     , playerComponents : Table ComponentPlayer
     , positionComponents : Table ComponentPosition
+    , velocityComponents : Table ComponentVelocity
     , lifeComponents : Table ComponentLife
     , visualComponents : Table ComponentVisual
     , entityIdDebug : Maybe EntityId
@@ -58,6 +61,10 @@ init _ =
                 |> setComponent playerId (ComponentPosition.mapX (\_ -> 4) ComponentPosition.identity)
                 |> setComponent enemyId (ComponentPosition.mapX (\_ -> 5) ComponentPosition.identity)
 
+        velocityComponents =
+            emptyComponentTable
+                |> setComponent playerId ComponentVelocity.identity
+
         lifeComponents =
             emptyComponentTable
                 |> setComponent playerId ComponentLife.identity
@@ -71,6 +78,7 @@ init _ =
     ( { entities = entities2
       , playerComponents = playerComponents
       , positionComponents = positionComponents
+      , velocityComponents = velocityComponents
       , lifeComponents = lifeComponents
       , visualComponents = visualComponents
       , entityIdDebug = Nothing
@@ -97,16 +105,16 @@ update msg model =
     case msg of
         Tick dt ->
             let
-                ( newPositionComponents, newLifeComponents ) =
-                    damageSystem dt model.entities ( model.positionComponents, model.lifeComponents )
+                ( _, velocityComponents ) =
+                    systemUpdatePlayerVelocity model.key dt model.entities ( model.playerComponents, model.velocityComponents )
 
-                ( playerComponents, finalPositionComponents ) =
-                    movePlayerSystem model.key dt model.entities ( model.playerComponents, model.positionComponents )
+                ( velocityComponentsAfterMove, finalPositionComponents ) =
+                    systemMove dt model.entities ( velocityComponents, model.positionComponents )
             in
             ( { model
                 | entities = model.entities
                 , positionComponents = finalPositionComponents
-                , lifeComponents = newLifeComponents
+                , velocityComponents = velocityComponentsAfterMove
                 , key = Nothing
               }
             , Cmd.none
@@ -219,6 +227,18 @@ displayDebug model entityId =
                             ++ String.fromInt position.x
                             ++ ", y = "
                             ++ String.fromInt position.y
+                            ++ ")"
+                        )
+
+                Nothing ->
+                    Html.text ""
+            , case getComponent model.velocityComponents entityId of
+                Just velocity ->
+                    Html.text
+                        ("Velocity(x = "
+                            ++ String.fromInt velocity.x
+                            ++ ", y = "
+                            ++ String.fromInt velocity.y
                             ++ ")"
                         )
 
