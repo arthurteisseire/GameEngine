@@ -10,6 +10,10 @@ import Dict exposing (Dict)
 type EntityId
     = EntityId Int
 
+entityIdToString : EntityId -> String
+entityIdToString (EntityId id) =
+    String.fromInt id
+
 
 type EntityTable
     = EntityTable Int (List EntityId)
@@ -36,6 +40,10 @@ mapEntityTable : (EntityId -> a) -> EntityTable -> List a
 mapEntityTable f (EntityTable _ entities) =
     List.map f entities
 
+
+filterMapEntityTable : (EntityId -> Maybe a) -> EntityTable -> List a
+filterMapEntityTable f (EntityTable _ entities) =
+    List.filterMap f entities
 
 
 -- Component Table

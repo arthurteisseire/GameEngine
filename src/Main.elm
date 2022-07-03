@@ -14,8 +14,8 @@ import KeyboardInput exposing (Key, keyDecoder)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
+import SystemCollision exposing (systemCollision)
 import SystemPlayerVelocity exposing (systemUpdatePlayerVelocity)
-import SytemMove exposing (systemMove)
 
 
 main =
@@ -81,8 +81,8 @@ init _ =
       , velocityComponents = velocityComponents
       , lifeComponents = lifeComponents
       , visualComponents = visualComponents
-      , entityIdDebug = Nothing
-      , key = Nothing
+      , entityIdDebug = Just playerId
+      , key = Nothing -- TODO: Create KeyboardInputComponent and remove key from model. And remove PlayerComponent.
       }
     , Cmd.none
     )
@@ -95,7 +95,7 @@ init _ =
 type Msg
     = Tick Float
     | KeyBoardInput Key
-    | Clicked -- TODO: Move Clicked Msg to VisualComponent
+    | Clicked -- TODO: Move Clicked Msg to VisualComponent ?
     | DisplayDebug EntityId
     | HideDebug
 
@@ -108,13 +108,13 @@ update msg model =
                 ( _, velocityComponents ) =
                     systemUpdatePlayerVelocity model.key dt model.entities ( model.playerComponents, model.velocityComponents )
 
-                ( velocityComponentsAfterMove, finalPositionComponents ) =
-                    systemMove dt model.entities ( velocityComponents, model.positionComponents )
+                ( positionComponentsAfterCollision, velocityComponentsAfterCollision ) =
+                    systemCollision dt model.entities ( model.positionComponents, velocityComponents )
             in
             ( { model
                 | entities = model.entities
-                , positionComponents = finalPositionComponents
-                , velocityComponents = velocityComponentsAfterMove
+                , positionComponents = positionComponentsAfterCollision
+                , velocityComponents = velocityComponentsAfterCollision
                 , key = Nothing
               }
             , Cmd.none
@@ -203,7 +203,8 @@ displayDebug model entityId =
                 [ Html.text "Hide" ]
 
         componentsDebug =
-            [ case getComponent model.playerComponents entityId of
+            [ Html.text ("EntityId(" ++ entityIdToString entityId ++ ")")
+            , case getComponent model.playerComponents entityId of
                 Just _ ->
                     Html.text
                         "Player()"
