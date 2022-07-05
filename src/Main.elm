@@ -2,8 +2,8 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events
+import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentLife exposing (ComponentLife)
-import ComponentPlayer exposing (ComponentPlayer)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
@@ -14,8 +14,8 @@ import KeyboardInput exposing (Key, keyDecoder)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
+import SystemAcceleration exposing (systemAcceleration)
 import SystemCollision exposing (systemCollision)
-import SystemPlayerVelocity exposing (systemUpdatePlayerVelocity)
 
 
 main =
@@ -29,13 +29,12 @@ main =
 
 type alias Model =
     { entities : EntityTable
-    , playerComponents : Table ComponentPlayer
+    , keyboardInputComponents : Table ComponentKeyboardInput
     , positionComponents : Table ComponentPosition
     , velocityComponents : Table ComponentVelocity
     , lifeComponents : Table ComponentLife
     , visualComponents : Table ComponentVisual
     , entityIdDebug : Maybe EntityId
-    , key : Maybe Key
     }
 
 
@@ -52,9 +51,9 @@ init _ =
         ( entities2, enemyId ) =
             addEntity entities
 
-        playerComponents =
+        keyboardInputComponents =
             emptyComponentTable
-                |> setComponent playerId ComponentPlayer.identity
+                |> setComponent playerId ComponentKeyboardInput.identity
 
         positionComponents =
             emptyComponentTable
@@ -76,13 +75,12 @@ init _ =
                 |> setComponent enemyId (ComponentVisual.init "red")
     in
     ( { entities = entities2
-      , playerComponents = playerComponents
+      , keyboardInputComponents = keyboardInputComponents
       , positionComponents = positionComponents
       , velocityComponents = velocityComponents
       , lifeComponents = lifeComponents
       , visualComponents = visualComponents
       , entityIdDebug = Just playerId
-      , key = Nothing -- TODO: Create KeyboardInputComponent and remove key from model. And remove PlayerComponent.
       }
     , Cmd.none
     )
@@ -105,23 +103,24 @@ update msg model =
     case msg of
         Tick dt ->
             let
-                ( _, velocityComponents ) =
-                    systemUpdatePlayerVelocity model.key dt model.entities ( model.playerComponents, model.velocityComponents )
+                ( _, velocityComponentsAfterAcceleration ) =
+                    systemAcceleration model.entities ( model.keyboardInputComponents, model.velocityComponents )
 
                 ( positionComponentsAfterCollision, velocityComponentsAfterCollision ) =
-                    systemCollision dt model.entities ( model.positionComponents, velocityComponents )
+                    systemCollision dt model.entities ( model.positionComponents, velocityComponentsAfterAcceleration )
             in
             ( { model
-                | entities = model.entities
-                , positionComponents = positionComponentsAfterCollision
+                | positionComponents = positionComponentsAfterCollision
                 , velocityComponents = velocityComponentsAfterCollision
-                , key = Nothing
+                , keyboardInputComponents = mapComponents (\_ _ -> { key = Nothing }) model.keyboardInputComponents
               }
             , Cmd.none
             )
 
         KeyBoardInput key ->
-            ( { model | key = Just key }
+            ( { model
+                | keyboardInputComponents = mapComponents (\_ _ -> { key = Just key }) model.keyboardInputComponents
+              }
             , Cmd.none
             )
 
@@ -204,10 +203,9 @@ displayDebug model entityId =
 
         componentsDebug =
             [ Html.text ("EntityId(" ++ entityIdToString entityId ++ ")")
-            , case getComponent model.playerComponents entityId of
+            , case getComponent model.keyboardInputComponents entityId of
                 Just _ ->
-                    Html.text
-                        "Player()"
+                    Html.text "KeyboardInput()"
 
                 Nothing ->
                     Html.text ""

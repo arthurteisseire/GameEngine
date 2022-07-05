@@ -1,27 +1,27 @@
-module SystemPlayerVelocity exposing (..)
+module SystemAcceleration exposing (systemAcceleration)
 
-import ComponentPlayer exposing (ComponentPlayer)
+import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (EntityTable, Table, foldlEntityTable, mapTable2)
 import KeyboardInput exposing (Key)
 
 
-systemUpdatePlayerVelocity : Maybe Key -> Float -> EntityTable -> ( Table ComponentPlayer, Table ComponentVelocity ) -> ( Table ComponentPlayer, Table ComponentVelocity )
-systemUpdatePlayerVelocity maybeKey dt entityTable componentTables =
+systemAcceleration : EntityTable -> ( Table ComponentKeyboardInput, Table ComponentVelocity ) -> ( Table ComponentKeyboardInput, Table ComponentVelocity )
+systemAcceleration entityTable componentTables =
     foldlEntityTable
-        (mapTable2 (updatePlayerVelocity maybeKey dt))
+        (mapTable2 updatePlayerVelocity)
         componentTables
         entityTable
 
 
-updatePlayerVelocity : Maybe Key -> Float -> ComponentPlayer -> ComponentVelocity -> ( ComponentPlayer, ComponentVelocity )
-updatePlayerVelocity maybeKey dt player position =
-    case maybeKey of
+updatePlayerVelocity : ComponentKeyboardInput -> ComponentVelocity -> ( ComponentKeyboardInput, ComponentVelocity )
+updatePlayerVelocity keyboardInput position =
+    case keyboardInput.key of
         Just key ->
-            ( player, updateVelocityFromKey key position )
+            ( keyboardInput, updateVelocityFromKey key position )
 
         Nothing ->
-            ( player, position )
+            ( keyboardInput, position )
 
 
 updateVelocityFromKey : Key -> ComponentVelocity -> ComponentVelocity

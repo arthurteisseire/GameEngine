@@ -10,6 +10,7 @@ import Dict exposing (Dict)
 type EntityId
     = EntityId Int
 
+
 entityIdToString : EntityId -> String
 entityIdToString (EntityId id) =
     String.fromInt id
@@ -46,6 +47,7 @@ filterMapEntityTable f (EntityTable _ entities) =
     List.filterMap f entities
 
 
+
 -- Component Table
 
 
@@ -66,6 +68,11 @@ setComponent (EntityId entityId) component (Table dict) =
 getComponent : Table a -> EntityId -> Maybe a
 getComponent (Table dict) (EntityId id) =
     Dict.get id dict
+
+
+mapComponents : (Int -> a -> b) -> Table a -> Table b
+mapComponents f (Table dict) =
+    Table (Dict.map f dict)
 
 
 mapComponent : (a -> res) -> Table a -> EntityId -> Maybe res
