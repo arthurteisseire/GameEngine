@@ -57,8 +57,8 @@ init _ =
 
         positionComponents =
             emptyComponentTable
-                |> setComponent playerId (ComponentPosition.mapX (\_ -> 4) ComponentPosition.identity)
-                |> setComponent enemyId (ComponentPosition.mapX (\_ -> 5) ComponentPosition.identity)
+                |> setComponent playerId { x = 4, y = 0 }
+                |> setComponent enemyId { x = 5, y = 0 }
 
         velocityComponents =
             emptyComponentTable
@@ -136,19 +136,6 @@ update msg model =
 
         Clicked ->
             ( model, Cmd.none )
-
-
-damageSystem : Float -> EntityTable -> ( Table ComponentPosition, Table ComponentLife ) -> ( Table ComponentPosition, Table ComponentLife )
-damageSystem dt entityTable componentTables =
-    foldlEntityTable
-        (mapTable2 (updateDamageSystem dt))
-        componentTables
-        entityTable
-
-
-updateDamageSystem : Float -> ComponentPosition -> ComponentLife -> ( ComponentPosition, ComponentLife )
-updateDamageSystem dt position life =
-    ( position, ComponentLife.mapHp (\hp -> hp - 1) life )
 
 
 
@@ -324,7 +311,7 @@ toSvg visual position =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.batch
         [ Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
         , Sub.map KeyBoardInput (Browser.Events.onKeyDown keyDecoder)

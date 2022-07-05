@@ -1,4 +1,4 @@
-module ComponentLife exposing (ComponentLife, identity, mapHp)
+module ComponentLife exposing (ComponentLife, identity)
 
 
 type alias ComponentLife =
@@ -8,9 +8,5 @@ type alias ComponentLife =
 
 identity : ComponentLife
 identity =
-    { healPoints = 0 }
-
-
-mapHp : (Int -> Int) -> ComponentLife -> ComponentLife
-mapHp f life =
-    { healPoints = f life.healPoints }
+    { healPoints = 0
+    }
