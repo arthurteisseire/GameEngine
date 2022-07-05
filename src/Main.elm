@@ -71,8 +71,8 @@ init _ =
 
         visualComponents =
             emptyComponentTable
-                |> setComponent playerId (ComponentVisual.init "blue")
-                |> setComponent enemyId (ComponentVisual.init "red")
+                |> setComponent playerId ComponentVisual.defaultRect
+                |> setComponent enemyId ComponentVisual.defaultCircle
     in
     ( { entities = entities2
       , keyboardInputComponents = keyboardInputComponents
@@ -197,12 +197,8 @@ displayDebug model entityId =
                 Nothing ->
                     Html.text ""
             , case getComponent model.visualComponents entityId of
-                Just visual ->
-                    Html.text
-                        ("Visual(color = "
-                            ++ visual.color
-                            ++ ")"
-                        )
+                Just _ ->
+                    Html.text "Visual()"
 
                 Nothing ->
                     Html.text ""
@@ -278,36 +274,25 @@ systemDraw entityTable componentTables =
     List.filterMap
         identity
         (mapEntityTable
-            (\entityId -> map2Component (\visual position -> Svg.map (clickedToDisplayDebug entityId) (toSvg visual position)) componentTables entityId)
+            (\entityId -> map2Component (\visual position -> toSvg entityId visual position) componentTables entityId)
             entityTable
         )
 
 
-clickedToDisplayDebug : EntityId -> Msg -> Msg
-clickedToDisplayDebug entityId msg =
-    case msg of
-        Clicked ->
-            DisplayDebug entityId
+toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg
+toSvg entityId visual position =
+    Svg.map
+        (\visualMsg ->
+            if visualMsg == ComponentVisual.Clicked then
+                DisplayDebug entityId
 
-        _ ->
-            msg
-
-
-toSvg : ComponentVisual -> ComponentPosition -> Svg Msg
-toSvg visual position =
-    Svg.rect
-        [ SA.x <| String.fromInt position.x
-        , SA.y <| String.fromInt position.y
-        , SA.width "1"
-        , SA.height "1"
-        , SA.fill visual.color
-        , SE.onClick Clicked
-        ]
-        []
-
-
-
--- Subscriptions
+            else
+                Clicked
+        )
+        (visual.shape
+            (visual.attributes ++ visual.posToAttributes position.x position.y)
+            []
+        )
 
 
 subscriptions : Model -> Sub Msg
