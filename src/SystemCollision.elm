@@ -1,12 +1,12 @@
-module SystemCollision exposing (systemCollision)
+module SystemCollision exposing (update)
 
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
 
 
-systemCollision : Float -> EntityTable -> ( Table ComponentPosition, Table ComponentVelocity ) -> ( Table ComponentPosition, Table ComponentVelocity )
-systemCollision dt entityTable ( positionTable, velocityTable ) =
+update : Float -> EntityTable -> ( Table ComponentPosition, Table ComponentVelocity ) -> ( Table ComponentPosition, Table ComponentVelocity )
+update dt entityTable ( positionTable, velocityTable ) =
     let
         entitiesWithVelocity =
             map2ToEntityList entityTable ( positionTable, velocityTable )

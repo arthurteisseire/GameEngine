@@ -1,4 +1,4 @@
-module SystemAcceleration exposing (systemAcceleration)
+module SystemAcceleration exposing (update)
 
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
@@ -6,8 +6,8 @@ import EntityTable exposing (EntityTable, Table, foldlEntityTable, mapTable2)
 import KeyboardInput exposing (Key)
 
 
-systemAcceleration : EntityTable -> ( Table ComponentKeyboardInput, Table ComponentVelocity ) -> ( Table ComponentKeyboardInput, Table ComponentVelocity )
-systemAcceleration entityTable componentTables =
+update : EntityTable -> ( Table ComponentKeyboardInput, Table ComponentVelocity ) -> ( Table ComponentKeyboardInput, Table ComponentVelocity )
+update entityTable componentTables =
     foldlEntityTable
         (mapTable2 updatePlayerVelocity)
         componentTables

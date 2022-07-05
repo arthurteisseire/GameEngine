@@ -14,8 +14,8 @@ import KeyboardInput exposing (Key, keyDecoder)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
-import SystemAcceleration exposing (systemAcceleration)
-import SystemCollision exposing (systemCollision)
+import SystemAcceleration
+import SystemCollision
 
 
 main =
@@ -104,10 +104,10 @@ update msg model =
         Tick dt ->
             let
                 ( _, velocityComponentsAfterAcceleration ) =
-                    systemAcceleration model.entities ( model.keyboardInputComponents, model.velocityComponents )
+                    SystemAcceleration.update model.entities ( model.keyboardInputComponents, model.velocityComponents )
 
                 ( positionComponentsAfterCollision, velocityComponentsAfterCollision ) =
-                    systemCollision dt model.entities ( model.positionComponents, velocityComponentsAfterAcceleration )
+                    SystemCollision.update dt model.entities ( model.positionComponents, velocityComponentsAfterAcceleration )
             in
             ( { model
                 | positionComponents = positionComponentsAfterCollision
