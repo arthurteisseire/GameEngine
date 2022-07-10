@@ -2,26 +2,32 @@ module SystemAcceleration exposing (update)
 
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
-import EntityTable exposing (EntityTable, Table, foldlEntityTable, mapTable2)
+import EntityTable exposing (..)
 import KeyboardInput exposing (Key)
 
 
-update : EntityTable -> ( Table ComponentKeyboardInput, Table ComponentVelocity ) -> ( Table ComponentKeyboardInput, Table ComponentVelocity )
-update entityTable componentTables =
-    foldlEntityTable
-        (mapTable2 updatePlayerVelocity)
-        componentTables
-        entityTable
+update : Table (Component2 ComponentKeyboardInput ComponentVelocity) -> Table (Component2 ComponentKeyboardInput ComponentVelocity)
+update table2 =
+    newMapTable
+        (\_ component2 -> updatePlayerVelocity component2)
+        table2
 
 
-updatePlayerVelocity : ComponentKeyboardInput -> ComponentVelocity -> ( ComponentKeyboardInput, ComponentVelocity )
-updatePlayerVelocity keyboardInput position =
+updatePlayerVelocity : Component2 ComponentKeyboardInput ComponentVelocity -> Component2 ComponentKeyboardInput ComponentVelocity
+updatePlayerVelocity component2 =
+    let
+        keyboardInput =
+            component2.a
+
+        velocity =
+            component2.b
+    in
     case keyboardInput.key of
         Just key ->
-            ( keyboardInput, updateVelocityFromKey key position )
+            { a = keyboardInput, b = updateVelocityFromKey key velocity }
 
         Nothing ->
-            ( keyboardInput, position )
+            { a = keyboardInput, b = velocity }
 
 
 updateVelocityFromKey : Key -> ComponentVelocity -> ComponentVelocity

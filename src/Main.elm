@@ -15,6 +15,7 @@ import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
 import SystemAcceleration
+import SystemAttack
 import SystemCollision
 
 
@@ -103,16 +104,33 @@ update msg model =
     case msg of
         Tick dt ->
             let
-                ( _, velocityComponentsAfterAcceleration ) =
-                    SystemAcceleration.update model.entities ( model.keyboardInputComponents, model.velocityComponents )
+                tablesAfterAcceleration =
+                    update2Tables
+                        SystemAcceleration.update
+                        { a = model.keyboardInputComponents
+                        , b = model.velocityComponents
+                        }
+                    --splitTable
+                    --    (SystemAcceleration.update
+                    --        (mergeTable
+                    --            { a = model.keyboardInputComponents
+                    --            , b = model.velocityComponents
+                    --            }
+                    --        )
+                    --    )
 
                 ( positionComponentsAfterCollision, velocityComponentsAfterCollision ) =
-                    SystemCollision.update dt model.entities ( model.positionComponents, velocityComponentsAfterAcceleration )
+                    SystemCollision.update dt model.entities ( model.positionComponents, tablesAfterAcceleration.b )
+
+                --( lifeComponentsAfterAttack, _ ) =
+                --    SystemAttack.update model.entities ( model.lifeComponents, model.positionComponents )
             in
             ( { model
                 | positionComponents = positionComponentsAfterCollision
                 , velocityComponents = velocityComponentsAfterCollision
                 , keyboardInputComponents = mapComponents (\_ _ -> { key = Nothing }) model.keyboardInputComponents
+
+                --, lifeComponents = lifeComponentsAfterAttack
               }
             , Cmd.none
             )

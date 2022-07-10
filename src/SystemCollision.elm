@@ -17,7 +17,7 @@ update dt entityTable ( positionTable, velocityTable ) =
         updatedEntities =
             collide allEntities entitiesWithVelocity
     in
-    updateComponentTables ( positionTable, velocityTable ) updatedEntities
+    update2ComponentsTablesFromEntityList ( positionTable, velocityTable ) updatedEntities
 
 
 collide : List ( EntityId, ComponentPosition ) -> List ( EntityId, ComponentPosition, ComponentVelocity ) -> List ( EntityId, ComponentPosition, ComponentVelocity )
@@ -44,45 +44,3 @@ collideEntity allEntities ( entityId, position, velocity ) =
     , nextPos
     , ComponentVelocity.identity
     )
-
-
-updateComponentTables : ( Table ComponentPosition, Table ComponentVelocity ) -> List ( EntityId, ComponentPosition, ComponentVelocity ) -> ( Table ComponentPosition, Table ComponentVelocity )
-updateComponentTables ( positionTable, velocityTable ) entityList =
-    let
-        newPositionTable =
-            List.foldl
-                (\( entityId, position, _ ) table -> setComponent entityId position table)
-                positionTable
-                entityList
-
-        newVelocityTable =
-            List.foldl
-                (\( entityId, _, velocity ) table -> setComponent entityId velocity table)
-                velocityTable
-                entityList
-    in
-    ( newPositionTable, newVelocityTable )
-
-
-mapToEntityList : EntityTable -> Table a -> List ( EntityId, a )
-mapToEntityList entityTable componentTable =
-    filterMapEntityTable
-        (\id -> getComponent componentTable id)
-        entityTable
-
-
-getComponent : Table a -> EntityId -> Maybe ( EntityId, a )
-getComponent componentTable entityId =
-    mapComponent (\a -> ( entityId, a )) componentTable entityId
-
-
-map2ToEntityList : EntityTable -> ( Table a, Table b ) -> List ( EntityId, a, b )
-map2ToEntityList entityTable componentTables =
-    filterMapEntityTable
-        (\id -> get2Components componentTables id)
-        entityTable
-
-
-get2Components : ( Table a, Table b ) -> EntityId -> Maybe ( EntityId, a, b )
-get2Components ( positionTable, velocityTable ) entityId =
-    map2Component (\a b -> ( entityId, a, b )) ( positionTable, velocityTable ) entityId
