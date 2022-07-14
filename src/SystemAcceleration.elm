@@ -6,10 +6,10 @@ import EntityTable exposing (..)
 import KeyboardInput exposing (Key)
 
 
-update : Table (Component2 ComponentKeyboardInput ComponentVelocity) -> Table (Component2 ComponentKeyboardInput ComponentVelocity)
+update : Table2 ComponentKeyboardInput ComponentVelocity -> Table2 ComponentKeyboardInput ComponentVelocity
 update table2 =
-    newMapTable
-        (\_ component2 -> updatePlayerVelocity component2)
+    update2Tables
+        (newMapTable (\_ component2 -> updatePlayerVelocity component2))
         table2
 
 

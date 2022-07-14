@@ -5,42 +5,41 @@ import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
 
 
-update : Float -> EntityTable -> ( Table ComponentPosition, Table ComponentVelocity ) -> ( Table ComponentPosition, Table ComponentVelocity )
-update dt entityTable ( positionTable, velocityTable ) =
-    let
-        entitiesWithVelocity =
-            map2ToEntityList entityTable ( positionTable, velocityTable )
-
-        allEntities =
-            mapToEntityList entityTable positionTable
-
-        updatedEntities =
-            collide allEntities entitiesWithVelocity
-    in
-    update2ComponentsTablesFromEntityList ( positionTable, velocityTable ) updatedEntities
+update : Table2 ComponentPosition ComponentVelocity -> Table2 ComponentPosition ComponentVelocity
+update tables =
+    update2Tables
+        (collide tables.a)
+        tables
 
 
-collide : List ( EntityId, ComponentPosition ) -> List ( EntityId, ComponentPosition, ComponentVelocity ) -> List ( EntityId, ComponentPosition, ComponentVelocity )
+collide : Table ComponentPosition -> Table (Component2 ComponentPosition ComponentVelocity) -> Table (Component2 ComponentPosition ComponentVelocity)
 collide allEntities entitiesWithVelocity =
-    List.map
-        (\entity -> collideEntity allEntities entity)
+    newMapTable
+        (\_ entity -> collideEntity allEntities entity)
         entitiesWithVelocity
 
 
-collideEntity : List ( EntityId, ComponentPosition ) -> ( EntityId, ComponentPosition, ComponentVelocity ) -> ( EntityId, ComponentPosition, ComponentVelocity )
-collideEntity allEntities ( entityId, position, velocity ) =
+collideEntity : Table ComponentPosition -> Component2 ComponentPosition ComponentVelocity -> Component2 ComponentPosition ComponentVelocity
+collideEntity allEntities component2 =
     let
+        position =
+            component2.a
+
+        velocity =
+            component2.b
+
         movedPos =
-            { x = position.x + velocity.x, y = position.y + velocity.y }
+            { x = position.x + velocity.x
+            , y = position.y + velocity.y
+            }
 
         nextPos =
-            if List.member movedPos (List.map Tuple.second allEntities) then
+            if List.member movedPos (valuesTable allEntities) then
                 position
 
             else
                 movedPos
     in
-    ( entityId
-    , nextPos
-    , ComponentVelocity.identity
-    )
+    { a = nextPos
+    , b = ComponentVelocity.identity
+    }

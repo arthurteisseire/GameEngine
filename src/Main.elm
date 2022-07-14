@@ -105,32 +105,21 @@ update msg model =
         Tick dt ->
             let
                 tablesAfterAcceleration =
-                    update2Tables
-                        SystemAcceleration.update
+                    SystemAcceleration.update
                         { a = model.keyboardInputComponents
                         , b = model.velocityComponents
                         }
-                    --splitTable
-                    --    (SystemAcceleration.update
-                    --        (mergeTable
-                    --            { a = model.keyboardInputComponents
-                    --            , b = model.velocityComponents
-                    --            }
-                    --        )
-                    --    )
 
-                ( positionComponentsAfterCollision, velocityComponentsAfterCollision ) =
-                    SystemCollision.update dt model.entities ( model.positionComponents, tablesAfterAcceleration.b )
-
-                --( lifeComponentsAfterAttack, _ ) =
-                --    SystemAttack.update model.entities ( model.lifeComponents, model.positionComponents )
+                tablesAfterCollision =
+                    SystemCollision.update
+                        { a = model.positionComponents
+                        , b = tablesAfterAcceleration.b
+                        }
             in
             ( { model
-                | positionComponents = positionComponentsAfterCollision
-                , velocityComponents = velocityComponentsAfterCollision
+                | positionComponents = tablesAfterCollision.a
+                , velocityComponents = tablesAfterCollision.b
                 , keyboardInputComponents = mapComponents (\_ _ -> { key = Nothing }) model.keyboardInputComponents
-
-                --, lifeComponents = lifeComponentsAfterAttack
               }
             , Cmd.none
             )

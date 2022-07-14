@@ -111,14 +111,36 @@ rightStep _ _ table =
     table
 
 
+isEmptyTable : Table a -> Bool
+isEmptyTable (Table dict) =
+    Dict.isEmpty dict
+
+
+filterTable : (Int -> a -> Bool) -> Table a -> Table a
+filterTable isGood (Table dict) =
+    Table (Dict.filter isGood dict)
+
+
 getDictTable : Table a -> Dict Int a
 getDictTable (Table dict) =
     dict
 
 
-mergeTable : Table2 a b -> Table (Component2 a b)
-mergeTable { a, b } =
+table2ToMatchingEntities : Table2 a b -> Table (Component2 a b)
+table2ToMatchingEntities { a, b } =
     Dict.merge (\_ _ t -> t) bothStep (\_ _ t -> t) (getDictTable a) (getDictTable b) emptyComponentTable
+
+
+unionTables : Table2 a b -> Table2 a b -> Table2 a b
+unionTables tableHighPriority tableLowPriority =
+    { a = unionTable tableHighPriority.a tableLowPriority.a
+    , b = unionTable tableHighPriority.b tableLowPriority.b
+    }
+
+
+unionTable : Table a -> Table a -> Table a
+unionTable (Table dictHighPriority) (Table dictLowPriority) =
+    Table (Dict.union dictHighPriority dictLowPriority)
 
 
 splitTable : Table (Component2 a b) -> Table2 a b
@@ -131,7 +153,11 @@ splitTable table =
 
 update2Tables : (Table (Component2 a b) -> Table (Component2 a b)) -> Table2 a b -> Table2 a b
 update2Tables func table2 =
-    splitTable (func (mergeTable table2))
+    let
+        updated =
+            splitTable (func (table2ToMatchingEntities table2))
+    in
+    unionTables updated table2
 
 
 insertInTable : Int -> a -> Table a -> Table a
@@ -142,6 +168,15 @@ insertInTable id a (Table dict) =
 foldlTable : (Int -> a -> b -> b) -> b -> Table a -> b
 foldlTable func acc (Table dict) =
     Dict.foldl func acc dict
+
+
+valuesTable : Table a -> List a
+valuesTable (Table dict) =
+    Dict.values dict
+
+sizeTable : Table a -> Int
+sizeTable (Table dict) =
+    Dict.size dict
 
 
 newMapTable : (Int -> a -> b) -> Table a -> Table b
