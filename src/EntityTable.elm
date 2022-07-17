@@ -25,6 +25,11 @@ emptyEntityTable =
     EntityTable 0 []
 
 
+doesEntityExist : EntityId -> EntityTable -> Bool
+doesEntityExist entityId (EntityTable _ list) =
+    List.member entityId list
+
+
 addEntity : EntityTable -> ( EntityTable, EntityId )
 addEntity (EntityTable nextId entities) =
     ( EntityTable (nextId + 1) (EntityId nextId :: entities)
@@ -96,13 +101,23 @@ splitTable table =
         table
 
 
-update2Tables : (Table (Component2 a b) -> Table (Component2 a b)) -> Table2 a b -> Table2 a b
-update2Tables func table2 =
+update2Tables : EntityTable -> (Table (Component2 a b) -> Table (Component2 a b)) -> Table2 a b -> Table2 a b
+update2Tables entities func table2 =
     let
         updated =
-            splitTable (func (table2ToMatchingEntities table2))
+            splitTable (func (filterEntities entities (table2ToMatchingEntities table2)))
     in
     unionTables updated table2
+
+
+filterEntities : EntityTable -> Table a -> Table a
+filterEntities entities table =
+    filterTable (\id _ -> doesEntityExist (EntityId id) entities) table
+
+
+filterTable : (Int -> a -> Bool) -> Table a -> Table a
+filterTable isGood (Table dict) =
+    Table (Dict.filter isGood dict)
 
 
 insertInTable : Int -> a -> Table a -> Table a

@@ -75,7 +75,7 @@ init _ =
                 |> setComponent playerId ComponentVisual.defaultRect
                 |> setComponent enemyId ComponentVisual.defaultCircle
     in
-    ( { entities = entities2
+    ( { entities = entities
       , keyboardInputComponents = keyboardInputComponents
       , positionComponents = positionComponents
       , velocityComponents = velocityComponents
@@ -106,12 +106,14 @@ update msg model =
             let
                 tablesAfterAcceleration =
                     SystemAcceleration.update
+                        model.entities
                         { a = model.keyboardInputComponents
                         , b = model.velocityComponents
                         }
 
                 tablesAfterCollision =
                     SystemCollision.update
+                        model.entities
                         { a = model.positionComponents
                         , b = tablesAfterAcceleration.b
                         }

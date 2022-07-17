@@ -5,10 +5,11 @@ import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
 
 
-update : Table2 ComponentPosition ComponentVelocity -> Table2 ComponentPosition ComponentVelocity
-update tables =
+update : EntityTable -> Table2 ComponentPosition ComponentVelocity -> Table2 ComponentPosition ComponentVelocity
+update entities tables =
     update2Tables
-        (collide tables.a)
+        entities
+        (collide (filterEntities entities tables.a))
         tables
 
 
