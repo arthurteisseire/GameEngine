@@ -107,21 +107,21 @@ update msg model =
                 tablesAfterAcceleration =
                     SystemAcceleration.update
                         model.entities
-                        { a = model.keyboardInputComponents
-                        , b = model.velocityComponents
+                        { tableA = model.keyboardInputComponents
+                        , tableB = model.velocityComponents
                         }
 
                 tablesAfterCollision =
                     SystemCollision.update
                         model.entities
                         model.positionComponents
-                        { a = model.positionComponents
-                        , b = tablesAfterAcceleration.b
+                        { tableA = model.positionComponents
+                        , tableB = tablesAfterAcceleration.tableB
                         }
             in
             ( { model
-                | positionComponents = tablesAfterCollision.a
-                , velocityComponents = tablesAfterCollision.b
+                | positionComponents = tablesAfterCollision.tableA
+                , velocityComponents = tablesAfterCollision.tableB
                 , keyboardInputComponents = updateEachEntity (\_ _ -> { key = Nothing }) model.entities model.keyboardInputComponents
               }
             , Cmd.none
@@ -170,7 +170,7 @@ view model =
                     , SA.height "300"
                     , SA.viewBox "0 0 10 10"
                     ]
-                    (systemDraw model.entities { a = model.visualComponents, b = model.positionComponents })
+                    (systemDraw model.entities { tableA = model.visualComponents, tableB = model.positionComponents })
                 ]
             , systemDisplayDebug model model.entityIdDebug
             ]

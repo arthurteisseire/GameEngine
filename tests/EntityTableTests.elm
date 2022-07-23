@@ -18,10 +18,10 @@ suite =
                             |> insertInTable 1 { a = { x = 1, y = 2 }, b = { x = 3, y = 4 } }
 
                     expectedTable2 =
-                        { a =
+                        { tableA =
                             emptyComponentTable
                                 |> insertInTable 1 { x = 1, y = 2 }
-                        , b =
+                        , tableB =
                             emptyComponentTable
                                 |> insertInTable 1 { x = 3, y = 4 }
                         }
@@ -32,11 +32,11 @@ suite =
             (\_ ->
                 let
                     actualTable2 =
-                        { a =
+                        { tableA =
                             emptyComponentTable
                                 |> insertInTable 1 { x = 1, y = 2 }
                                 |> insertInTable 2 { x = 1, y = 2 }
-                        , b =
+                        , tableB =
                             emptyComponentTable
                                 |> insertInTable 1 { x = 3, y = 4 }
                         }
@@ -54,8 +54,8 @@ suite =
             (\xs ys ->
                 let
                     tables =
-                        { a = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
-                        , b = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
+                        { tableA = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
+                        , tableB = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
                         }
                 in
                 Expect.equal tables (unionTable2 (splitTable2 (intersectTable2 tables)) tables)
@@ -67,8 +67,8 @@ suite =
             (\xs ys ->
                 let
                     tables =
-                        { a = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
-                        , b = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
+                        { tableA = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
+                        , tableB = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
                         }
                 in
                 Expect.equal tables (update2Tables (\tableComp2 -> tableComp2) tables)

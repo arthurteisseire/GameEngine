@@ -56,14 +56,9 @@ type alias Table2New a b =
 
 
 type alias Table2 a b =
-    { a : Table a
-    , b : Table b
+    { tableA : Table a
+    , tableB : Table b
     }
-
-
-bothStep : Int -> a -> b -> Table (Component2 a b) -> Table (Component2 a b)
-bothStep id a b (Table dict) =
-    Table (Dict.insert id { a = a, b = b } dict)
 
 
 getDictTable : Table a -> Dict Int a
@@ -79,35 +74,97 @@ unionTable (Table dictHighPriority) (Table dictLowPriority) =
 splitTable2 : Table (Component2 a b) -> Table2 a b
 splitTable2 table =
     foldlTable
-        (\id comp2 table2 -> { a = insertInTable id comp2.a table2.a, b = insertInTable id comp2.b table2.b })
-        { a = emptyComponentTable, b = emptyComponentTable }
+        (\id comp2 table2 ->
+            { tableA = insertInTable (EntityId id) comp2.a table2.tableA
+            , tableB = insertInTable (EntityId id) comp2.b table2.tableB
+            }
+        )
+        { tableA = emptyComponentTable, tableB = emptyComponentTable }
         table
 
 
 intersectTable2 : Table2 a b -> Table (Component2 a b)
-intersectTable2 { a, b } =
-    Dict.merge (\_ _ t -> t) bothStep (\_ _ t -> t) (getDictTable a) (getDictTable b) emptyComponentTable
+intersectTable2 { tableA, tableB } =
+    Dict.merge
+        (\_ _ t -> t)
+        (\id a b t -> Table (Dict.insert id { a = a, b = b } (getDictTable t)))
+        (\_ _ t -> t)
+        (getDictTable tableA)
+        (getDictTable tableB)
+        emptyComponentTable
 
 
 unionTable2 : Table2 a b -> Table2 a b -> Table2 a b
 unionTable2 tableHighPriority tableLowPriority =
-    { a = unionTable tableHighPriority.a tableLowPriority.a
-    , b = unionTable tableHighPriority.b tableLowPriority.b
+    { tableA = unionTable tableHighPriority.tableA tableLowPriority.tableA
+    , tableB = unionTable tableHighPriority.tableB tableLowPriority.tableB
     }
-
-
-update2Tables : (Table (Component2 a b) -> Table (Component2 a b)) -> Table2 a b -> Table2 a b
-update2Tables func table2 =
-    let
-        updated =
-            splitTable2 (createFromTable2 func table2)
-    in
-    unionTable2 updated table2
 
 
 createFromTable2 : (Table (Component2 a b) -> Table c) -> Table2 a b -> Table c
 createFromTable2 func table2 =
     func (intersectTable2 table2)
+
+
+update2Tables : (Table (Component2 a b) -> Table (Component2 a b)) -> Table2 a b -> Table2 a b
+update2Tables func table2 =
+    let
+        entities : Table (Component2 a b)
+        entities =
+            mergeTable
+                (\_ _ t -> t)
+                (\id a b t -> insertInTable id { a = a, b = b } t)
+                (\_ _ t -> t)
+                table2.tableA
+                table2.tableB
+                emptyComponentTable
+
+        updatedEntities : Table (Component2 a b)
+        updatedEntities =
+            func entities
+
+        splitedTable2 : Table2 a b
+        splitedTable2 =
+            foldlTable
+                (\id comp2 fTable2 ->
+                    { tableA = insertInTable (EntityId id) comp2.a fTable2.tableA
+                    , tableB = insertInTable (EntityId id) comp2.b fTable2.tableB
+                    }
+                )
+                { tableA = emptyComponentTable, tableB = emptyComponentTable }
+                updatedEntities
+
+        unionedTable2 : Table2 a b
+        unionedTable2 =
+            { tableA = unionTable splitedTable2.tableA table2.tableA
+            , tableB = unionTable splitedTable2.tableB table2.tableB
+            }
+    in
+    unionedTable2
+
+
+
+--unionTable2
+--    (splitTable2 (createFromTable2 func table2))
+--    table2
+
+
+mergeTable :
+    (EntityId -> a -> result -> result)
+    -> (EntityId -> a -> b -> result -> result)
+    -> (EntityId -> b -> result -> result)
+    -> Table a
+    -> Table b
+    -> result
+    -> result
+mergeTable leftStep bothStep rightStep (Table leftDict) (Table rightDict) initialResult =
+    Dict.merge
+        (\id a t -> leftStep (EntityId id) a t)
+        (\id a b t -> bothStep (EntityId id) a b t)
+        (\id b t -> rightStep (EntityId id) b t)
+        leftDict
+        rightDict
+        initialResult
 
 
 applyEntityLaw : (EntityId -> Table r1 -> r2 -> w) -> EntityTable -> Table r1 -> Table r2 -> Table w
@@ -135,8 +192,8 @@ filterTable isGood (Table dict) =
     Table (Dict.filter isGood dict)
 
 
-insertInTable : Int -> a -> Table a -> Table a
-insertInTable id a (Table dict) =
+insertInTable : EntityId -> a -> Table a -> Table a
+insertInTable (EntityId id) a (Table dict) =
     Table (Dict.insert id a dict)
 
 
@@ -161,13 +218,10 @@ emptyComponentTable =
 
 
 setComponent : EntityId -> a -> Table a -> Table a
-setComponent (EntityId entityId) component table =
+setComponent entityId component table =
     insertInTable entityId component table
 
 
 getComponent : Table a -> EntityId -> Maybe a
 getComponent (Table dict) (EntityId id) =
     Dict.get id dict
-
-
-
