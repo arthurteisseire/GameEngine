@@ -5,23 +5,35 @@ import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
 
 
-update : EntityTable -> Table2 ComponentPosition ComponentVelocity -> Table2 ComponentPosition ComponentVelocity
-update entities tables =
+update :
+    EntityTable
+    -> Table ComponentPosition
+    -> Table2 ComponentPosition ComponentVelocity
+    -> Table2 ComponentPosition ComponentVelocity
+update entities readTable writeTables =
     update2Tables
+        (collide entities readTable)
+        writeTables
+
+
+collide :
+    EntityTable
+    -> Table ComponentPosition
+    -> Table (Component2 ComponentPosition ComponentVelocity)
+    -> Table (Component2 ComponentPosition ComponentVelocity)
+collide entities readTable writeTable =
+    applyEntityLaw
+        (\_ read comp2 -> collideEntity read comp2)
         entities
-        (collide (filterEntities entities tables.a))
-        tables
+        readTable
+        writeTable
 
 
-collide : Table ComponentPosition -> Table (Component2 ComponentPosition ComponentVelocity) -> Table (Component2 ComponentPosition ComponentVelocity)
-collide allEntities entitiesWithVelocity =
-    newMapTable
-        (\_ entity -> collideEntity allEntities entity)
-        entitiesWithVelocity
-
-
-collideEntity : Table ComponentPosition -> Component2 ComponentPosition ComponentVelocity -> Component2 ComponentPosition ComponentVelocity
-collideEntity allEntities component2 =
+collideEntity :
+    Table ComponentPosition
+    -> Component2 ComponentPosition ComponentVelocity
+    -> Component2 ComponentPosition ComponentVelocity
+collideEntity readTable component2 =
     let
         position =
             component2.a
@@ -35,7 +47,7 @@ collideEntity allEntities component2 =
             }
 
         nextPos =
-            if List.member movedPos (valuesTable allEntities) then
+            if List.member movedPos (valuesTable readTable) then
                 position
 
             else

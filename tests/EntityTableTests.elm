@@ -26,7 +26,7 @@ suite =
                                 |> insertInTable 1 { x = 3, y = 4 }
                         }
                 in
-                Expect.equal (splitTable tableComponent2) expectedTable2
+                Expect.equal (splitTable2 tableComponent2) expectedTable2
             )
         , test "mergeTables"
             (\_ ->
@@ -45,7 +45,7 @@ suite =
                         emptyComponentTable
                             |> insertInTable 1 { a = { x = 1, y = 2 }, b = { x = 3, y = 4 } }
                 in
-                Expect.equal (table2ToMatchingEntities actualTable2) expectedTableComponent2
+                Expect.equal (intersectTable2 actualTable2) expectedTableComponent2
             )
         , fuzz2
             (list int)
@@ -58,7 +58,7 @@ suite =
                         , b = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
                         }
                 in
-                Expect.equal tables (unionTables (splitTable (table2ToMatchingEntities tables)) tables)
+                Expect.equal tables (unionTable2 (splitTable2 (intersectTable2 tables)) tables)
             )
         , fuzz2
             (list int)

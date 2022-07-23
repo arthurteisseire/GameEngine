@@ -37,11 +37,6 @@ addEntity (EntityTable nextId entities) =
     )
 
 
-mapEntityTable : (EntityId -> a) -> EntityTable -> List a
-mapEntityTable f (EntityTable _ entities) =
-    List.map f entities
-
-
 
 -- Component Table
 
@@ -76,38 +71,58 @@ getDictTable (Table dict) =
     dict
 
 
-table2ToMatchingEntities : Table2 a b -> Table (Component2 a b)
-table2ToMatchingEntities { a, b } =
-    Dict.merge (\_ _ t -> t) bothStep (\_ _ t -> t) (getDictTable a) (getDictTable b) emptyComponentTable
-
-
-unionTables : Table2 a b -> Table2 a b -> Table2 a b
-unionTables tableHighPriority tableLowPriority =
-    { a = unionTable tableHighPriority.a tableLowPriority.a
-    , b = unionTable tableHighPriority.b tableLowPriority.b
-    }
-
-
 unionTable : Table a -> Table a -> Table a
 unionTable (Table dictHighPriority) (Table dictLowPriority) =
     Table (Dict.union dictHighPriority dictLowPriority)
 
 
-splitTable : Table (Component2 a b) -> Table2 a b
-splitTable table =
+splitTable2 : Table (Component2 a b) -> Table2 a b
+splitTable2 table =
     foldlTable
         (\id comp2 table2 -> { a = insertInTable id comp2.a table2.a, b = insertInTable id comp2.b table2.b })
         { a = emptyComponentTable, b = emptyComponentTable }
         table
 
 
-update2Tables : EntityTable -> (Table (Component2 a b) -> Table (Component2 a b)) -> Table2 a b -> Table2 a b
-update2Tables entities func table2 =
+intersectTable2 : Table2 a b -> Table (Component2 a b)
+intersectTable2 { a, b } =
+    Dict.merge (\_ _ t -> t) bothStep (\_ _ t -> t) (getDictTable a) (getDictTable b) emptyComponentTable
+
+
+unionTable2 : Table2 a b -> Table2 a b -> Table2 a b
+unionTable2 tableHighPriority tableLowPriority =
+    { a = unionTable tableHighPriority.a tableLowPriority.a
+    , b = unionTable tableHighPriority.b tableLowPriority.b
+    }
+
+
+update2Tables : (Table (Component2 a b) -> Table (Component2 a b)) -> Table2 a b -> Table2 a b
+update2Tables func table2 =
     let
         updated =
-            splitTable (func (filterEntities entities (table2ToMatchingEntities table2)))
+            splitTable2 (createFromTable2 func table2)
     in
-    unionTables updated table2
+    unionTable2 updated table2
+
+
+createFromTable2 : (Table (Component2 a b) -> Table c) -> Table2 a b -> Table c
+createFromTable2 func table2 =
+    func (intersectTable2 table2)
+
+
+applyEntityLaw : (EntityId -> Table r1 -> r2 -> w) -> EntityTable -> Table r1 -> Table r2 -> Table w
+applyEntityLaw func entities readTable writeTable =
+    updateEachEntity
+        (\entityId writeEntity -> func entityId (filterEntities entities readTable) writeEntity)
+        entities
+        writeTable
+
+
+updateEachEntity : (EntityId -> r -> w) -> EntityTable -> Table r -> Table w
+updateEachEntity func entities writeTable =
+    mapTable
+        (\id writeEntity -> func (EntityId id) writeEntity)
+        (filterEntities entities writeTable)
 
 
 filterEntities : EntityTable -> Table a -> Table a
@@ -135,8 +150,8 @@ valuesTable (Table dict) =
     Dict.values dict
 
 
-newMapTable : (Int -> a -> b) -> Table a -> Table b
-newMapTable func (Table dict) =
+mapTable : (Int -> a -> b) -> Table a -> Table b
+mapTable func (Table dict) =
     Table (Dict.map func dict)
 
 
@@ -160,9 +175,3 @@ mapComponents f (Table dict) =
     Table (Dict.map f dict)
 
 
-map2Component : (a -> b -> c) -> ( Table a, Table b ) -> EntityId -> Maybe c
-map2Component f ( tableA, tableB ) entityId =
-    Maybe.map2
-        f
-        (getComponent tableA entityId)
-        (getComponent tableB entityId)

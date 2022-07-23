@@ -75,7 +75,7 @@ init _ =
                 |> setComponent playerId ComponentVisual.defaultRect
                 |> setComponent enemyId ComponentVisual.defaultCircle
     in
-    ( { entities = entities
+    ( { entities = entities2
       , keyboardInputComponents = keyboardInputComponents
       , positionComponents = positionComponents
       , velocityComponents = velocityComponents
@@ -114,6 +114,7 @@ update msg model =
                 tablesAfterCollision =
                     SystemCollision.update
                         model.entities
+                        model.positionComponents
                         { a = model.positionComponents
                         , b = tablesAfterAcceleration.b
                         }
@@ -169,7 +170,7 @@ view model =
                     , SA.height "300"
                     , SA.viewBox "0 0 10 10"
                     ]
-                    (systemDraw model.entities ( model.visualComponents, model.positionComponents ))
+                    (systemDraw model.entities { a = model.visualComponents, b = model.positionComponents })
                 ]
             , systemDisplayDebug model model.entityIdDebug
             ]
@@ -278,14 +279,17 @@ displayDebug model entityId =
         ]
 
 
-systemDraw : EntityTable -> ( Table ComponentVisual, Table ComponentPosition ) -> List (Svg Msg)
-systemDraw entityTable componentTables =
-    List.filterMap
-        identity
-        (mapEntityTable
-            (\entityId -> map2Component (\visual position -> toSvg entityId visual position) componentTables entityId)
-            entityTable
-        )
+systemDraw : EntityTable -> Table2 ComponentVisual ComponentPosition -> List (Svg Msg)
+systemDraw entityTable table2 =
+    valuesTable <|
+        createFromTable2
+            (\entities -> updateEachEntity svgFromVisualPosition entityTable entities)
+            table2
+
+
+svgFromVisualPosition : EntityId -> Component2 ComponentVisual ComponentPosition -> Svg Msg
+svgFromVisualPosition entityId comp2 =
+    toSvg entityId comp2.a comp2.b
 
 
 toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg
