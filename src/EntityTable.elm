@@ -1,4 +1,21 @@
-module EntityTable exposing (..)
+module EntityTable exposing
+    ( Component2
+    , EntityId
+    , EntityTable
+    , Table
+    , Table2
+    , addEntity
+    , emptyEntityTable
+    , emptyTable
+    , entityIdToString
+    , getComponent
+    , mapEntities1
+    , mapEntities2
+    , setComponent
+    , updateEachEntity2
+    , updateEachEntityWithOthers2
+    , valuesTable
+    )
 
 import Dict exposing (Dict)
 
@@ -45,108 +62,70 @@ type Table a
     = Table (Dict Int a)
 
 
-type alias Component2 a b =
-    { a : a
-    , b : b
-    }
-
-
-type alias Table2New a b =
-    Table (Component2 a b)
-
-
 type alias Table2 a b =
     { tableA : Table a
     , tableB : Table b
     }
 
 
-getDictTable : Table a -> Dict Int a
-getDictTable (Table dict) =
-    dict
-
-
-unionTable : Table a -> Table a -> Table a
-unionTable (Table dictHighPriority) (Table dictLowPriority) =
-    Table (Dict.union dictHighPriority dictLowPriority)
-
-
-splitTable2 : Table (Component2 a b) -> Table2 a b
-splitTable2 table =
-    foldlTable
-        (\id comp2 table2 ->
-            { tableA = insertInTable (EntityId id) comp2.a table2.tableA
-            , tableB = insertInTable (EntityId id) comp2.b table2.tableB
-            }
-        )
-        { tableA = emptyComponentTable, tableB = emptyComponentTable }
-        table
-
-
-intersectTable2 : Table2 a b -> Table (Component2 a b)
-intersectTable2 { tableA, tableB } =
-    Dict.merge
-        (\_ _ t -> t)
-        (\id a b t -> Table (Dict.insert id { a = a, b = b } (getDictTable t)))
-        (\_ _ t -> t)
-        (getDictTable tableA)
-        (getDictTable tableB)
-        emptyComponentTable
-
-
-unionTable2 : Table2 a b -> Table2 a b -> Table2 a b
-unionTable2 tableHighPriority tableLowPriority =
-    { tableA = unionTable tableHighPriority.tableA tableLowPriority.tableA
-    , tableB = unionTable tableHighPriority.tableB tableLowPriority.tableB
+type alias Component2 a b =
+    { a : a
+    , b : b
     }
 
 
-createFromTable2 : (Table (Component2 a b) -> Table c) -> Table2 a b -> Table c
-createFromTable2 func table2 =
-    func (intersectTable2 table2)
+updateEachEntityWithOthers2 : (EntityId -> Table a -> Component2 a b -> Component2 a b) -> EntityTable -> Table a -> Table2 a b -> Table2 a b
+updateEachEntityWithOthers2 func entityTable readTable writeTable =
+    updateEachEntity2
+        (\entityId comp2 -> func entityId (filterEntitiesInTable entityTable readTable) comp2)
+        entityTable
+        writeTable
 
 
-update2Tables : (Table (Component2 a b) -> Table (Component2 a b)) -> Table2 a b -> Table2 a b
-update2Tables func table2 =
+updateEachEntity2 : (EntityId -> Component2 a b -> Component2 a b) -> EntityTable -> Table2 a b -> Table2 a b
+updateEachEntity2 func entityTable writeTables =
     let
-        entities : Table (Component2 a b)
-        entities =
-            mergeTable
-                (\_ _ t -> t)
-                (\id a b t -> insertInTable id { a = a, b = b } t)
-                (\_ _ t -> t)
-                table2.tableA
-                table2.tableB
-                emptyComponentTable
-
-        updatedEntities : Table (Component2 a b)
         updatedEntities =
-            func entities
+            mapEntities2
+                func
+                entityTable
+                writeTables
 
-        splitedTable2 : Table2 a b
         splitedTable2 =
             foldlTable
-                (\id comp2 fTable2 ->
-                    { tableA = insertInTable (EntityId id) comp2.a fTable2.tableA
-                    , tableB = insertInTable (EntityId id) comp2.b fTable2.tableB
+                (\entityId comp2 table2 ->
+                    { tableA = insertInTable entityId comp2.a table2.tableA
+                    , tableB = insertInTable entityId comp2.b table2.tableB
                     }
                 )
-                { tableA = emptyComponentTable, tableB = emptyComponentTable }
+                { tableA = emptyTable, tableB = emptyTable }
                 updatedEntities
 
-        unionedTable2 : Table2 a b
         unionedTable2 =
-            { tableA = unionTable splitedTable2.tableA table2.tableA
-            , tableB = unionTable splitedTable2.tableB table2.tableB
+            { tableA = unionTable splitedTable2.tableA writeTables.tableA
+            , tableB = unionTable splitedTable2.tableB writeTables.tableB
             }
     in
     unionedTable2
 
 
+mapEntities2 : (EntityId -> Component2 a b -> result) -> EntityTable -> Table2 a b -> Table result
+mapEntities2 func entityTable table2 =
+    mergeTable
+        (\_ _ t2 -> t2)
+        (\entityId a b t2 -> insertInTable entityId (func entityId { a = a, b = b }) t2)
+        (\_ _ t2 -> t2)
+        (filterEntitiesInTable entityTable table2.tableA)
+        (filterEntitiesInTable entityTable table2.tableB)
+        emptyTable
 
---unionTable2
---    (splitTable2 (createFromTable2 func table2))
---    table2
+
+mapEntities1 : (EntityId -> a -> result) -> EntityTable -> Table a -> Table result
+mapEntities1 func entityTable table =
+    foldlTable
+        (\entityId a accTable -> insertInTable entityId (func entityId a) accTable)
+        emptyTable
+        (filterEntitiesInTable entityTable table)
 
 
 mergeTable :
@@ -167,29 +146,19 @@ mergeTable leftStep bothStep rightStep (Table leftDict) (Table rightDict) initia
         initialResult
 
 
-applyEntityLaw : (EntityId -> Table r1 -> r2 -> w) -> EntityTable -> Table r1 -> Table r2 -> Table w
-applyEntityLaw func entities readTable writeTable =
-    updateEachEntity
-        (\entityId writeEntity -> func entityId (filterEntities entities readTable) writeEntity)
-        entities
-        writeTable
+unionTable : Table a -> Table a -> Table a
+unionTable (Table dictHighPriority) (Table dictLowPriority) =
+    Table (Dict.union dictHighPriority dictLowPriority)
 
 
-updateEachEntity : (EntityId -> r -> w) -> EntityTable -> Table r -> Table w
-updateEachEntity func entities writeTable =
-    mapTable
-        (\id writeEntity -> func (EntityId id) writeEntity)
-        (filterEntities entities writeTable)
+filterEntitiesInTable : EntityTable -> Table a -> Table a
+filterEntitiesInTable entities table =
+    filterTable (\entityId _ -> doesEntityExist entityId entities) table
 
 
-filterEntities : EntityTable -> Table a -> Table a
-filterEntities entities table =
-    filterTable (\id _ -> doesEntityExist (EntityId id) entities) table
-
-
-filterTable : (Int -> a -> Bool) -> Table a -> Table a
+filterTable : (EntityId -> a -> Bool) -> Table a -> Table a
 filterTable isGood (Table dict) =
-    Table (Dict.filter isGood dict)
+    Table (Dict.filter (\id a -> isGood (EntityId id) a) dict)
 
 
 insertInTable : EntityId -> a -> Table a -> Table a
@@ -197,9 +166,9 @@ insertInTable (EntityId id) a (Table dict) =
     Table (Dict.insert id a dict)
 
 
-foldlTable : (Int -> a -> b -> b) -> b -> Table a -> b
+foldlTable : (EntityId -> a -> b -> b) -> b -> Table a -> b
 foldlTable func acc (Table dict) =
-    Dict.foldl func acc dict
+    Dict.foldl (\id a b -> func (EntityId id) a b) acc dict
 
 
 valuesTable : Table a -> List a
@@ -207,13 +176,8 @@ valuesTable (Table dict) =
     Dict.values dict
 
 
-mapTable : (Int -> a -> b) -> Table a -> Table b
-mapTable func (Table dict) =
-    Table (Dict.map func dict)
-
-
-emptyComponentTable : Table a
-emptyComponentTable =
+emptyTable : Table a
+emptyTable =
     Table Dict.empty
 
 

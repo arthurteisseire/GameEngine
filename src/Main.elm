@@ -53,25 +53,25 @@ init _ =
             addEntity entities
 
         keyboardInputComponents =
-            emptyComponentTable
+            emptyTable
                 |> setComponent playerId ComponentKeyboardInput.identity
 
         positionComponents =
-            emptyComponentTable
+            emptyTable
                 |> setComponent playerId { x = 4, y = 0 }
                 |> setComponent enemyId { x = 5, y = 0 }
 
         velocityComponents =
-            emptyComponentTable
+            emptyTable
                 |> setComponent playerId ComponentVelocity.identity
 
         lifeComponents =
-            emptyComponentTable
+            emptyTable
                 |> setComponent playerId ComponentLife.identity
                 |> setComponent enemyId ComponentLife.identity
 
         visualComponents =
-            emptyComponentTable
+            emptyTable
                 |> setComponent playerId ComponentVisual.defaultRect
                 |> setComponent enemyId ComponentVisual.defaultCircle
     in
@@ -122,14 +122,14 @@ update msg model =
             ( { model
                 | positionComponents = tablesAfterCollision.tableA
                 , velocityComponents = tablesAfterCollision.tableB
-                , keyboardInputComponents = updateEachEntity (\_ _ -> { key = Nothing }) model.entities model.keyboardInputComponents
+                , keyboardInputComponents = mapEntities1 (\_ _ -> { key = Nothing }) model.entities model.keyboardInputComponents
               }
             , Cmd.none
             )
 
         KeyBoardInput key ->
             ( { model
-                | keyboardInputComponents = updateEachEntity (\_ _ -> { key = Just key }) model.entities model.keyboardInputComponents
+                | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) model.entities model.keyboardInputComponents
               }
             , Cmd.none
             )
@@ -181,8 +181,9 @@ view model =
 systemDraw : EntityTable -> Table2 ComponentVisual ComponentPosition -> List (Svg Msg)
 systemDraw entityTable table2 =
     valuesTable <|
-        createFromTable2
-            (\entities -> updateEachEntity svgFromVisualPosition entityTable entities)
+        mapEntities2
+            svgFromVisualPosition
+            entityTable
             table2
 
 

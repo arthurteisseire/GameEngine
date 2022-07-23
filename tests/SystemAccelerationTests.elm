@@ -20,19 +20,19 @@ suite =
 
                     actualTables =
                         { a =
-                            emptyComponentTable
+                            emptyTable
                                 |> setComponent entity { key = Just KeyboardInput.Right }
                         , b =
-                            emptyComponentTable
+                            emptyTable
                                 |> setComponent entity { x = 0, y = 0 }
                         }
 
                     expectedTables =
                         { a =
-                            emptyComponentTable
+                            emptyTable
                                 |> setComponent entity { key = Just KeyboardInput.Right }
                         , b =
-                            emptyComponentTable
+                            emptyTable
                                 |> setComponent entity { x = 1, y = 0 }
                         }
                 in

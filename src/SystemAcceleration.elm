@@ -7,25 +7,15 @@ import KeyboardInput exposing (Key)
 
 
 update : EntityTable -> Table2 ComponentKeyboardInput ComponentVelocity -> Table2 ComponentKeyboardInput ComponentVelocity
-update entities tables =
-    update2Tables
-        (updatePlayerVelocity entities)
+update entityTable tables =
+    updateEachEntity2
+        updatePlayerVelocityEntity
+        entityTable
         tables
 
 
-updatePlayerVelocity :
-    EntityTable
-    -> Table (Component2 ComponentKeyboardInput ComponentVelocity)
-    -> Table (Component2 ComponentKeyboardInput ComponentVelocity)
-updatePlayerVelocity entities writeTable =
-    updateEachEntity
-        (\_ comp2 -> updatePlayerVelocityEntity comp2)
-        entities
-        writeTable
-
-
-updatePlayerVelocityEntity : Component2 ComponentKeyboardInput ComponentVelocity -> Component2 ComponentKeyboardInput ComponentVelocity
-updatePlayerVelocityEntity component2 =
+updatePlayerVelocityEntity : EntityId -> Component2 ComponentKeyboardInput ComponentVelocity -> Component2 ComponentKeyboardInput ComponentVelocity
+updatePlayerVelocityEntity _ component2 =
     let
         keyboardInput =
             component2.a

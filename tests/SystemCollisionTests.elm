@@ -13,8 +13,8 @@ suite =
             "Update empty table"
             (\_ ->
                 Expect.equal
-                    (SystemCollision.update { a = emptyComponentTable, b = emptyComponentTable })
-                    { a = emptyComponentTable, b = emptyComponentTable }
+                    (SystemCollision.update { a = emptyTable, b = emptyTable })
+                    { a = emptyTable, b = emptyTable }
             )
         , test
             "Simple update"
@@ -25,19 +25,19 @@ suite =
 
                     actualTables =
                         { a =
-                            emptyComponentTable
+                            emptyTable
                                 |> setComponent entity { x = 0, y = 0 }
                         , b =
-                            emptyComponentTable
+                            emptyTable
                                 |> setComponent entity { x = 1, y = 0 }
                         }
 
                     expectedTables =
                         { a =
-                            emptyComponentTable
+                            emptyTable
                                 |> setComponent entity { x = 1, y = 0 }
                         , b =
-                            emptyComponentTable
+                            emptyTable
                                 |> setComponent entity { x = 0, y = 0 }
                         }
                 in

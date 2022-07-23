@@ -14,15 +14,15 @@ suite =
             (\_ ->
                 let
                     tableComponent2 =
-                        emptyComponentTable
+                        emptyTable
                             |> insertInTable 1 { a = { x = 1, y = 2 }, b = { x = 3, y = 4 } }
 
                     expectedTable2 =
                         { tableA =
-                            emptyComponentTable
+                            emptyTable
                                 |> insertInTable 1 { x = 1, y = 2 }
                         , tableB =
-                            emptyComponentTable
+                            emptyTable
                                 |> insertInTable 1 { x = 3, y = 4 }
                         }
                 in
@@ -33,16 +33,16 @@ suite =
                 let
                     actualTable2 =
                         { tableA =
-                            emptyComponentTable
+                            emptyTable
                                 |> insertInTable 1 { x = 1, y = 2 }
                                 |> insertInTable 2 { x = 1, y = 2 }
                         , tableB =
-                            emptyComponentTable
+                            emptyTable
                                 |> insertInTable 1 { x = 3, y = 4 }
                         }
 
                     expectedTableComponent2 =
-                        emptyComponentTable
+                        emptyTable
                             |> insertInTable 1 { a = { x = 1, y = 2 }, b = { x = 3, y = 4 } }
                 in
                 Expect.equal (intersectTable2 actualTable2) expectedTableComponent2
