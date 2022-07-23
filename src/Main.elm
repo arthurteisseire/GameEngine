@@ -122,14 +122,14 @@ update msg model =
             ( { model
                 | positionComponents = tablesAfterCollision.a
                 , velocityComponents = tablesAfterCollision.b
-                , keyboardInputComponents = mapComponents (\_ _ -> { key = Nothing }) model.keyboardInputComponents
+                , keyboardInputComponents = updateEachEntity (\_ _ -> { key = Nothing }) model.entities model.keyboardInputComponents
               }
             , Cmd.none
             )
 
         KeyBoardInput key ->
             ( { model
-                | keyboardInputComponents = mapComponents (\_ _ -> { key = Just key }) model.keyboardInputComponents
+                | keyboardInputComponents = updateEachEntity (\_ _ -> { key = Just key }) model.entities model.keyboardInputComponents
               }
             , Cmd.none
             )
@@ -176,6 +176,35 @@ view model =
             ]
         ]
     }
+
+
+systemDraw : EntityTable -> Table2 ComponentVisual ComponentPosition -> List (Svg Msg)
+systemDraw entityTable table2 =
+    valuesTable <|
+        createFromTable2
+            (\entities -> updateEachEntity svgFromVisualPosition entityTable entities)
+            table2
+
+
+svgFromVisualPosition : EntityId -> Component2 ComponentVisual ComponentPosition -> Svg Msg
+svgFromVisualPosition entityId comp2 =
+    toSvg entityId comp2.a comp2.b
+
+
+toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg
+toSvg entityId visual position =
+    Svg.map
+        (\visualMsg ->
+            if visualMsg == ComponentVisual.Clicked then
+                DisplayDebug entityId
+
+            else
+                Clicked
+        )
+        (visual.shape
+            (visual.attributes ++ visual.posToAttributes position.x position.y)
+            []
+        )
 
 
 systemDisplayDebug : Model -> Maybe EntityId -> Html Msg
@@ -279,33 +308,8 @@ displayDebug model entityId =
         ]
 
 
-systemDraw : EntityTable -> Table2 ComponentVisual ComponentPosition -> List (Svg Msg)
-systemDraw entityTable table2 =
-    valuesTable <|
-        createFromTable2
-            (\entities -> updateEachEntity svgFromVisualPosition entityTable entities)
-            table2
 
-
-svgFromVisualPosition : EntityId -> Component2 ComponentVisual ComponentPosition -> Svg Msg
-svgFromVisualPosition entityId comp2 =
-    toSvg entityId comp2.a comp2.b
-
-
-toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg
-toSvg entityId visual position =
-    Svg.map
-        (\visualMsg ->
-            if visualMsg == ComponentVisual.Clicked then
-                DisplayDebug entityId
-
-            else
-                Clicked
-        )
-        (visual.shape
-            (visual.attributes ++ visual.posToAttributes position.x position.y)
-            []
-        )
+-- Subscriptions
 
 
 subscriptions : Model -> Sub Msg

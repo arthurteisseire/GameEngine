@@ -170,8 +170,4 @@ getComponent (Table dict) (EntityId id) =
     Dict.get id dict
 
 
-mapComponents : (Int -> a -> b) -> Table a -> Table b
-mapComponents f (Table dict) =
-    Table (Dict.map f dict)
-
 
