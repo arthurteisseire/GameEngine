@@ -182,14 +182,9 @@ systemDraw : EntityTable -> Table2 ComponentVisual ComponentPosition -> List (Sv
 systemDraw entityTable table2 =
     valuesTable <|
         mapEntities2
-            svgFromVisualPosition
+            toSvg
             entityTable
             table2
-
-
-svgFromVisualPosition : EntityId -> Component2 ComponentVisual ComponentPosition -> Svg Msg
-svgFromVisualPosition entityId comp2 =
-    toSvg entityId comp2.a comp2.b
 
 
 toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg

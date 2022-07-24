@@ -12,6 +12,7 @@ module EntityTable exposing
     , mapEntities1
     , mapEntities2
     , setComponent
+    , toComponent2
     , updateEachEntity2
     , updateEachEntityWithOthers2
     , valuesTable
@@ -74,15 +75,20 @@ type alias Component2 a b =
     }
 
 
-updateEachEntityWithOthers2 : (EntityId -> Table a -> Component2 a b -> Component2 a b) -> EntityTable -> Table a -> Table2 a b -> Table2 a b
+toComponent2 : a -> b -> Component2 a b
+toComponent2 a b =
+    { a = a, b = b }
+
+
+updateEachEntityWithOthers2 : (EntityId -> Table a -> a -> b -> Component2 a b) -> EntityTable -> Table a -> Table2 a b -> Table2 a b
 updateEachEntityWithOthers2 func entityTable readTable writeTable =
     updateEachEntity2
-        (\entityId comp2 -> func entityId (filterEntitiesInTable entityTable readTable) comp2)
+        (\entityId a b -> func entityId (filterEntitiesInTable entityTable readTable) a b)
         entityTable
         writeTable
 
 
-updateEachEntity2 : (EntityId -> Component2 a b -> Component2 a b) -> EntityTable -> Table2 a b -> Table2 a b
+updateEachEntity2 : (EntityId -> a -> b -> Component2 a b) -> EntityTable -> Table2 a b -> Table2 a b
 updateEachEntity2 func entityTable writeTables =
     let
         updatedEntities =
@@ -109,11 +115,11 @@ updateEachEntity2 func entityTable writeTables =
     unionedTable2
 
 
-mapEntities2 : (EntityId -> Component2 a b -> result) -> EntityTable -> Table2 a b -> Table result
+mapEntities2 : (EntityId -> a -> b -> result) -> EntityTable -> Table2 a b -> Table result
 mapEntities2 func entityTable table2 =
     mergeTable
         (\_ _ t2 -> t2)
-        (\entityId a b t2 -> insertInTable entityId (func entityId { a = a, b = b }) t2)
+        (\entityId a b t2 -> insertInTable entityId (func entityId a b) t2)
         (\_ _ t2 -> t2)
         (filterEntitiesInTable entityTable table2.tableA)
         (filterEntitiesInTable entityTable table2.tableB)

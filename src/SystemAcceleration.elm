@@ -9,26 +9,23 @@ import KeyboardInput exposing (Key)
 update : EntityTable -> Table2 ComponentKeyboardInput ComponentVelocity -> Table2 ComponentKeyboardInput ComponentVelocity
 update entityTable tables =
     updateEachEntity2
-        updatePlayerVelocityEntity
+        updatePlayerVelocity
         entityTable
         tables
 
 
-updatePlayerVelocityEntity : EntityId -> Component2 ComponentKeyboardInput ComponentVelocity -> Component2 ComponentKeyboardInput ComponentVelocity
-updatePlayerVelocityEntity _ component2 =
-    let
-        keyboardInput =
-            component2.a
-
-        velocity =
-            component2.b
-    in
+updatePlayerVelocity :
+    EntityId
+    -> ComponentKeyboardInput
+    -> ComponentVelocity
+    -> Component2 ComponentKeyboardInput ComponentVelocity
+updatePlayerVelocity _ keyboardInput velocity =
     case keyboardInput.key of
         Just key ->
-            { a = keyboardInput, b = updateVelocityFromKey key velocity }
+            toComponent2 keyboardInput (updateVelocityFromKey key velocity)
 
         Nothing ->
-            { a = keyboardInput, b = velocity }
+            toComponent2 keyboardInput velocity
 
 
 updateVelocityFromKey : Key -> ComponentVelocity -> ComponentVelocity
