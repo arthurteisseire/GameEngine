@@ -13,36 +13,34 @@ suite =
             "Update empty table"
             (\_ ->
                 Expect.equal
-                    (SystemCollision.update { a = emptyTable, b = emptyTable })
-                    { a = emptyTable, b = emptyTable }
+                    (SystemCollision.update emptyEntityTable emptyTable emptyTable emptyTable)
+                    { tableA = emptyTable, tableB = emptyTable }
             )
         , test
             "Simple update"
             (\_ ->
                 let
-                    entity =
-                        EntityId 1
+                    ( entityTable, entityId ) =
+                        emptyEntityTable |> addEntity
 
-                    actualTables =
-                        { a =
-                            emptyTable
-                                |> setComponent entity { x = 0, y = 0 }
-                        , b =
-                            emptyTable
-                                |> setComponent entity { x = 1, y = 0 }
-                        }
+                    actualPositionTable =
+                        emptyTable |> setComponent entityId { x = 0, y = 0 }
+
+                    actualVelocityTable =
+                        emptyTable |> setComponent entityId { x = 1, y = 0 }
 
                     expectedTables =
-                        { a =
-                            emptyTable
-                                |> setComponent entity { x = 1, y = 0 }
-                        , b =
-                            emptyTable
-                                |> setComponent entity { x = 0, y = 0 }
+                        { tableA = emptyTable |> setComponent entityId { x = 1, y = 0 }
+                        , tableB = emptyTable |> setComponent entityId { x = 0, y = 0 }
                         }
                 in
                 Expect.equal
-                    (SystemCollision.update actualTables)
+                    (SystemCollision.update
+                        entityTable
+                        actualPositionTable
+                        actualPositionTable
+                        actualVelocityTable
+                    )
                     expectedTables
             )
         ]

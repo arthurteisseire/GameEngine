@@ -10,68 +10,47 @@ import Test exposing (..)
 suite : Test
 suite =
     describe "Entity Table tests"
-        [ test "splitTables"
+        [ test "Map entities 1"
             (\_ ->
                 let
-                    tableComponent2 =
-                        emptyTable
-                            |> insertInTable 1 { a = { x = 1, y = 2 }, b = { x = 3, y = 4 } }
+                    ( entityTable, entityId ) =
+                        emptyEntityTable |> addEntity
 
-                    expectedTable2 =
-                        { tableA =
-                            emptyTable
-                                |> insertInTable 1 { x = 1, y = 2 }
-                        , tableB =
-                            emptyTable
-                                |> insertInTable 1 { x = 3, y = 4 }
-                        }
-                in
-                Expect.equal (splitTable2 tableComponent2) expectedTable2
-            )
-        , test "mergeTables"
-            (\_ ->
-                let
-                    actualTable2 =
-                        { tableA =
-                            emptyTable
-                                |> insertInTable 1 { x = 1, y = 2 }
-                                |> insertInTable 2 { x = 1, y = 2 }
-                        , tableB =
-                            emptyTable
-                                |> insertInTable 1 { x = 3, y = 4 }
-                        }
+                    numberTable =
+                        emptyTable |> setComponent entityId 5
 
-                    expectedTableComponent2 =
-                        emptyTable
-                            |> insertInTable 1 { a = { x = 1, y = 2 }, b = { x = 3, y = 4 } }
+                    updatedNumberTable =
+                        mapEntities1 (\_ n -> n + 1) entityTable numberTable
                 in
-                Expect.equal (intersectTable2 actualTable2) expectedTableComponent2
+                Expect.equal
+                    updatedNumberTable
+                    (emptyTable |> setComponent entityId 6)
             )
-        , fuzz2
-            (list int)
-            (list int)
-            "merge then split"
-            (\xs ys ->
-                let
-                    tables =
-                        { tableA = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
-                        , tableB = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
-                        }
-                in
-                Expect.equal tables (unionTable2 (splitTable2 (intersectTable2 tables)) tables)
-            )
-        , fuzz2
-            (list int)
-            (list int)
-            "update 2 tables"
-            (\xs ys ->
-                let
-                    tables =
-                        { tableA = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
-                        , tableB = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
-                        }
-                in
-                Expect.equal tables (update2Tables (\tableComp2 -> tableComp2) tables)
-            )
+
+        --, fuzz2
+        --    (list int)
+        --    (list int)
+        --    "merge then split"
+        --    (\xs ys ->
+        --        let
+        --            tables =
+        --                { tableA = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
+        --                , tableB = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
+        --                }
+        --        in
+        --        Expect.equal tables (unionTable2 (splitTable2 (intersectTable2 tables)) tables)
+        --    )
+        --, fuzz2
+        --    (list int)
+        --    (list int)
+        --    "update 2 tables"
+        --    (\xs ys ->
+        --        let
+        --            tables =
+        --                { tableA = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
+        --                , tableB = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
+        --                }
+        --        in
+        --        Expect.equal tables (update2Tables (\tableComp2 -> tableComp2) tables)
+        --    )
         ]
-
