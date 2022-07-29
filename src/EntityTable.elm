@@ -80,22 +80,35 @@ toComponent2 a b =
     { a = a, b = b }
 
 
-updateEachEntityWithOthers2 : (EntityId -> Table a -> a -> b -> Component2 a b) -> EntityTable -> Table a -> Table2 a b -> Table2 a b
-updateEachEntityWithOthers2 func entityTable readTable writeTable =
+updateEachEntityWithOthers2 :
+    (EntityId -> Table r -> a -> b -> Component2 a b)
+    -> EntityTable
+    -> Table r
+    -> Table a
+    -> Table b
+    -> Table2 a b
+updateEachEntityWithOthers2 func entityTable readTable tableA tableB =
     updateEachEntity2
         (\entityId a b -> func entityId (filterEntitiesInTable entityTable readTable) a b)
         entityTable
-        writeTable
+        tableA
+        tableB
 
 
-updateEachEntity2 : (EntityId -> a -> b -> Component2 a b) -> EntityTable -> Table2 a b -> Table2 a b
-updateEachEntity2 func entityTable writeTables =
+updateEachEntity2 :
+    (EntityId -> a -> b -> Component2 a b)
+    -> EntityTable
+    -> Table a
+    -> Table b
+    -> Table2 a b
+updateEachEntity2 func entityTable tableA tableB =
     let
         updatedEntities =
             mapEntities2
                 func
                 entityTable
-                writeTables
+                tableA
+                tableB
 
         splitedTable2 =
             foldlTable
@@ -108,21 +121,26 @@ updateEachEntity2 func entityTable writeTables =
                 updatedEntities
 
         unionedTable2 =
-            { tableA = unionTable splitedTable2.tableA writeTables.tableA
-            , tableB = unionTable splitedTable2.tableB writeTables.tableB
+            { tableA = unionTable splitedTable2.tableA tableA
+            , tableB = unionTable splitedTable2.tableB tableB
             }
     in
     unionedTable2
 
 
-mapEntities2 : (EntityId -> a -> b -> result) -> EntityTable -> Table2 a b -> Table result
-mapEntities2 func entityTable table2 =
+mapEntities2 :
+    (EntityId -> a -> b -> result)
+    -> EntityTable
+    -> Table a
+    -> Table b
+    -> Table result
+mapEntities2 func entityTable tableA tableB =
     mergeTable
         (\_ _ t2 -> t2)
         (\entityId a b t2 -> insertInTable entityId (func entityId a b) t2)
         (\_ _ t2 -> t2)
-        (filterEntitiesInTable entityTable table2.tableA)
-        (filterEntitiesInTable entityTable table2.tableB)
+        (filterEntitiesInTable entityTable tableA)
+        (filterEntitiesInTable entityTable tableB)
         emptyTable
 
 

@@ -107,17 +107,15 @@ update msg model =
                 tablesAfterAcceleration =
                     SystemAcceleration.update
                         model.entities
-                        { tableA = model.keyboardInputComponents
-                        , tableB = model.velocityComponents
-                        }
+                        model.keyboardInputComponents
+                        model.velocityComponents
 
                 tablesAfterCollision =
                     SystemCollision.update
                         model.entities
                         model.positionComponents
-                        { tableA = model.positionComponents
-                        , tableB = tablesAfterAcceleration.tableB
-                        }
+                        model.positionComponents
+                        tablesAfterAcceleration.tableB
             in
             ( { model
                 | positionComponents = tablesAfterCollision.tableA
@@ -170,7 +168,7 @@ view model =
                     , SA.height "300"
                     , SA.viewBox "0 0 10 10"
                     ]
-                    (systemDraw model.entities { tableA = model.visualComponents, tableB = model.positionComponents })
+                    (systemDraw model.entities model.visualComponents model.positionComponents)
                 ]
             , systemDisplayDebug model model.entityIdDebug
             ]
@@ -178,13 +176,18 @@ view model =
     }
 
 
-systemDraw : EntityTable -> Table2 ComponentVisual ComponentPosition -> List (Svg Msg)
-systemDraw entityTable table2 =
+systemDraw :
+    EntityTable
+    -> Table ComponentVisual
+    -> Table ComponentPosition
+    -> List (Svg Msg)
+systemDraw entityTable visualTable positionTable =
     valuesTable <|
         mapEntities2
             toSvg
             entityTable
-            table2
+            visualTable
+            positionTable
 
 
 toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg

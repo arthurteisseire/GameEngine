@@ -8,14 +8,16 @@ import EntityTable exposing (..)
 update :
     EntityTable
     -> Table ComponentPosition
+    -> Table ComponentPosition
+    -> Table ComponentVelocity
     -> Table2 ComponentPosition ComponentVelocity
-    -> Table2 ComponentPosition ComponentVelocity
-update entityTable readTable writeTables =
+update entityTable readTable positionTable velocityTable =
     updateEachEntityWithOthers2
         collide
         entityTable
         readTable
-        writeTables
+        positionTable
+        velocityTable
 
 
 collide :

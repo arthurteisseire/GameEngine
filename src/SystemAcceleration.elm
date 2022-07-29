@@ -6,12 +6,17 @@ import EntityTable exposing (..)
 import KeyboardInput exposing (Key)
 
 
-update : EntityTable -> Table2 ComponentKeyboardInput ComponentVelocity -> Table2 ComponentKeyboardInput ComponentVelocity
-update entityTable tables =
+update :
+    EntityTable
+    -> Table ComponentKeyboardInput
+    -> Table ComponentVelocity
+    -> Table2 ComponentKeyboardInput ComponentVelocity
+update entityTable keyboardInputTable velocityTable =
     updateEachEntity2
         updatePlayerVelocity
         entityTable
-        tables
+        keyboardInputTable
+        velocityTable
 
 
 updatePlayerVelocity :
