@@ -1,9 +1,7 @@
 module EntityTableTests exposing (..)
 
-import Dict
 import EntityTable exposing (..)
 import Expect exposing (..)
-import Fuzz exposing (int, list)
 import Test exposing (..)
 
 
@@ -26,31 +24,25 @@ suite =
                     updatedNumberTable
                     (emptyTable |> setComponent entityId 6)
             )
+        , test "Update each entity 2"
+            (\_ ->
+                let
+                    ( entityTable, entityId ) =
+                        emptyEntityTable |> addEntity
 
-        --, fuzz2
-        --    (list int)
-        --    (list int)
-        --    "merge then split"
-        --    (\xs ys ->
-        --        let
-        --            tables =
-        --                { tableA = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
-        --                , tableB = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
-        --                }
-        --        in
-        --        Expect.equal tables (unionTable2 (splitTable2 (intersectTable2 tables)) tables)
-        --    )
-        --, fuzz2
-        --    (list int)
-        --    (list int)
-        --    "update 2 tables"
-        --    (\xs ys ->
-        --        let
-        --            tables =
-        --                { tableA = Table (Dict.fromList (List.indexedMap (\idx x -> ( idx, x )) xs))
-        --                , tableB = Table (Dict.fromList (List.indexedMap (\idx y -> ( idx, y )) ys))
-        --                }
-        --        in
-        --        Expect.equal tables (update2Tables (\tableComp2 -> tableComp2) tables)
-        --    )
+                    intTable =
+                        emptyTable |> setComponent entityId 5
+
+                    floatTable =
+                        emptyTable |> setComponent entityId 5.5
+
+                    func _ int float =
+                        Tuple2 (int + 1) (float + 2.2)
+                in
+                Expect.equal
+                    (updateEachEntity2 func entityTable intTable floatTable)
+                    { tableA = emptyTable |> setComponent entityId 6
+                    , tableB = emptyTable |> setComponent entityId 7.7
+                    }
+            )
         ]

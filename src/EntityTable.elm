@@ -1,9 +1,9 @@
 module EntityTable exposing
-    ( Component2
-    , EntityId
+    ( EntityId
     , EntityTable
     , Table
     , Table2
+    , Tuple2
     , addEntity
     , emptyEntityTable
     , emptyTable
@@ -12,7 +12,8 @@ module EntityTable exposing
     , mapEntities1
     , mapEntities2
     , setComponent
-    , toComponent2
+    , toTuple2
+    , unionTable
     , updateEachEntity2
     , updateEachEntityWithOthers2
     , valuesTable
@@ -69,19 +70,27 @@ type alias Table2 a b =
     }
 
 
-type alias Component2 a b =
+type alias Tuple2 a b =
     { a : a
     , b : b
     }
 
 
-toComponent2 : a -> b -> Component2 a b
-toComponent2 a b =
+toTuple2 : a -> b -> Tuple2 a b
+toTuple2 a b =
     { a = a, b = b }
 
 
+getFirstTupleAsTable =
+    mapEntities1 (\_ tuple -> tuple.a)
+
+
+getSecondTupleAsTable =
+    mapEntities1 (\_ tuple -> tuple.b)
+
+
 updateEachEntityWithOthers2 :
-    (EntityId -> Table r -> a -> b -> Component2 a b)
+    (EntityId -> Table r -> a -> b -> Tuple2 a b)
     -> EntityTable
     -> Table r
     -> Table a
@@ -96,7 +105,7 @@ updateEachEntityWithOthers2 func entityTable readTable tableA tableB =
 
 
 updateEachEntity2 :
-    (EntityId -> a -> b -> Component2 a b)
+    (EntityId -> a -> b -> Tuple2 a b)
     -> EntityTable
     -> Table a
     -> Table b
@@ -104,28 +113,11 @@ updateEachEntity2 :
 updateEachEntity2 func entityTable tableA tableB =
     let
         updatedEntities =
-            mapEntities2
-                func
-                entityTable
-                tableA
-                tableB
-
-        splitedTable2 =
-            foldlTable
-                (\entityId comp2 table2 ->
-                    { tableA = insertInTable entityId comp2.a table2.tableA
-                    , tableB = insertInTable entityId comp2.b table2.tableB
-                    }
-                )
-                { tableA = emptyTable, tableB = emptyTable }
-                updatedEntities
-
-        unionedTable2 =
-            { tableA = unionTable splitedTable2.tableA tableA
-            , tableB = unionTable splitedTable2.tableB tableB
-            }
+            mapEntities2 func entityTable tableA tableB
     in
-    unionedTable2
+    { tableA = unionTable (getFirstTupleAsTable entityTable updatedEntities) tableA
+    , tableB = unionTable (getSecondTupleAsTable entityTable updatedEntities) tableB
+    }
 
 
 mapEntities2 :

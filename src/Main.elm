@@ -182,12 +182,8 @@ systemDraw :
     -> Table ComponentPosition
     -> List (Svg Msg)
 systemDraw entityTable visualTable positionTable =
-    valuesTable <|
-        mapEntities2
-            toSvg
-            entityTable
-            visualTable
-            positionTable
+    mapEntities2 toSvg entityTable visualTable positionTable
+        |> valuesTable
 
 
 toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg

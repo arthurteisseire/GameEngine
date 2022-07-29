@@ -25,7 +25,7 @@ collide :
     -> Table ComponentPosition
     -> ComponentPosition
     -> ComponentVelocity
-    -> Component2 ComponentPosition ComponentVelocity
+    -> Tuple2 ComponentPosition ComponentVelocity
 collide _ readTable position velocity =
     let
         movedPos =
@@ -40,4 +40,4 @@ collide _ readTable position velocity =
             else
                 movedPos
     in
-    toComponent2 nextPos ComponentVelocity.identity
+    toTuple2 nextPos ComponentVelocity.identity

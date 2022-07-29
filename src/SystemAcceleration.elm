@@ -23,14 +23,14 @@ updatePlayerVelocity :
     EntityId
     -> ComponentKeyboardInput
     -> ComponentVelocity
-    -> Component2 ComponentKeyboardInput ComponentVelocity
+    -> Tuple2 ComponentKeyboardInput ComponentVelocity
 updatePlayerVelocity _ keyboardInput velocity =
     case keyboardInput.key of
         Just key ->
-            toComponent2 keyboardInput (updateVelocityFromKey key velocity)
+            toTuple2 keyboardInput (updateVelocityFromKey key velocity)
 
         Nothing ->
-            toComponent2 keyboardInput velocity
+            toTuple2 keyboardInput velocity
 
 
 updateVelocityFromKey : Key -> ComponentVelocity -> ComponentVelocity
