@@ -2,6 +2,7 @@ module SystemCollision exposing (update)
 
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
+import CustomTuple exposing (..)
 import EntityTable exposing (..)
 
 
@@ -10,7 +11,7 @@ update :
     -> Table ComponentPosition
     -> Table ComponentPosition
     -> Table ComponentVelocity
-    -> Table2 ComponentPosition ComponentVelocity
+    -> Tuple2 (Table ComponentPosition) (Table ComponentVelocity)
 update entityTable readTable positionTable velocityTable =
     updateEachEntityWithOthers2
         collide

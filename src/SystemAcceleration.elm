@@ -1,29 +1,31 @@
-module SystemAcceleration exposing (update)
+module SystemAcceleration exposing (updateWorld)
 
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
+import CustomTuple exposing (..)
 import EntityTable exposing (..)
 import KeyboardInput exposing (Key)
+import World exposing (World)
 
 
-update :
-    EntityTable
-    -> Table ComponentKeyboardInput
-    -> Table ComponentVelocity
-    -> Table2 ComponentKeyboardInput ComponentVelocity
-update entityTable keyboardInputTable velocityTable =
-    updateEachEntity2
-        updatePlayerVelocity
-        entityTable
-        keyboardInputTable
-        velocityTable
+
+updateWorld : World -> World
+updateWorld world =
+    let
+        tables =
+            updateEachEntity2
+                updatePlayerVelocity
+                world.entities
+                world.keyboardInputComponents
+                world.velocityComponents
+    in
+    { world
+        | keyboardInputComponents = tables.first
+        , velocityComponents = tables.second
+    }
 
 
-updatePlayerVelocity :
-    EntityId
-    -> ComponentKeyboardInput
-    -> ComponentVelocity
-    -> Tuple2 ComponentKeyboardInput ComponentVelocity
+updatePlayerVelocity : EntityId -> ComponentKeyboardInput -> ComponentVelocity -> Tuple2 ComponentKeyboardInput ComponentVelocity
 updatePlayerVelocity _ keyboardInput velocity =
     case keyboardInput.key of
         Just key ->

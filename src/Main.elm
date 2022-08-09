@@ -17,6 +17,7 @@ import Svg.Events as SE
 import SystemAcceleration
 import SystemAttack
 import SystemCollision
+import World exposing (World)
 
 
 main =
@@ -28,61 +29,13 @@ main =
         }
 
 
-type alias Model =
-    { entities : EntityTable
-    , keyboardInputComponents : Table ComponentKeyboardInput
-    , positionComponents : Table ComponentPosition
-    , velocityComponents : Table ComponentVelocity
-    , lifeComponents : Table ComponentLife
-    , visualComponents : Table ComponentVisual
-    , entityIdDebug : Maybe EntityId
-    }
-
-
 
 -- Init
 
 
-init : () -> ( Model, Cmd Msg )
+init : () -> ( World, Cmd Msg )
 init _ =
-    let
-        ( entities, playerId ) =
-            addEntity emptyEntityTable
-
-        ( entities2, enemyId ) =
-            addEntity entities
-
-        keyboardInputComponents =
-            emptyTable
-                |> setComponent playerId ComponentKeyboardInput.identity
-
-        positionComponents =
-            emptyTable
-                |> setComponent playerId { x = 4, y = 0 }
-                |> setComponent enemyId { x = 5, y = 0 }
-
-        velocityComponents =
-            emptyTable
-                |> setComponent playerId ComponentVelocity.identity
-
-        lifeComponents =
-            emptyTable
-                |> setComponent playerId ComponentLife.identity
-                |> setComponent enemyId ComponentLife.identity
-
-        visualComponents =
-            emptyTable
-                |> setComponent playerId ComponentVisual.defaultRect
-                |> setComponent enemyId ComponentVisual.defaultCircle
-    in
-    ( { entities = entities2
-      , keyboardInputComponents = keyboardInputComponents
-      , positionComponents = positionComponents
-      , velocityComponents = velocityComponents
-      , lifeComponents = lifeComponents
-      , visualComponents = visualComponents
-      , entityIdDebug = Just playerId
-      }
+    ( World.init
     , Cmd.none
     )
 
@@ -99,59 +52,56 @@ type Msg
     | HideDebug
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> World -> ( World, Cmd Msg )
+update msg world =
     case msg of
         Tick dt ->
             let
-                tablesAfterAcceleration =
-                    SystemAcceleration.update
-                        model.entities
-                        model.keyboardInputComponents
-                        model.velocityComponents
+                worldAfterAcceleration =
+                    SystemAcceleration.updateWorld world
 
                 tablesAfterCollision =
                     SystemCollision.update
-                        model.entities
-                        model.positionComponents
-                        model.positionComponents
-                        tablesAfterAcceleration.tableB
+                        world.entities
+                        world.positionComponents
+                        world.positionComponents
+                        worldAfterAcceleration.velocityComponents
             in
-            ( { model
-                | positionComponents = tablesAfterCollision.tableA
-                , velocityComponents = tablesAfterCollision.tableB
-                , keyboardInputComponents = mapEntities1 (\_ _ -> { key = Nothing }) model.entities model.keyboardInputComponents
+            ( { world
+                | positionComponents = tablesAfterCollision.first
+                , velocityComponents = tablesAfterCollision.second
+                , keyboardInputComponents = mapEntities1 (\_ _ -> { key = Nothing }) world.entities world.keyboardInputComponents
               }
             , Cmd.none
             )
 
         KeyBoardInput key ->
-            ( { model
-                | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) model.entities model.keyboardInputComponents
+            ( { world
+                | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) world.entities world.keyboardInputComponents
               }
             , Cmd.none
             )
 
         DisplayDebug entityId ->
-            ( { model | entityIdDebug = Just entityId }
+            ( { world | entityIdDebug = Just entityId }
             , Cmd.none
             )
 
         HideDebug ->
-            ( { model | entityIdDebug = Nothing }
+            ( { world | entityIdDebug = Nothing }
             , Cmd.none
             )
 
         Clicked ->
-            ( model, Cmd.none )
+            ( world, Cmd.none )
 
 
 
 -- View
 
 
-view : Model -> Browser.Document Msg
-view model =
+view : World -> Browser.Document Msg
+view world =
     { title = "ECS"
     , body =
         [ Html.div
@@ -168,9 +118,9 @@ view model =
                     , SA.height "300"
                     , SA.viewBox "0 0 10 10"
                     ]
-                    (systemDraw model.entities model.visualComponents model.positionComponents)
+                    (systemDraw world.entities world.visualComponents world.positionComponents)
                 ]
-            , systemDisplayDebug model model.entityIdDebug
+            , systemDisplayDebug world world.entityIdDebug
             ]
         ]
     }
@@ -181,9 +131,8 @@ systemDraw :
     -> Table ComponentVisual
     -> Table ComponentPosition
     -> List (Svg Msg)
-systemDraw entityTable visualTable positionTable =
-    mapEntities2 toSvg entityTable visualTable positionTable
-        |> valuesTable
+systemDraw =
+    foldlEntities2 (\entityId visual position list -> toSvg entityId visual position :: list) []
 
 
 toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg
@@ -202,18 +151,18 @@ toSvg entityId visual position =
         )
 
 
-systemDisplayDebug : Model -> Maybe EntityId -> Html Msg
-systemDisplayDebug model maybeEntityId =
+systemDisplayDebug : World -> Maybe EntityId -> Html Msg
+systemDisplayDebug world maybeEntityId =
     case maybeEntityId of
         Just entityId ->
-            displayDebug model entityId
+            displayDebug world entityId
 
         Nothing ->
             Html.text ""
 
 
-displayDebug : Model -> EntityId -> Html Msg
-displayDebug model entityId =
+displayDebug : World -> EntityId -> Html Msg
+displayDebug world entityId =
     let
         hideButton =
             Html.button
@@ -224,19 +173,19 @@ displayDebug model entityId =
 
         componentsDebug =
             [ Html.text ("EntityId(" ++ entityIdToString entityId ++ ")")
-            , case getComponent model.keyboardInputComponents entityId of
+            , case getComponent entityId world.keyboardInputComponents of
                 Just _ ->
                     Html.text "KeyboardInput()"
 
                 Nothing ->
                     Html.text ""
-            , case getComponent model.visualComponents entityId of
+            , case getComponent entityId world.visualComponents of
                 Just _ ->
                     Html.text "Visual()"
 
                 Nothing ->
                     Html.text ""
-            , case getComponent model.positionComponents entityId of
+            , case getComponent entityId world.positionComponents of
                 Just position ->
                     Html.text
                         ("Position(x = "
@@ -248,7 +197,7 @@ displayDebug model entityId =
 
                 Nothing ->
                     Html.text ""
-            , case getComponent model.velocityComponents entityId of
+            , case getComponent entityId world.velocityComponents of
                 Just velocity ->
                     Html.text
                         ("Velocity(x = "
@@ -260,7 +209,7 @@ displayDebug model entityId =
 
                 Nothing ->
                     Html.text ""
-            , case getComponent model.lifeComponents entityId of
+            , case getComponent entityId world.lifeComponents of
                 Just life ->
                     Html.text
                         ("Life(healPoints = "
@@ -307,7 +256,7 @@ displayDebug model entityId =
 -- Subscriptions
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : World -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
