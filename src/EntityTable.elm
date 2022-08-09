@@ -89,6 +89,29 @@ type Table a
     = Table (Dict Int a)
 
 
+updateEachEntity3 :
+    (EntityId -> a -> b -> c -> Tuple3 a b c)
+    -> EntityTable
+    -> Table a
+    -> Table b
+    -> Table c
+    -> Tuple3 (Table a) (Table b) (Table c)
+updateEachEntity3 func entityTable tableA tableB tableC =
+    let
+        table3 =
+            mapEntities3
+                func
+                entityTable
+                tableA
+                tableB
+                tableC
+    in
+    toTuple3
+        (unionTable (mapEntities1 (\_ -> .first) entityTable table3) tableA)
+        (unionTable (mapEntities1 (\_ -> .second) entityTable table3) tableB)
+        (unionTable (mapEntities1 (\_ -> .third) entityTable table3) tableC)
+
+
 updateEachEntityWithOthers2 :
     (EntityId -> Table r -> a -> b -> Tuple2 a b)
     -> EntityTable
@@ -98,10 +121,23 @@ updateEachEntityWithOthers2 :
     -> Tuple2 (Table a) (Table b)
 updateEachEntityWithOthers2 func entityTable readTable tableA tableB =
     updateEachEntity2
-        (\entityId a b -> func entityId (filterEntitiesInTable entityTable readTable) a b)
+        (\entityId a b -> func entityId (mapEntities1 (\_ r -> r) entityTable readTable) a b)
         entityTable
         tableA
         tableB
+
+
+updateEachEntityWithOthers1 :
+    (EntityId -> Table r -> a -> b)
+    -> EntityTable
+    -> Table r
+    -> Table a
+    -> Table b
+updateEachEntityWithOthers1 func entityTable readTable tableA =
+    updateEachEntity1
+        (\entityId a -> func entityId (mapEntities1 (\_ r -> r) entityTable readTable) a)
+        entityTable
+        tableA
 
 
 updateEachEntity2 :
@@ -123,6 +159,15 @@ updateEachEntity2 func entityTable tableA tableB =
     toTuple2
         (unionTable (mapEntities1 (\_ -> .first) entityTable table2) tableA)
         (unionTable (mapEntities1 (\_ -> .second) entityTable table2) tableB)
+
+
+updateEachEntity1 :
+    (EntityId -> a -> b)
+    -> EntityTable
+    -> Table a
+    -> Table b
+updateEachEntity1 =
+    mapEntities1
 
 
 intersectTable3 :

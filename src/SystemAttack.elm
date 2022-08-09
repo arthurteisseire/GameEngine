@@ -1,31 +1,40 @@
-module SystemAttack exposing (..)
+module SystemAttack exposing (updateWorld)
 
-import ComponentKeyboardInput exposing (ComponentKeyboardInput)
-import ComponentLife exposing (ComponentLife)
+import ComponentAttack exposing (ComponentAttack)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
+import CustomTuple exposing (..)
 import EntityTable exposing (..)
+import World exposing (World)
 
 
---update : EntityTable -> ( Table ComponentLife, Table ComponentVelocity, Table ComponentPosition ) -> ( Table ComponentLife, Table ComponentVelocity, Table ComponentPosition )
---update entityTable ( lifeTable, velocityTable, positionTable ) =
---    let
---        entities =
---            map3ToEntityList entityTable ( lifeTable, velocityTable, positionTable )
---
---        updatedEntities =
---            fight entities
---    in
---    update3ComponentsTablesFromEntityList ( lifeTable, positionTable, velocityTable ) updatedEntities
+updateWorld : World -> World
+updateWorld world =
+    let
+        tables =
+            updateEachEntity3
+                velocityAttack
+                world.entities
+                world.positionComponents
+                world.velocityComponents
+                world.attackComponents
+    in
+    { world
+        | positionComponents = tables.first
+        , velocityComponents = tables.second
+        , attackComponents = tables.third
+    }
 
 
-fight : List ( EntityId, ComponentLife, ComponentPosition ) -> List ( EntityId, ComponentLife, ComponentPosition )
-fight entities =
-    List.map
-        (\entity -> attack entities entity)
-        entities
+velocityAttack :
+    EntityId
+    -> ComponentPosition
+    -> ComponentVelocity
+    -> ComponentAttack
+    -> Tuple3 ComponentPosition ComponentVelocity ComponentAttack
+velocityAttack _ position velocity attack =
+    if velocity /= ComponentVelocity.identity then
+        toTuple3 position velocity (Just { x = position.x + velocity.x, y = position.y + velocity.y })
 
-
-attack : List ( EntityId, ComponentLife, ComponentPosition ) -> ( EntityId, ComponentLife, ComponentPosition ) -> ( EntityId, ComponentLife, ComponentPosition )
-attack entities ( id, life, position ) =
-    ( id, life, position )
+    else
+        toTuple3 position velocity Nothing

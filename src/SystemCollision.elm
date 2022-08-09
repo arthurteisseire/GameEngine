@@ -30,7 +30,7 @@ collide :
     -> ComponentPosition
     -> ComponentVelocity
     -> Tuple2 ComponentPosition ComponentVelocity
-collide _ readTable position velocity =
+collide _ positionTable position velocity =
     let
         movedPos =
             { x = position.x + velocity.x
@@ -38,7 +38,7 @@ collide _ readTable position velocity =
             }
 
         nextPos =
-            if List.member movedPos (valuesTable readTable) then
+            if List.member movedPos (valuesTable positionTable) then
                 position
 
             else

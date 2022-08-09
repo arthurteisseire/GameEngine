@@ -1,8 +1,10 @@
 module World exposing (..)
 
+import ComponentAttack exposing (ComponentAttack)
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentLife exposing (ComponentLife)
 import ComponentPosition exposing (ComponentPosition)
+import ComponentAttack exposing (ComponentAttack)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
 import EntityTable exposing (..)
@@ -15,6 +17,7 @@ type alias World =
     , velocityComponents : Table ComponentVelocity
     , lifeComponents : Table ComponentLife
     , visualComponents : Table ComponentVisual
+    , attackComponents : Table ComponentAttack
     , entityIdDebug : Maybe EntityId
     }
 
@@ -50,6 +53,10 @@ init =
             emptyTable
                 |> setComponent playerId ComponentVisual.defaultRect
                 |> setComponent enemyId ComponentVisual.defaultCircle
+
+        attackComponents =
+            emptyTable
+                |> setComponent playerId ComponentAttack.identity
     in
     { entities = entities2
     , keyboardInputComponents = keyboardInputComponents
@@ -57,5 +64,6 @@ init =
     , velocityComponents = velocityComponents
     , lifeComponents = lifeComponents
     , visualComponents = visualComponents
+    , attackComponents = attackComponents
     , entityIdDebug = Just playerId
     }

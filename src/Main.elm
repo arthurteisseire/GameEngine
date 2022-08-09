@@ -18,6 +18,7 @@ import SystemAcceleration
 import SystemAttack
 import SystemClearKeyboardInputs
 import SystemCollision
+import SystemDamage
 import World exposing (World)
 
 
@@ -59,8 +60,11 @@ update msg world =
         Tick dt ->
             ( world
                 |> SystemAcceleration.updateWorld
+                |> SystemAttack.updateWorld
+                |> SystemDamage.updateWorld
                 |> SystemCollision.updateWorld
                 |> SystemClearKeyboardInputs.updateWorld
+                |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities1 (\_ _ -> ComponentVelocity.identity) world.entities world.velocityComponents })
             , Cmd.none
             )
 
@@ -204,6 +208,23 @@ displayDebug world entityId =
                         ("Life(healPoints = "
                             ++ String.fromInt life.healPoints
                             ++ ")"
+                        )
+
+                Nothing ->
+                    Html.text ""
+            , case getComponent entityId world.attackComponents of
+                Just maybeAttack ->
+                    Html.text
+                        (case maybeAttack of
+                            Just attack ->
+                                "Attack(x = "
+                                    ++ String.fromInt attack.x
+                                    ++ ", y = "
+                                    ++ String.fromInt attack.y
+                                    ++ ")"
+
+                            Nothing ->
+                                "Attack(None)"
                         )
 
                 Nothing ->
