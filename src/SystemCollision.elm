@@ -1,24 +1,27 @@
-module SystemCollision exposing (update)
+module SystemCollision exposing (updateWorld)
 
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import CustomTuple exposing (..)
 import EntityTable exposing (..)
+import World exposing (World)
 
 
-update :
-    EntityTable
-    -> Table ComponentPosition
-    -> Table ComponentPosition
-    -> Table ComponentVelocity
-    -> Tuple2 (Table ComponentPosition) (Table ComponentVelocity)
-update entityTable readTable positionTable velocityTable =
-    updateEachEntityWithOthers2
-        collide
-        entityTable
-        readTable
-        positionTable
-        velocityTable
+updateWorld : World -> World
+updateWorld world =
+    let
+        tables =
+            updateEachEntityWithOthers2
+                collide
+                world.entities
+                world.positionComponents
+                world.positionComponents
+                world.velocityComponents
+    in
+    { world
+        | positionComponents = tables.first
+        , velocityComponents = tables.second
+    }
 
 
 collide :

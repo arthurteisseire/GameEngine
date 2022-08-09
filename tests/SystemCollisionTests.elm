@@ -13,7 +13,7 @@ suite =
             "Update empty table"
             (\_ ->
                 Expect.equal
-                    (SystemCollision.update emptyEntityTable emptyTable emptyTable emptyTable)
+                    (SystemCollision.updateWorld emptyEntityTable emptyTable emptyTable emptyTable)
                     { tableA = emptyTable, tableB = emptyTable }
             )
         , test
@@ -35,7 +35,7 @@ suite =
                         }
                 in
                 Expect.equal
-                    (SystemCollision.update
+                    (SystemCollision.updateWorld
                         entityTable
                         actualPositionTable
                         actualPositionTable

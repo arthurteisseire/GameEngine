@@ -16,6 +16,7 @@ import Svg.Attributes as SA
 import Svg.Events as SE
 import SystemAcceleration
 import SystemAttack
+import SystemClearKeyboardInputs
 import SystemCollision
 import World exposing (World)
 
@@ -56,22 +57,10 @@ update : Msg -> World -> ( World, Cmd Msg )
 update msg world =
     case msg of
         Tick dt ->
-            let
-                worldAfterAcceleration =
-                    SystemAcceleration.updateWorld world
-
-                tablesAfterCollision =
-                    SystemCollision.update
-                        world.entities
-                        world.positionComponents
-                        world.positionComponents
-                        worldAfterAcceleration.velocityComponents
-            in
-            ( { world
-                | positionComponents = tablesAfterCollision.first
-                , velocityComponents = tablesAfterCollision.second
-                , keyboardInputComponents = mapEntities1 (\_ _ -> { key = Nothing }) world.entities world.keyboardInputComponents
-              }
+            ( world
+                |> SystemAcceleration.updateWorld
+                |> SystemCollision.updateWorld
+                |> SystemClearKeyboardInputs.updateWorld
             , Cmd.none
             )
 
