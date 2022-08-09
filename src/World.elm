@@ -4,7 +4,6 @@ import ComponentAttack exposing (ComponentAttack)
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentLife exposing (ComponentLife)
 import ComponentPosition exposing (ComponentPosition)
-import ComponentAttack exposing (ComponentAttack)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
 import EntityTable exposing (..)
@@ -46,8 +45,8 @@ init =
 
         lifeComponents =
             emptyTable
-                |> setComponent playerId ComponentLife.identity
-                |> setComponent enemyId ComponentLife.identity
+                |> setComponent playerId { healPoints = 1 }
+                |> setComponent enemyId { healPoints = 5 }
 
         visualComponents =
             emptyTable

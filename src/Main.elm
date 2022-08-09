@@ -19,6 +19,7 @@ import SystemAttack
 import SystemClearKeyboardInputs
 import SystemCollision
 import SystemDamage
+import SystemDie
 import World exposing (World)
 
 
@@ -65,6 +66,7 @@ update msg world =
                 |> SystemCollision.updateWorld
                 |> SystemClearKeyboardInputs.updateWorld
                 |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities1 (\_ _ -> ComponentVelocity.identity) world.entities world.velocityComponents })
+                |> SystemDie.updateWorld
             , Cmd.none
             )
 

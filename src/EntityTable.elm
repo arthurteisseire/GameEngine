@@ -64,6 +64,11 @@ foldlEntityTable func result (EntityTable _ list) =
         list
 
 
+filterEntities : (EntityId -> Bool) -> EntityTable -> EntityTable
+filterEntities isGood (EntityTable lastId list) =
+    EntityTable lastId (List.filter isGood list)
+
+
 emptyEntityTable : EntityTable
 emptyEntityTable =
     EntityTable 0 []
