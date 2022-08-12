@@ -2,11 +2,11 @@ module ComponentAI exposing (..)
 
 
 type alias ComponentAI =
-    { acceleration : Float
+    { remainingTurnsBeforeMove : Int
     }
 
 
 identity : ComponentAI
 identity =
-    { acceleration = 0.0
+    { remainingTurnsBeforeMove = 3
     }

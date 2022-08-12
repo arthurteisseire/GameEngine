@@ -48,8 +48,7 @@ init _ =
 
 
 type Msg
-    = Tick Float
-    | KeyBoardInput Key
+    = KeyBoardInput Key
     | Clicked -- TODO: Move Clicked Msg to VisualComponent ?
     | DisplayDebug EntityId
     | HideDebug
@@ -58,22 +57,16 @@ type Msg
 update : Msg -> World -> ( World, Cmd Msg )
 update msg world =
     case msg of
-        Tick dt ->
+        KeyBoardInput key ->
             ( world
+                |> (\currentWorld -> { currentWorld | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) currentWorld.entities currentWorld.keyboardInputComponents })
                 |> SystemAcceleration.updateWorld
                 |> SystemAttack.updateWorld
                 |> SystemDamage.updateWorld
                 |> SystemCollision.updateWorld
                 |> SystemClearKeyboardInputs.updateWorld
-                |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities1 (\_ _ -> ComponentVelocity.identity) world.entities world.velocityComponents })
+                |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities1 (\_ _ -> ComponentVelocity.identity) currentWorld.entities currentWorld.velocityComponents })
                 |> SystemDie.updateWorld
-            , Cmd.none
-            )
-
-        KeyBoardInput key ->
-            ( { world
-                | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) world.entities world.keyboardInputComponents
-              }
             , Cmd.none
             )
 
@@ -271,6 +264,6 @@ displayDebug world entityId =
 subscriptions : World -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
-        , Sub.map KeyBoardInput (Browser.Events.onKeyDown keyDecoder)
+        --[ Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
+        [ Sub.map KeyBoardInput (Browser.Events.onKeyDown keyDecoder)
         ]
