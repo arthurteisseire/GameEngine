@@ -16,6 +16,11 @@ type alias ComponentVisual =
     }
 
 
+toString : ComponentVisual -> String
+toString _ =
+    "Visual()"
+
+
 defaultRect : ComponentVisual
 defaultRect =
     { shape = Svg.rect

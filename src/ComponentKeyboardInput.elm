@@ -12,3 +12,8 @@ identity : ComponentKeyboardInput
 identity =
     { key = Nothing
     }
+
+
+toString : ComponentKeyboardInput -> String
+toString _ =
+    "KeyboardInput()"

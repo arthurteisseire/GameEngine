@@ -2,8 +2,11 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events
+import ComponentAI
+import ComponentAttack
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentLife exposing (ComponentLife)
+import ComponentPlayer
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
@@ -172,53 +175,14 @@ displayDebug world entityId =
 
         componentsDebug =
             [ Html.text ("EntityId(" ++ entityIdToString entityId ++ ")")
-            , componentToHtml world.keyboardInputComponents
-                (\_ -> "KeyboardInput()")
-            , componentToHtml world.visualComponents
-                (\_ -> "Visual()")
-            , componentToHtml world.positionComponents
-                (\position ->
-                    "Position(x = "
-                        ++ String.fromInt position.x
-                        ++ ", y = "
-                        ++ String.fromInt position.y
-                        ++ ")"
-                )
-            , componentToHtml world.velocityComponents
-                (\velocity ->
-                    "Velocity(x = "
-                        ++ String.fromInt velocity.x
-                        ++ ", y = "
-                        ++ String.fromInt velocity.y
-                        ++ ")"
-                )
-            , componentToHtml world.lifeComponents
-                (\life ->
-                    "Life(healPoints = "
-                        ++ String.fromInt life.healPoints
-                        ++ ")"
-                )
-            , componentToHtml world.attackComponents
-                (\maybeAttack ->
-                    case maybeAttack of
-                        Just attack ->
-                            "Attack(x = "
-                                ++ String.fromInt attack.x
-                                ++ ", y = "
-                                ++ String.fromInt attack.y
-                                ++ ")"
-
-                        Nothing ->
-                            ""
-                )
-            , componentToHtml world.aiComponents
-                (\ai ->
-                    "AI(remainingTurnsBeforeMove = "
-                        ++ String.fromInt ai.remainingTurnsBeforeMove
-                        ++ ")"
-                )
-            , componentToHtml world.playerComponents
-                (\_ -> "Player()")
+            , componentToHtml world.keyboardInputComponents ComponentKeyboardInput.toString
+            , componentToHtml world.visualComponents ComponentVisual.toString
+            , componentToHtml world.positionComponents ComponentPosition.toString
+            , componentToHtml world.velocityComponents ComponentVelocity.toString
+            , componentToHtml world.lifeComponents ComponentLife.toString
+            , componentToHtml world.attackComponents ComponentAttack.toString
+            , componentToHtml world.aiComponents ComponentAI.toString
+            , componentToHtml world.playerComponents ComponentPlayer.toString
             ]
     in
     Html.div

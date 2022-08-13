@@ -13,3 +13,11 @@ identity =
     , y = 0
     }
 
+
+toString : ComponentVelocity -> String
+toString velocity =
+    "Velocity(x = "
+        ++ String.fromInt velocity.x
+        ++ ", y = "
+        ++ String.fromInt velocity.y
+        ++ ")"

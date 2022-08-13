@@ -1,4 +1,4 @@
-module ComponentLife exposing (ComponentLife, identity)
+module ComponentLife exposing (..)
 
 
 type alias ComponentLife =
@@ -10,3 +10,10 @@ identity : ComponentLife
 identity =
     { healPoints = 0
     }
+
+
+toString : ComponentLife -> String
+toString life =
+    "Life(healPoints = "
+        ++ String.fromInt life.healPoints
+        ++ ")"
