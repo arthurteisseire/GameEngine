@@ -94,6 +94,23 @@ type Table a
     = Table (Dict Int a)
 
 
+updateEachEntityWithOthers3 :
+    (EntityId -> Table r -> a -> b -> c -> Tuple3 a b c)
+    -> EntityTable
+    -> Table r
+    -> Table a
+    -> Table b
+    -> Table c
+    -> Tuple3 (Table a) (Table b) (Table c)
+updateEachEntityWithOthers3 func entityTable readTable tableA tableB tableC =
+    updateEachEntity3
+        (\entityId a b c -> func entityId (mapEntities1 (\_ r -> r) entityTable readTable) a b c)
+        entityTable
+        tableA
+        tableB
+        tableC
+
+
 updateEachEntity3 :
     (EntityId -> a -> b -> c -> Tuple3 a b c)
     -> EntityTable

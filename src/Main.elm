@@ -104,9 +104,9 @@ view world =
                 , HA.style "float" "left"
                 ]
                 [ Svg.svg
-                    [ SA.width "300"
-                    , SA.height "300"
-                    , SA.viewBox "0 0 10 10"
+                    [ SA.width "500"
+                    , SA.height "500"
+                    , SA.viewBox "0 0 20 20"
                     ]
                     (systemDraw world.entities world.visualComponents world.positionComponents)
                 ]
@@ -223,6 +223,22 @@ displayDebug world entityId =
                             Nothing ->
                                 "Attack(None)"
                         )
+
+                Nothing ->
+                    Html.text ""
+            , case getComponent entityId world.aiComponents of
+                Just ai ->
+                    Html.text
+                        ("AI(remainingTurnsBeforeMove = "
+                            ++ String.fromInt ai.remainingTurnsBeforeMove
+                            ++ ")"
+                        )
+
+                Nothing ->
+                    Html.text ""
+            , case getComponent entityId world.playerComponents of
+                Just player ->
+                    Html.text "Player()"
 
                 Nothing ->
                     Html.text ""
