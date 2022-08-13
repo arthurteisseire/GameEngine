@@ -44,6 +44,7 @@ init =
         velocityComponents =
             emptyTable
                 |> setComponent playerId ComponentVelocity.identity
+                |> setComponent enemyId ComponentVelocity.identity
 
         lifeComponents =
             emptyTable

@@ -15,6 +15,7 @@ import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
 import SystemAcceleration
+import SystemAccelerationAI
 import SystemAttack
 import SystemClearKeyboardInputs
 import SystemCollision
@@ -60,6 +61,7 @@ update msg world =
         KeyBoardInput key ->
             ( world
                 |> (\currentWorld -> { currentWorld | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) currentWorld.entities currentWorld.keyboardInputComponents })
+                |> SystemAccelerationAI.updateWorld
                 |> SystemAcceleration.updateWorld
                 |> SystemAttack.updateWorld
                 |> SystemDamage.updateWorld
