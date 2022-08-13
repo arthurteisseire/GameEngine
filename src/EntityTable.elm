@@ -59,32 +59,34 @@ type Table a
 
 
 updateEntities :
-    (EntityId -> w -> w)
-    -> (EntityId -> w -> result -> result)
-    -> EntityTable
-    -> Table w
+    { updateComponents : EntityId -> w -> w
+    , updateWorld : EntityId -> w -> result -> result
+    , world : result
+    , entityTable : EntityTable
+    , componentTables : Table w
+    }
     -> result
-    -> result
-updateEntities componentFunc resultFunc entityTable writeTable result =
+updateEntities { updateComponents, updateWorld, world, entityTable, componentTables } =
     foldlEntities1
-        (\entityId w accResult -> resultFunc entityId (componentFunc entityId w) accResult)
-        result
+        (\entityId w accResult -> updateWorld entityId (updateComponents entityId w) accResult)
+        world
         entityTable
-        writeTable
+        componentTables
 
 
 updateEntitiesWithOthers :
-    (EntityId -> Table r -> w -> w)
-    -> (EntityId -> w -> result -> result)
-    -> EntityTable
-    -> Table r
-    -> Table w
+    { updateComponents : EntityId -> Table r -> w -> w
+    , updateWorld : EntityId -> w -> result -> result
+    , world : result
+    , entityTable : EntityTable
+    , readTable : Table r
+    , writeTable : Table w
+    }
     -> result
-    -> result
-updateEntitiesWithOthers componentFunc resultFunc entityTable readTable writeTable result =
+updateEntitiesWithOthers { updateComponents, updateWorld, world, entityTable, readTable, writeTable } =
     foldlEntities1
-        (\entityId w accResult -> resultFunc entityId (componentFunc entityId readTable w) accResult)
-        result
+        (\entityId w accResult -> updateWorld entityId (updateComponents entityId readTable w) accResult)
+        world
         entityTable
         writeTable
 

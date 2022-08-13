@@ -16,17 +16,18 @@ type alias OutputComponents =
 updateWorld : World -> World
 updateWorld world =
     updateEntitiesWithOthers
-        takeDamage
-        (\entityId { position, life } accWorld ->
-            { accWorld
-                | positionComponents = setComponent entityId position accWorld.positionComponents
-                , lifeComponents = setComponent entityId life accWorld.lifeComponents
-            }
-        )
-        world.entities
-        world.attackComponents
-        (intersectTable2 OutputComponents world.entities world.positionComponents world.lifeComponents)
-        world
+        { updateComponents = takeDamage
+        , updateWorld =
+            \entityId { position, life } accWorld ->
+                { accWorld
+                    | positionComponents = setComponent entityId position accWorld.positionComponents
+                    , lifeComponents = setComponent entityId life accWorld.lifeComponents
+                }
+        , world = world
+        , entityTable = world.entities
+        , readTable = mapEntities1 (\_ attack -> attack) world.entities world.attackComponents
+        , writeTable = intersectTable2 OutputComponents world.entities world.positionComponents world.lifeComponents
+        }
 
 
 takeDamage :

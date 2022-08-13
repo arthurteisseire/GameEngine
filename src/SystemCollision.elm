@@ -15,17 +15,20 @@ type alias OutputComponents =
 updateWorld : World -> World
 updateWorld world =
     updateEntitiesWithOthers
-        collide
-        (\entityId { position, velocity } accWorld ->
-            { accWorld
-                | positionComponents = setComponent entityId position accWorld.positionComponents
-                , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
-            }
-        )
-        world.entities
-        world.positionComponents
-        (intersectTable2 OutputComponents world.entities world.positionComponents world.velocityComponents)
-        world
+        { updateComponents = collide
+        , updateWorld =
+            \entityId { position, velocity } accWorld ->
+                { accWorld
+                    | positionComponents = setComponent entityId position accWorld.positionComponents
+                    , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+                }
+        , world = world
+        , entityTable = world.entities
+
+        -- TODO: Find a way to oblige/avoid mapEntities. Because we need to filter destroyed entities from tables
+        , readTable = mapEntities1 (\_ pos -> pos) world.entities world.positionComponents
+        , writeTable = intersectTable2 OutputComponents world.entities world.positionComponents world.velocityComponents
+        }
 
 
 collide :

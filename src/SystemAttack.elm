@@ -17,17 +17,18 @@ type alias Components =
 updateWorld : World -> World
 updateWorld world =
     updateEntities
-        velocityAttack
-        (\entityId { position, velocity, attack } accWorld ->
-            { accWorld
-                | positionComponents = setComponent entityId position accWorld.positionComponents
-                , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
-                , attackComponents = setComponent entityId attack accWorld.attackComponents
-            }
-        )
-        world.entities
-        (intersectTable3 Components world.entities world.positionComponents world.velocityComponents world.attackComponents)
-        world
+        { updateComponents = velocityAttack
+        , updateWorld =
+            \entityId { position, velocity, attack } accWorld ->
+                { accWorld
+                    | positionComponents = setComponent entityId position accWorld.positionComponents
+                    , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+                    , attackComponents = setComponent entityId attack accWorld.attackComponents
+                }
+        , world = world
+        , entityTable = world.entities
+        , componentTables = intersectTable3 Components world.entities world.positionComponents world.velocityComponents world.attackComponents
+        }
 
 
 velocityAttack : EntityId -> Components -> Components
@@ -43,18 +44,3 @@ velocityAttack _ { position, velocity, attack } =
         , velocity = velocity
         , attack = Nothing
         }
-
-
-
---velocityAttack :
---    EntityId
---    -> ComponentPosition
---    -> ComponentVelocity
---    -> ComponentAttack
---    -> Tuple3 ComponentPosition ComponentVelocity ComponentAttack
---velocityAttack _ position velocity attack =
---    if velocity /= ComponentVelocity.identity then
---        toTuple3 position velocity (Just { x = position.x + velocity.x, y = position.y + velocity.y })
---
---    else
---        toTuple3 position velocity Nothing

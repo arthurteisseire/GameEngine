@@ -16,16 +16,17 @@ type alias Components =
 updateWorld : World -> World
 updateWorld world =
     updateEntities
-        updatePlayerVelocity
-        (\entityId { keyboardInput, velocity } accWorld ->
-            { accWorld
-                | keyboardInputComponents = setComponent entityId keyboardInput accWorld.keyboardInputComponents
-                , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
-            }
-        )
-        world.entities
-        (intersectTable2 Components world.entities world.keyboardInputComponents world.velocityComponents)
-        world
+        { updateComponents = updatePlayerVelocity
+        , updateWorld =
+            \entityId { keyboardInput, velocity } accWorld ->
+                { accWorld
+                    | keyboardInputComponents = setComponent entityId keyboardInput accWorld.keyboardInputComponents
+                    , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+                }
+        , world = world
+        , entityTable = world.entities
+        , componentTables = intersectTable2 Components world.entities world.keyboardInputComponents world.velocityComponents
+        }
 
 
 updatePlayerVelocity : EntityId -> Components -> Components

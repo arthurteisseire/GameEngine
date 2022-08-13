@@ -24,18 +24,19 @@ type alias OutputComponents =
 updateWorld : World -> World
 updateWorld world =
     updateEntitiesWithOthers
-        updateAIVelocity
-        (\entityId { ai, velocity, position } accWorld ->
-            { accWorld
-                | aiComponents = setComponent entityId ai accWorld.aiComponents
-                , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
-                , positionComponents = setComponent entityId position accWorld.positionComponents
-            }
-        )
-        world.entities
-        (intersectTable2 InputComponents world.entities world.playerComponents world.positionComponents)
-        (intersectTable3 OutputComponents world.entities world.aiComponents world.velocityComponents world.positionComponents)
-        world
+        { updateComponents = updateAIVelocity
+        , updateWorld =
+            \entityId { ai, velocity, position } accWorld ->
+                { accWorld
+                    | aiComponents = setComponent entityId ai accWorld.aiComponents
+                    , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+                    , positionComponents = setComponent entityId position accWorld.positionComponents
+                }
+        , world = world
+        , entityTable = world.entities
+        , readTable = intersectTable2 InputComponents world.entities world.playerComponents world.positionComponents
+        , writeTable = intersectTable3 OutputComponents world.entities world.aiComponents world.velocityComponents world.positionComponents
+        }
 
 
 updateAIVelocity : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
