@@ -1,25 +1,5 @@
 module EntityTable exposing (..)
 
---module EntityTable exposing
---    ( EntityId
---    , EntityTable
---    , Table
---    , addEntity
---    , emptyEntityTable
---    , emptyTable
---    , entityIdToString
---    , getComponent
---    , mapEntities1
---    , mapEntities2
---    , mapEntities3
---    , setComponent
---    , unionTable
---    , updateEachEntity2
---    , updateEachEntityWithOthers2
---    , valuesTable
---    )
-
-import CustomTuple exposing (..)
 import Dict exposing (Dict)
 
 
@@ -38,22 +18,6 @@ entityIdToString (EntityId id) =
 
 type EntityTable
     = EntityTable Int (List EntityId)
-
-
-mapFilterEntityTableToTable : (EntityId -> Maybe a) -> EntityTable -> Table a
-mapFilterEntityTableToTable func (EntityTable _ list) =
-    List.filterMap
-        (\(EntityId id) -> Maybe.map (\v -> ( id, v )) (func (EntityId id)))
-        list
-        |> fromListTable
-
-
-mapEntityTableToTable : (EntityId -> a) -> EntityTable -> Table a
-mapEntityTableToTable func (EntityTable _ list) =
-    List.indexedMap
-        (\idx a -> ( idx, func a ))
-        list
-        |> fromListTable
 
 
 foldlEntityTable : (EntityId -> result -> result) -> result -> EntityTable -> result
@@ -123,104 +87,6 @@ updateEntitiesWithOthers componentFunc resultFunc entityTable readTable writeTab
         result
         entityTable
         writeTable
-
-
-updateEachEntityWithOthers3 :
-    (EntityId -> Table r -> a -> b -> c -> Tuple3 a b c)
-    -> EntityTable
-    -> Table r
-    -> Table a
-    -> Table b
-    -> Table c
-    -> Tuple3 (Table a) (Table b) (Table c)
-updateEachEntityWithOthers3 func entityTable readTable tableA tableB tableC =
-    updateEachEntity3
-        (\entityId a b c -> func entityId (mapEntities1 (\_ r -> r) entityTable readTable) a b c)
-        entityTable
-        tableA
-        tableB
-        tableC
-
-
-updateEachEntity3 :
-    (EntityId -> a -> b -> c -> Tuple3 a b c)
-    -> EntityTable
-    -> Table a
-    -> Table b
-    -> Table c
-    -> Tuple3 (Table a) (Table b) (Table c)
-updateEachEntity3 func entityTable tableA tableB tableC =
-    let
-        table3 =
-            mapEntities3
-                func
-                entityTable
-                tableA
-                tableB
-                tableC
-    in
-    toTuple3
-        (unionTable (mapEntities1 (\_ -> .first) entityTable table3) tableA)
-        (unionTable (mapEntities1 (\_ -> .second) entityTable table3) tableB)
-        (unionTable (mapEntities1 (\_ -> .third) entityTable table3) tableC)
-
-
-updateEachEntityWithOthers2 :
-    (EntityId -> Table r -> a -> b -> Tuple2 a b)
-    -> EntityTable
-    -> Table r
-    -> Table a
-    -> Table b
-    -> Tuple2 (Table a) (Table b)
-updateEachEntityWithOthers2 func entityTable readTable tableA tableB =
-    updateEachEntity2
-        (\entityId a b -> func entityId (mapEntities1 (\_ r -> r) entityTable readTable) a b)
-        entityTable
-        tableA
-        tableB
-
-
-updateEachEntityWithOthers1 :
-    (EntityId -> Table r -> a -> b)
-    -> EntityTable
-    -> Table r
-    -> Table a
-    -> Table b
-updateEachEntityWithOthers1 func entityTable readTable tableA =
-    updateEachEntity1
-        (\entityId a -> func entityId (mapEntities1 (\_ r -> r) entityTable readTable) a)
-        entityTable
-        tableA
-
-
-updateEachEntity2 :
-    (EntityId -> a -> b -> Tuple2 a b)
-    -> EntityTable
-    -> Table a
-    -> Table b
-    -> Tuple2 (Table a) (Table b)
-updateEachEntity2 func entityTable tableA tableB =
-    let
-        table2 : Table (Tuple2 a b)
-        table2 =
-            mapEntities2
-                func
-                entityTable
-                tableA
-                tableB
-    in
-    toTuple2
-        (unionTable (mapEntities1 (\_ -> .first) entityTable table2) tableA)
-        (unionTable (mapEntities1 (\_ -> .second) entityTable table2) tableB)
-
-
-updateEachEntity1 :
-    (EntityId -> a -> b)
-    -> EntityTable
-    -> Table a
-    -> Table b
-updateEachEntity1 =
-    mapEntities1
 
 
 intersectTable3 : (a -> b -> c -> w) -> EntityTable -> Table a -> Table b -> Table c -> Table w
@@ -324,6 +190,20 @@ foldlEntities1 func result entityTable table =
         entityTable
 
 
+setComponent : EntityId -> a -> Table a -> Table a
+setComponent =
+    insertInTable
+
+
+getComponent : EntityId -> Table a -> Maybe a
+getComponent (EntityId id) (Table dict) =
+    Dict.get id dict
+
+
+
+-- (Table <-> Dict) Bindings
+
+
 mergeTable :
     (EntityId -> a -> result -> result)
     -> (EntityId -> a -> b -> result -> result)
@@ -375,16 +255,6 @@ valuesTable (Table dict) =
 emptyTable : Table a
 emptyTable =
     Table Dict.empty
-
-
-setComponent : EntityId -> a -> Table a -> Table a
-setComponent =
-    insertInTable
-
-
-getComponent : EntityId -> Table a -> Maybe a
-getComponent (EntityId id) (Table dict) =
-    Dict.get id dict
 
 
 updateTable : EntityId -> (Maybe v -> Maybe v) -> Table v -> Table v
