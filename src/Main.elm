@@ -161,87 +161,64 @@ displayDebug world entityId =
                 ]
                 [ Html.text "Hide" ]
 
+        componentToHtml : Table a -> (a -> String) -> Html Msg
+        componentToHtml table toStr =
+            case getComponent entityId table of
+                Just comp ->
+                    Html.text (toStr comp)
+
+                Nothing ->
+                    Html.text ""
+
         componentsDebug =
             [ Html.text ("EntityId(" ++ entityIdToString entityId ++ ")")
-            , case getComponent entityId world.keyboardInputComponents of
-                Just _ ->
-                    Html.text "KeyboardInput()"
+            , componentToHtml world.keyboardInputComponents
+                (\_ -> "KeyboardInput()")
+            , componentToHtml world.visualComponents
+                (\_ -> "Visual()")
+            , componentToHtml world.positionComponents
+                (\position ->
+                    "Position(x = "
+                        ++ String.fromInt position.x
+                        ++ ", y = "
+                        ++ String.fromInt position.y
+                        ++ ")"
+                )
+            , componentToHtml world.velocityComponents
+                (\velocity ->
+                    "Velocity(x = "
+                        ++ String.fromInt velocity.x
+                        ++ ", y = "
+                        ++ String.fromInt velocity.y
+                        ++ ")"
+                )
+            , componentToHtml world.lifeComponents
+                (\life ->
+                    "Life(healPoints = "
+                        ++ String.fromInt life.healPoints
+                        ++ ")"
+                )
+            , componentToHtml world.attackComponents
+                (\maybeAttack ->
+                    case maybeAttack of
+                        Just attack ->
+                            "Attack(x = "
+                                ++ String.fromInt attack.x
+                                ++ ", y = "
+                                ++ String.fromInt attack.y
+                                ++ ")"
 
-                Nothing ->
-                    Html.text ""
-            , case getComponent entityId world.visualComponents of
-                Just _ ->
-                    Html.text "Visual()"
-
-                Nothing ->
-                    Html.text ""
-            , case getComponent entityId world.positionComponents of
-                Just position ->
-                    Html.text
-                        ("Position(x = "
-                            ++ String.fromInt position.x
-                            ++ ", y = "
-                            ++ String.fromInt position.y
-                            ++ ")"
-                        )
-
-                Nothing ->
-                    Html.text ""
-            , case getComponent entityId world.velocityComponents of
-                Just velocity ->
-                    Html.text
-                        ("Velocity(x = "
-                            ++ String.fromInt velocity.x
-                            ++ ", y = "
-                            ++ String.fromInt velocity.y
-                            ++ ")"
-                        )
-
-                Nothing ->
-                    Html.text ""
-            , case getComponent entityId world.lifeComponents of
-                Just life ->
-                    Html.text
-                        ("Life(healPoints = "
-                            ++ String.fromInt life.healPoints
-                            ++ ")"
-                        )
-
-                Nothing ->
-                    Html.text ""
-            , case getComponent entityId world.attackComponents of
-                Just maybeAttack ->
-                    Html.text
-                        (case maybeAttack of
-                            Just attack ->
-                                "Attack(x = "
-                                    ++ String.fromInt attack.x
-                                    ++ ", y = "
-                                    ++ String.fromInt attack.y
-                                    ++ ")"
-
-                            Nothing ->
-                                "Attack(None)"
-                        )
-
-                Nothing ->
-                    Html.text ""
-            , case getComponent entityId world.aiComponents of
-                Just ai ->
-                    Html.text
-                        ("AI(remainingTurnsBeforeMove = "
-                            ++ String.fromInt ai.remainingTurnsBeforeMove
-                            ++ ")"
-                        )
-
-                Nothing ->
-                    Html.text ""
-            , case getComponent entityId world.playerComponents of
-                Just player ->
-                    Html.text "Player()"
-
-                Nothing ->
-                    Html.text ""
+                        Nothing ->
+                            ""
+                )
+            , componentToHtml world.aiComponents
+                (\ai ->
+                    "AI(remainingTurnsBeforeMove = "
+                        ++ String.fromInt ai.remainingTurnsBeforeMove
+                        ++ ")"
+                )
+            , componentToHtml world.playerComponents
+                (\_ -> "Player()")
             ]
     in
     Html.div
