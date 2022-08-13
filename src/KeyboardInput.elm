@@ -4,10 +4,10 @@ import Json.Decode as Decode
 
 
 type Key
-    = Left
-    | Right
-    | Up
-    | Down
+    = ArrowLeft
+    | ArrowRight
+    | ArrowUp
+    | ArrowDown
     | Other
 
 
@@ -20,17 +20,17 @@ toDirection : String -> Key
 toDirection string =
     case string of
         "ArrowLeft" ->
-            Left
+            ArrowLeft
 
         "ArrowRight" ->
-            Right
+            ArrowRight
 
         "ArrowUp" ->
             -- TODO: Wrap Keys to avoid the "ArrowUp -> Down"
-            Down
+            ArrowDown
 
         "ArrowDown" ->
-            Up
+            ArrowUp
 
         _ ->
             Other

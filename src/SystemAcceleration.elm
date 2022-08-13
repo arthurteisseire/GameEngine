@@ -48,16 +48,16 @@ updatePlayerVelocity _ { keyboardInput, velocity } =
 updateVelocityFromKey : Key -> ComponentVelocity -> ComponentVelocity
 updateVelocityFromKey key velocity =
     case key of
-        KeyboardInput.Left ->
+        KeyboardInput.ArrowLeft ->
             { x = velocity.x - 1, y = velocity.y }
 
-        KeyboardInput.Right ->
+        KeyboardInput.ArrowRight ->
             { x = velocity.x + 1, y = velocity.y }
 
-        KeyboardInput.Up ->
+        KeyboardInput.ArrowUp ->
             { x = velocity.x, y = velocity.y + 1 }
 
-        KeyboardInput.Down ->
+        KeyboardInput.ArrowDown ->
             { x = velocity.x, y = velocity.y - 1 }
 
         KeyboardInput.Other ->
