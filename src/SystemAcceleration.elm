@@ -2,37 +2,46 @@ module SystemAcceleration exposing (updateWorld)
 
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
-import CustomTuple exposing (..)
 import EntityTable exposing (..)
 import KeyboardInput exposing (Key)
 import World exposing (World)
 
 
-
-updateWorld : World -> World
-updateWorld world =
-    let
-        tables =
-            updateEachEntity2
-                updatePlayerVelocity
-                world.entities
-                world.keyboardInputComponents
-                world.velocityComponents
-    in
-    { world
-        | keyboardInputComponents = tables.first
-        , velocityComponents = tables.second
+type alias Components =
+    { keyboardInput : ComponentKeyboardInput
+    , velocity : ComponentVelocity
     }
 
 
-updatePlayerVelocity : EntityId -> ComponentKeyboardInput -> ComponentVelocity -> Tuple2 ComponentKeyboardInput ComponentVelocity
-updatePlayerVelocity _ keyboardInput velocity =
-    case keyboardInput.key of
-        Just key ->
-            toTuple2 keyboardInput (updateVelocityFromKey key velocity)
+updateWorld : World -> World
+updateWorld world =
+    updateEntities
+        updatePlayerVelocity
+        (\entityId { keyboardInput, velocity } accWorld ->
+            { accWorld
+                | keyboardInputComponents = setComponent entityId keyboardInput accWorld.keyboardInputComponents
+                , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+            }
+        )
+        world.entities
+        (intersectTable2 Components world.entities world.keyboardInputComponents world.velocityComponents)
+        world
 
-        Nothing ->
-            toTuple2 keyboardInput velocity
+
+updatePlayerVelocity : EntityId -> Components -> Components
+updatePlayerVelocity _ { keyboardInput, velocity } =
+    let
+        updatedVelocity =
+            case keyboardInput.key of
+                Just key ->
+                    updateVelocityFromKey key velocity
+
+                Nothing ->
+                    velocity
+    in
+    { keyboardInput = keyboardInput
+    , velocity = updatedVelocity
+    }
 
 
 updateVelocityFromKey : Key -> ComponentVelocity -> ComponentVelocity

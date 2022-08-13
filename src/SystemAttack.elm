@@ -3,38 +3,58 @@ module SystemAttack exposing (updateWorld)
 import ComponentAttack exposing (ComponentAttack)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
-import CustomTuple exposing (..)
 import EntityTable exposing (..)
 import World exposing (World)
 
 
-updateWorld : World -> World
-updateWorld world =
-    let
-        tables =
-            updateEachEntity3
-                velocityAttack
-                world.entities
-                world.positionComponents
-                world.velocityComponents
-                world.attackComponents
-    in
-    { world
-        | positionComponents = tables.first
-        , velocityComponents = tables.second
-        , attackComponents = tables.third
+type alias Components =
+    { position : ComponentPosition
+    , velocity : ComponentVelocity
+    , attack : ComponentAttack
     }
 
 
-velocityAttack :
-    EntityId
-    -> ComponentPosition
-    -> ComponentVelocity
-    -> ComponentAttack
-    -> Tuple3 ComponentPosition ComponentVelocity ComponentAttack
-velocityAttack _ position velocity attack =
+updateWorld : World -> World
+updateWorld world =
+    updateEntities
+        velocityAttack
+        (\entityId { position, velocity, attack } accWorld ->
+            { accWorld
+                | positionComponents = setComponent entityId position accWorld.positionComponents
+                , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+                , attackComponents = setComponent entityId attack accWorld.attackComponents
+            }
+        )
+        world.entities
+        (intersectTable3 Components world.entities world.positionComponents world.velocityComponents world.attackComponents)
+        world
+
+
+velocityAttack : EntityId -> Components -> Components
+velocityAttack _ { position, velocity, attack } =
     if velocity /= ComponentVelocity.identity then
-        toTuple3 position velocity (Just { x = position.x + velocity.x, y = position.y + velocity.y })
+        { position = position
+        , velocity = velocity
+        , attack = Just { x = position.x + velocity.x, y = position.y + velocity.y }
+        }
 
     else
-        toTuple3 position velocity Nothing
+        { position = position
+        , velocity = velocity
+        , attack = Nothing
+        }
+
+
+
+--velocityAttack :
+--    EntityId
+--    -> ComponentPosition
+--    -> ComponentVelocity
+--    -> ComponentAttack
+--    -> Tuple3 ComponentPosition ComponentVelocity ComponentAttack
+--velocityAttack _ position velocity attack =
+--    if velocity /= ComponentVelocity.identity then
+--        toTuple3 position velocity (Just { x = position.x + velocity.x, y = position.y + velocity.y })
+--
+--    else
+--        toTuple3 position velocity Nothing

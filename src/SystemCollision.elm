@@ -2,35 +2,38 @@ module SystemCollision exposing (updateWorld)
 
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
-import CustomTuple exposing (..)
 import EntityTable exposing (..)
 import World exposing (World)
 
 
+type alias OutputComponents =
+    { position : ComponentPosition
+    , velocity : ComponentVelocity
+    }
+
+
 updateWorld : World -> World
 updateWorld world =
-    let
-        tables =
-            updateEachEntityWithOthers2
-                collide
-                world.entities
-                world.positionComponents
-                world.positionComponents
-                world.velocityComponents
-    in
-    { world
-        | positionComponents = tables.first
-        , velocityComponents = tables.second
-    }
+    updateEntitiesWithOthers
+        collide
+        (\entityId { position, velocity } accWorld ->
+            { accWorld
+                | positionComponents = setComponent entityId position accWorld.positionComponents
+                , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+            }
+        )
+        world.entities
+        world.positionComponents
+        (intersectTable2 OutputComponents world.entities world.positionComponents world.velocityComponents)
+        world
 
 
 collide :
     EntityId
     -> Table ComponentPosition
-    -> ComponentPosition
-    -> ComponentVelocity
-    -> Tuple2 ComponentPosition ComponentVelocity
-collide _ positionTable position velocity =
+    -> OutputComponents
+    -> OutputComponents
+collide _ positionTable { position, velocity } =
     let
         movedPos =
             { x = position.x + velocity.x
@@ -44,4 +47,6 @@ collide _ positionTable position velocity =
             else
                 movedPos
     in
-    toTuple2 nextPos ComponentVelocity.identity
+    { position = nextPos
+    , velocity = ComponentVelocity.identity
+    }

@@ -23,7 +23,7 @@ type alias OutputComponents =
 
 updateWorld : World -> World
 updateWorld world =
-    updateEntities
+    updateEntitiesWithOthers
         updateAIVelocity
         (\entityId { ai, velocity, position } accWorld ->
             { accWorld

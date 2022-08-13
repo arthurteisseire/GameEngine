@@ -95,6 +95,21 @@ type Table a
 
 
 updateEntities :
+    (EntityId -> w -> w)
+    -> (EntityId -> w -> result -> result)
+    -> EntityTable
+    -> Table w
+    -> result
+    -> result
+updateEntities componentFunc resultFunc entityTable writeTable result =
+    foldlEntities1
+        (\entityId w accResult -> resultFunc entityId (componentFunc entityId w) accResult)
+        result
+        entityTable
+        writeTable
+
+
+updateEntitiesWithOthers :
     (EntityId -> Table r -> w -> w)
     -> (EntityId -> w -> result -> result)
     -> EntityTable
@@ -102,7 +117,7 @@ updateEntities :
     -> Table w
     -> result
     -> result
-updateEntities componentFunc resultFunc entityTable readTable writeTable result =
+updateEntitiesWithOthers componentFunc resultFunc entityTable readTable writeTable result =
     foldlEntities1
         (\entityId w accResult -> resultFunc entityId (componentFunc entityId readTable w) accResult)
         result
