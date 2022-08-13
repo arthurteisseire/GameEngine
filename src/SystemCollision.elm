@@ -31,11 +31,7 @@ updateWorld world =
         }
 
 
-collide :
-    EntityId
-    -> Table ComponentPosition
-    -> OutputComponents
-    -> OutputComponents
+collide : EntityId -> Table ComponentPosition -> OutputComponents -> OutputComponents
 collide _ positionTable { position, velocity } =
     let
         movedPos =

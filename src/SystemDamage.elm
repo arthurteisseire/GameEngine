@@ -30,11 +30,7 @@ updateWorld world =
         }
 
 
-takeDamage :
-    EntityId
-    -> Table ComponentAttack
-    -> OutputComponents
-    -> OutputComponents
+takeDamage : EntityId -> Table ComponentAttack -> OutputComponents -> OutputComponents
 takeDamage _ attackTable { position, life } =
     let
         updatedLife =

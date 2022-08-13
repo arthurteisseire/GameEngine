@@ -33,14 +33,12 @@ updateWorld world =
 
 velocityAttack : EntityId -> Components -> Components
 velocityAttack _ { position, velocity, attack } =
-    if velocity /= ComponentVelocity.identity then
-        { position = position
-        , velocity = velocity
-        , attack = Just { x = position.x + velocity.x, y = position.y + velocity.y }
-        }
+    { position = position
+    , velocity = velocity
+    , attack =
+        if velocity /= ComponentVelocity.identity then
+            Just { x = position.x + velocity.x, y = position.y + velocity.y }
 
-    else
-        { position = position
-        , velocity = velocity
-        , attack = Nothing
-        }
+        else
+            Nothing
+    }

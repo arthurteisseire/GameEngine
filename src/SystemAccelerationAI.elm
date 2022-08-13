@@ -42,9 +42,6 @@ updateWorld world =
 updateAIVelocity : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
 updateAIVelocity _ inputTable { ai, velocity, position } =
     let
-        remainingTurns =
-            ai.remainingTurnsBeforeMove - 1
-
         playerPos =
             Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))
 
@@ -58,14 +55,14 @@ updateAIVelocity _ inputTable { ai, velocity, position } =
             else
                 { x = 0, y = diff.y // abs diff.y }
     in
-    if remainingTurns < 0 then
-        { ai = { ai | remainingTurnsBeforeMove = 4 }
-        , velocity = nextVelocity
+    if ai.remainingTurnsBeforeMove > 0 then
+        { ai = { ai | remainingTurnsBeforeMove = ai.remainingTurnsBeforeMove - 1 }
+        , velocity = velocity
         , position = position
         }
 
     else
-        { ai = { ai | remainingTurnsBeforeMove = remainingTurns }
-        , velocity = velocity
+        { ai = { ai | remainingTurnsBeforeMove = 4 }
+        , velocity = nextVelocity
         , position = position
         }
