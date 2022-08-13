@@ -94,6 +94,22 @@ type Table a
     = Table (Dict Int a)
 
 
+updateEntities :
+    (EntityId -> Table r -> w -> w)
+    -> (EntityId -> w -> result -> result)
+    -> EntityTable
+    -> Table r
+    -> Table w
+    -> result
+    -> result
+updateEntities componentFunc resultFunc entityTable readTable writeTable result =
+    foldlEntities1
+        (\entityId w accResult -> resultFunc entityId (componentFunc entityId readTable w) accResult)
+        result
+        entityTable
+        writeTable
+
+
 updateEachEntityWithOthers3 :
     (EntityId -> Table r -> a -> b -> c -> Tuple3 a b c)
     -> EntityTable
@@ -192,26 +208,17 @@ updateEachEntity1 =
     mapEntities1
 
 
-intersectTable3 :
-    EntityTable
-    -> Table a
-    -> Table b
-    -> Table c
-    -> Table (Tuple3 a b c)
-intersectTable3 =
+intersectTable3 : (a -> b -> c -> w) -> EntityTable -> Table a -> Table b -> Table c -> Table w
+intersectTable3 func =
     foldlEntities3
-        (\entityId a b c accTable -> insertInTable entityId (toTuple3 a b c) accTable)
+        (\entityId a b c accTable -> insertInTable entityId (func a b c) accTable)
         emptyTable
 
 
-intersectTable2 :
-    EntityTable
-    -> Table a
-    -> Table b
-    -> Table (Tuple2 a b)
-intersectTable2 =
+intersectTable2 : (a -> b -> w) -> EntityTable -> Table a -> Table b -> Table w
+intersectTable2 func =
     foldlEntities2
-        (\entityId a b accTable -> insertInTable entityId (toTuple2 a b) accTable)
+        (\entityId a b accTable -> insertInTable entityId (func a b) accTable)
         emptyTable
 
 

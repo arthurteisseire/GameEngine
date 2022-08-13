@@ -4,43 +4,48 @@ import ComponentAI exposing (ComponentAI)
 import ComponentPlayer exposing (ComponentPlayer)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
-import CustomTuple exposing (..)
 import EntityTable exposing (..)
 import World exposing (World)
 
 
-updateWorld : World -> World
-updateWorld world =
-    let
-        tables =
-            updateEachEntityWithOthers3
-                updateAIVelocity
-                world.entities
-                (intersectTable2 world.entities world.playerComponents world.positionComponents)
-                world.aiComponents
-                world.velocityComponents
-                world.positionComponents
-    in
-    { world
-        | aiComponents = tables.first
-        , velocityComponents = tables.second
+type alias InputComponents =
+    { player : ComponentPlayer
+    , position : ComponentPosition
     }
 
 
-updateAIVelocity :
-    EntityId
-    -> Table (Tuple2 ComponentPlayer ComponentPosition)
-    -> ComponentAI
-    -> ComponentVelocity
-    -> ComponentPosition
-    -> Tuple3 ComponentAI ComponentVelocity ComponentPosition
-updateAIVelocity _ table ai velocity position =
+type alias OutputComponents =
+    { ai : ComponentAI
+    , velocity : ComponentVelocity
+    , position : ComponentPosition
+    }
+
+
+updateWorld : World -> World
+updateWorld world =
+    updateEntities
+        updateAIVelocity
+        (\entityId { ai, velocity, position } accWorld ->
+            { accWorld
+                | aiComponents = setComponent entityId ai accWorld.aiComponents
+                , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+                , positionComponents = setComponent entityId position accWorld.positionComponents
+            }
+        )
+        world.entities
+        (intersectTable2 InputComponents world.entities world.playerComponents world.positionComponents)
+        (intersectTable3 OutputComponents world.entities world.aiComponents world.velocityComponents world.positionComponents)
+        world
+
+
+updateAIVelocity : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
+updateAIVelocity _ inputTable { ai, velocity, position } =
     let
         remainingTurns =
             ai.remainingTurnsBeforeMove - 1
 
         playerPos =
-            Maybe.withDefault ComponentPosition.identity (List.head (List.map (\{ first, second } -> second) (valuesTable table)))
+            Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))
 
         diff =
             { x = playerPos.x - position.x, y = playerPos.y - position.y }
@@ -53,7 +58,13 @@ updateAIVelocity _ table ai velocity position =
                 { x = 0, y = diff.y // abs diff.y }
     in
     if remainingTurns < 0 then
-        toTuple3 { ai | remainingTurnsBeforeMove = 4 } nextVelocity position
+        { ai = { ai | remainingTurnsBeforeMove = 4 }
+        , velocity = nextVelocity
+        , position = position
+        }
 
     else
-        toTuple3 { ai | remainingTurnsBeforeMove = remainingTurns } velocity position
+        { ai = { ai | remainingTurnsBeforeMove = remainingTurns }
+        , velocity = velocity
+        , position = position
+        }
