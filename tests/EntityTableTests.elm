@@ -18,7 +18,7 @@ suite =
                         emptyTable |> setComponent entityId 5
 
                     updatedNumberTable =
-                        mapEntities1 (\_ n -> n + 1) entityTable numberTable
+                        mapEntities (\_ n -> n + 1) entityTable numberTable
                 in
                 Expect.equal
                     updatedNumberTable

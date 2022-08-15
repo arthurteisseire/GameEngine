@@ -9,5 +9,5 @@ updateWorld : World -> World
 updateWorld world =
     { world
         | keyboardInputComponents =
-            mapEntities1 (\_ _ -> { key = Nothing }) world.keyboardInputComponents world.entities
+            mapEntities (\_ _ -> { key = Nothing }) world.keyboardInputComponents world.entities
     }

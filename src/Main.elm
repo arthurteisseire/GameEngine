@@ -63,14 +63,14 @@ update msg world =
     case msg of
         KeyBoardInput key ->
             ( world
-                |> (\currentWorld -> { currentWorld | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) currentWorld.keyboardInputComponents currentWorld.entities })
+                |> (\currentWorld -> { currentWorld | keyboardInputComponents = mapEntities (\_ _ -> { key = Just key }) currentWorld.keyboardInputComponents currentWorld.entities })
                 |> SystemAccelerationAI.updateWorld
                 |> SystemAcceleration.updateWorld
                 |> SystemAttack.updateWorld
                 |> SystemDamage.updateWorld
                 |> SystemCollision.updateWorld
                 |> SystemClearKeyboardInputs.updateWorld
-                |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities1 (\_ _ -> ComponentVelocity.identity) currentWorld.velocityComponents currentWorld.entities })
+                |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities (\_ _ -> ComponentVelocity.identity) currentWorld.velocityComponents currentWorld.entities })
                 |> SystemDie.updateWorld
             , Cmd.none
             )
