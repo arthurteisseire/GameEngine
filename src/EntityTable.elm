@@ -106,27 +106,6 @@ join table resultTable entityTable =
         entityTable
 
 
-intersectTable3 : (a -> b -> c -> w) -> Table a -> Table b -> Table c -> EntityTable -> Table w
-intersectTable3 func =
-    foldlEntities3
-        (\entityId a b c accTable -> insertInTable entityId (func a b c) accTable)
-        emptyTable
-
-
-intersectTable2 : (a -> b -> w) -> Table a -> Table b -> EntityTable -> Table w
-intersectTable2 func =
-    foldlEntities2
-        (\entityId a b accTable -> insertInTable entityId (func a b) accTable)
-        emptyTable
-
-
-
---join : (a -> b -> (c -> w)) -> Table a -> Table b -> EntityTable -> Table (c -> w)
---join : Table a -> Table b -> EntityTable -> Table w
---from : Table a -> EntityTable -> Table w
---from tableA entityTable =
-
-
 mapEntities3 :
     (EntityId -> a -> b -> c -> result)
     -> Table a
