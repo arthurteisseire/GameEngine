@@ -8,7 +8,7 @@ import World exposing (World)
 updateWorld : World -> World
 updateWorld world =
     let
-        updatedEntities : EntityTable
+        updatedEntities : EntitySet
         updatedEntities =
             filterEntities
                 (\entityId ->

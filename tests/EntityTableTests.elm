@@ -12,7 +12,7 @@ suite =
             (\_ ->
                 let
                     ( entityTable, entityId ) =
-                        emptyEntityTable |> addEntity
+                        emptyEntitySet |> addEntity
 
                     numberTable =
                         emptyTable |> setComponent entityId 5
@@ -28,7 +28,7 @@ suite =
             (\_ ->
                 let
                     ( entityTable, entityId ) =
-                        emptyEntityTable |> addEntity
+                        emptyEntitySet |> addEntity
 
                     intTable =
                         emptyTable |> setComponent entityId 5
@@ -49,7 +49,7 @@ suite =
             (\_ ->
                 let
                     ( entityTable, entityId ) =
-                        emptyEntityTable |> addEntity
+                        emptyEntitySet |> addEntity
 
                     intTable : Table Int
                     intTable =

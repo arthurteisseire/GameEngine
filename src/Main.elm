@@ -122,7 +122,7 @@ view world =
 systemDraw :
     Table ComponentVisual
     -> Table ComponentPosition
-    -> EntityTable
+    -> EntitySet
     -> List (Svg Msg)
 systemDraw =
     foldlEntities2 (\entityId visual position list -> toSvg entityId visual position :: list) []

@@ -12,7 +12,7 @@ import EntityTable exposing (..)
 
 
 type alias World =
-    { entities : EntityTable
+    { entities : EntitySet
     , keyboardInputComponents : Table ComponentKeyboardInput
     , positionComponents : Table ComponentPosition
     , velocityComponents : Table ComponentVelocity
@@ -29,7 +29,7 @@ init : World
 init =
     let
         ( entities, playerId ) =
-            addEntity emptyEntityTable
+            addEntity emptyEntitySet
 
         ( entities2, enemyId ) =
             addEntity entities

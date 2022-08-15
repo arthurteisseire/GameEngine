@@ -16,36 +16,36 @@ entityIdToString (EntityId id) =
     String.fromInt id
 
 
-type EntityTable
-    = EntityTable Int (List EntityId)
+type EntitySet
+    = EntitySet Int (List EntityId)
 
 
-foldlEntityTable : (EntityId -> result -> result) -> result -> EntityTable -> result
-foldlEntityTable func result (EntityTable _ list) =
+foldlEntitySet : (EntityId -> result -> result) -> result -> EntitySet -> result
+foldlEntitySet func result (EntitySet _ list) =
     List.foldl
         (\entityId acc -> func entityId acc)
         result
         list
 
 
-filterEntities : (EntityId -> Bool) -> EntityTable -> EntityTable
-filterEntities isGood (EntityTable lastId list) =
-    EntityTable lastId (List.filter isGood list)
+filterEntities : (EntityId -> Bool) -> EntitySet -> EntitySet
+filterEntities isGood (EntitySet lastId list) =
+    EntitySet lastId (List.filter isGood list)
 
 
-emptyEntityTable : EntityTable
-emptyEntityTable =
-    EntityTable 0 []
+emptyEntitySet : EntitySet
+emptyEntitySet =
+    EntitySet 0 []
 
 
-doesEntityExist : EntityId -> EntityTable -> Bool
-doesEntityExist entityId (EntityTable _ list) =
+doesEntityExist : EntityId -> EntitySet -> Bool
+doesEntityExist entityId (EntitySet _ list) =
     List.member entityId list
 
 
-addEntity : EntityTable -> ( EntityTable, EntityId )
-addEntity (EntityTable nextId entities) =
-    ( EntityTable (nextId + 1) (EntityId nextId :: entities)
+addEntity : EntitySet -> ( EntitySet, EntityId )
+addEntity (EntitySet nextId entities) =
+    ( EntitySet (nextId + 1) (EntityId nextId :: entities)
     , EntityId nextId
     )
 
@@ -62,8 +62,8 @@ updateEntities :
     { updateComponents : EntityId -> w -> w
     , updateWorld : EntityId -> w -> result -> result
     , world : result
-    , entityTable : EntityTable
-    , componentTables : EntityTable -> Table w
+    , entityTable : EntitySet
+    , componentTables : EntitySet -> Table w
     }
     -> result
 updateEntities { updateComponents, updateWorld, world, entityTable, componentTables } =
@@ -78,9 +78,9 @@ updateEntitiesWithOthers :
     { updateComponents : EntityId -> Table r -> w -> w
     , updateWorld : EntityId -> w -> result -> result
     , world : result
-    , entityTable : EntityTable
-    , readTable : EntityTable -> Table r
-    , writeTable : EntityTable -> Table w
+    , entityTable : EntitySet
+    , readTable : EntitySet -> Table r
+    , writeTable : EntitySet -> Table w
     }
     -> result
 updateEntitiesWithOthers { updateComponents, updateWorld, world, entityTable, readTable, writeTable } =
@@ -91,12 +91,12 @@ updateEntitiesWithOthers { updateComponents, updateWorld, world, entityTable, re
         entityTable
 
 
-from : Table a -> (a -> result) -> EntityTable -> Table result
+from : Table a -> (a -> result) -> EntitySet -> Table result
 from table func =
     mapEntities1 (\_ -> func) table
 
 
-join : Table b -> (EntityTable -> Table (b -> a)) -> EntityTable -> Table a
+join : Table b -> (EntitySet -> Table (b -> a)) -> EntitySet -> Table a
 join table resultTable entityTable =
     foldlEntities2
         (\entityId keyboardInput func accTable -> insertInTable entityId (func keyboardInput) accTable)
@@ -111,7 +111,7 @@ mapEntities3 :
     -> Table a
     -> Table b
     -> Table c
-    -> EntityTable
+    -> EntitySet
     -> Table result
 mapEntities3 func =
     foldlEntities3
@@ -123,7 +123,7 @@ mapEntities2 :
     (EntityId -> a -> b -> result)
     -> Table a
     -> Table b
-    -> EntityTable
+    -> EntitySet
     -> Table result
 mapEntities2 func =
     foldlEntities2
@@ -131,7 +131,7 @@ mapEntities2 func =
         emptyTable
 
 
-mapEntities1 : (EntityId -> a -> result) -> Table a -> EntityTable -> Table result
+mapEntities1 : (EntityId -> a -> result) -> Table a -> EntitySet -> Table result
 mapEntities1 func =
     foldlEntities1
         (\entityId a accTable -> insertInTable entityId (func entityId a) accTable)
@@ -144,10 +144,10 @@ foldlEntities3 :
     -> Table a
     -> Table b
     -> Table c
-    -> EntityTable
+    -> EntitySet
     -> result
 foldlEntities3 func result tableA tableB tableC entityTable =
-    foldlEntityTable
+    foldlEntitySet
         (\entityId accResult ->
             Maybe.map3
                 (\a b c -> func entityId a b c accResult)
@@ -165,10 +165,10 @@ foldlEntities2 :
     -> result
     -> Table a
     -> Table b
-    -> EntityTable
+    -> EntitySet
     -> result
 foldlEntities2 func result tableA tableB entityTable =
-    foldlEntityTable
+    foldlEntitySet
         (\entityId accResult ->
             Maybe.map2
                 (\a b -> func entityId a b accResult)
@@ -180,9 +180,9 @@ foldlEntities2 func result tableA tableB entityTable =
         entityTable
 
 
-foldlEntities1 : (EntityId -> a -> result -> result) -> result -> Table a -> EntityTable -> result
+foldlEntities1 : (EntityId -> a -> result -> result) -> result -> Table a -> EntitySet -> result
 foldlEntities1 func result table entityTable =
-    foldlEntityTable
+    foldlEntitySet
         (\entityId accResult ->
             Maybe.map
                 (\a -> func entityId a accResult)
@@ -230,7 +230,7 @@ unionTable (Table dictHighPriority) (Table dictLowPriority) =
     Table (Dict.union dictHighPriority dictLowPriority)
 
 
-filterEntitiesInTable : EntityTable -> Table a -> Table a
+filterEntitiesInTable : EntitySet -> Table a -> Table a
 filterEntitiesInTable entities table =
     filterTable (\entityId _ -> doesEntityExist entityId entities) table
 
