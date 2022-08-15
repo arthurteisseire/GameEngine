@@ -27,7 +27,11 @@ updateWorld world =
                 }
         , world = world
         , entityTable = world.entities
-        , componentTables = intersectTable3 Components world.entities world.positionComponents world.velocityComponents world.attackComponents
+        , componentTables =
+            Components
+                |> from world.positionComponents
+                |> join world.velocityComponents
+                |> join world.attackComponents
         }
 
 

@@ -63,14 +63,14 @@ update msg world =
     case msg of
         KeyBoardInput key ->
             ( world
-                |> (\currentWorld -> { currentWorld | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) currentWorld.entities currentWorld.keyboardInputComponents })
+                |> (\currentWorld -> { currentWorld | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Just key }) currentWorld.keyboardInputComponents currentWorld.entities })
                 |> SystemAccelerationAI.updateWorld
                 |> SystemAcceleration.updateWorld
                 |> SystemAttack.updateWorld
                 |> SystemDamage.updateWorld
                 |> SystemCollision.updateWorld
                 |> SystemClearKeyboardInputs.updateWorld
-                |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities1 (\_ _ -> ComponentVelocity.identity) currentWorld.entities currentWorld.velocityComponents })
+                |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities1 (\_ _ -> ComponentVelocity.identity) currentWorld.velocityComponents currentWorld.entities })
                 |> SystemDie.updateWorld
             , Cmd.none
             )
@@ -111,7 +111,7 @@ view world =
                     , SA.height "500"
                     , SA.viewBox "0 0 20 20"
                     ]
-                    (systemDraw world.entities world.visualComponents world.positionComponents)
+                    (systemDraw world.visualComponents world.positionComponents world.entities)
                 ]
             , systemDisplayDebug world world.entityIdDebug
             ]
@@ -120,9 +120,9 @@ view world =
 
 
 systemDraw :
-    EntityTable
-    -> Table ComponentVisual
+    Table ComponentVisual
     -> Table ComponentPosition
+    -> EntityTable
     -> List (Svg Msg)
 systemDraw =
     foldlEntities2 (\entityId visual position list -> toSvg entityId visual position :: list) []

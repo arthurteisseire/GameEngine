@@ -34,8 +34,15 @@ updateWorld world =
                 }
         , world = world
         , entityTable = world.entities
-        , readTable = intersectTable2 InputComponents world.entities world.playerComponents world.positionComponents
-        , writeTable = intersectTable3 OutputComponents world.entities world.aiComponents world.velocityComponents world.positionComponents
+        , readTable =
+            InputComponents
+                |> from world.playerComponents
+                |> join world.positionComponents
+        , writeTable =
+            OutputComponents
+                |> from world.aiComponents
+                |> join world.velocityComponents
+                |> join world.positionComponents
         }
 
 

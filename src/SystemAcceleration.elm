@@ -25,7 +25,10 @@ updateWorld world =
                 }
         , world = world
         , entityTable = world.entities
-        , componentTables = intersectTable2 Components world.entities world.keyboardInputComponents world.velocityComponents
+        , componentTables =
+            Components
+                |> from world.keyboardInputComponents
+                |> join world.velocityComponents
         }
 
 

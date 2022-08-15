@@ -7,6 +7,11 @@ import EntityTable exposing (..)
 import World exposing (World)
 
 
+type alias InputComponents =
+    { attack : ComponentAttack
+    }
+
+
 type alias OutputComponents =
     { position : ComponentPosition
     , life : ComponentLife
@@ -25,16 +30,21 @@ updateWorld world =
                 }
         , world = world
         , entityTable = world.entities
-        , readTable = mapEntities1 (\_ attack -> attack) world.entities world.attackComponents
-        , writeTable = intersectTable2 OutputComponents world.entities world.positionComponents world.lifeComponents
+        , readTable =
+            InputComponents
+                |> from world.attackComponents
+        , writeTable =
+            OutputComponents
+                |> from world.positionComponents
+                |> join world.lifeComponents
         }
 
 
-takeDamage : EntityId -> Table ComponentAttack -> OutputComponents -> OutputComponents
+takeDamage : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
 takeDamage _ attackTable { position, life } =
     let
         updatedLife =
-            if List.member position (List.filterMap (\value -> value) (valuesTable attackTable)) then
+            if List.member position (List.filterMap (\value -> value.attack) (valuesTable attackTable)) then
                 { life | healPoints = life.healPoints - 1 }
 
             else

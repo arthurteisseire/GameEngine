@@ -7,4 +7,7 @@ import World exposing (World)
 
 updateWorld : World -> World
 updateWorld world =
-    { world | keyboardInputComponents = mapEntities1 (\_ _ -> { key = Nothing }) world.entities world.keyboardInputComponents }
+    { world
+        | keyboardInputComponents =
+            mapEntities1 (\_ _ -> { key = Nothing }) world.keyboardInputComponents world.entities
+    }

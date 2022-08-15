@@ -63,15 +63,15 @@ updateEntities :
     , updateWorld : EntityId -> w -> result -> result
     , world : result
     , entityTable : EntityTable
-    , componentTables : Table w
+    , componentTables : EntityTable -> Table w
     }
     -> result
 updateEntities { updateComponents, updateWorld, world, entityTable, componentTables } =
     foldlEntities1
         (\entityId w accResult -> updateWorld entityId (updateComponents entityId w) accResult)
         world
+        (componentTables entityTable)
         entityTable
-        componentTables
 
 
 updateEntitiesWithOthers :
@@ -79,38 +79,60 @@ updateEntitiesWithOthers :
     , updateWorld : EntityId -> w -> result -> result
     , world : result
     , entityTable : EntityTable
-    , readTable : Table r
-    , writeTable : Table w
+    , readTable : EntityTable -> Table r
+    , writeTable : EntityTable -> Table w
     }
     -> result
 updateEntitiesWithOthers { updateComponents, updateWorld, world, entityTable, readTable, writeTable } =
     foldlEntities1
-        (\entityId w accResult -> updateWorld entityId (updateComponents entityId readTable w) accResult)
+        (\entityId w accResult -> updateWorld entityId (updateComponents entityId (readTable entityTable) w) accResult)
         world
+        (writeTable entityTable)
         entityTable
-        writeTable
 
 
-intersectTable3 : (a -> b -> c -> w) -> EntityTable -> Table a -> Table b -> Table c -> Table w
+from : Table a -> (a -> result) -> EntityTable -> Table result
+from table func =
+    mapEntities1 (\_ -> func) table
+
+
+join : Table b -> (EntityTable -> Table (b -> a)) -> EntityTable -> Table a
+join table resultTable entityTable =
+    foldlEntities2
+        (\entityId keyboardInput func accTable -> insertInTable entityId (func keyboardInput) accTable)
+        emptyTable
+        table
+        (resultTable entityTable)
+        entityTable
+
+
+intersectTable3 : (a -> b -> c -> w) -> Table a -> Table b -> Table c -> EntityTable -> Table w
 intersectTable3 func =
     foldlEntities3
         (\entityId a b c accTable -> insertInTable entityId (func a b c) accTable)
         emptyTable
 
 
-intersectTable2 : (a -> b -> w) -> EntityTable -> Table a -> Table b -> Table w
+intersectTable2 : (a -> b -> w) -> Table a -> Table b -> EntityTable -> Table w
 intersectTable2 func =
     foldlEntities2
         (\entityId a b accTable -> insertInTable entityId (func a b) accTable)
         emptyTable
 
 
+
+--join : (a -> b -> (c -> w)) -> Table a -> Table b -> EntityTable -> Table (c -> w)
+--join : Table a -> Table b -> EntityTable -> Table w
+--from : Table a -> EntityTable -> Table w
+--from tableA entityTable =
+
+
 mapEntities3 :
     (EntityId -> a -> b -> c -> result)
-    -> EntityTable
     -> Table a
     -> Table b
     -> Table c
+    -> EntityTable
     -> Table result
 mapEntities3 func =
     foldlEntities3
@@ -120,9 +142,9 @@ mapEntities3 func =
 
 mapEntities2 :
     (EntityId -> a -> b -> result)
-    -> EntityTable
     -> Table a
     -> Table b
+    -> EntityTable
     -> Table result
 mapEntities2 func =
     foldlEntities2
@@ -130,7 +152,7 @@ mapEntities2 func =
         emptyTable
 
 
-mapEntities1 : (EntityId -> a -> result) -> EntityTable -> Table a -> Table result
+mapEntities1 : (EntityId -> a -> result) -> Table a -> EntityTable -> Table result
 mapEntities1 func =
     foldlEntities1
         (\entityId a accTable -> insertInTable entityId (func entityId a) accTable)
@@ -140,12 +162,12 @@ mapEntities1 func =
 foldlEntities3 :
     (EntityId -> a -> b -> c -> result -> result)
     -> result
-    -> EntityTable
     -> Table a
     -> Table b
     -> Table c
+    -> EntityTable
     -> result
-foldlEntities3 func result entityTable tableA tableB tableC =
+foldlEntities3 func result tableA tableB tableC entityTable =
     foldlEntityTable
         (\entityId accResult ->
             Maybe.map3
@@ -162,11 +184,11 @@ foldlEntities3 func result entityTable tableA tableB tableC =
 foldlEntities2 :
     (EntityId -> a -> b -> result -> result)
     -> result
-    -> EntityTable
     -> Table a
     -> Table b
+    -> EntityTable
     -> result
-foldlEntities2 func result entityTable tableA tableB =
+foldlEntities2 func result tableA tableB entityTable =
     foldlEntityTable
         (\entityId accResult ->
             Maybe.map2
@@ -179,8 +201,8 @@ foldlEntities2 func result entityTable tableA tableB =
         entityTable
 
 
-foldlEntities1 : (EntityId -> a -> result -> result) -> result -> EntityTable -> Table a -> result
-foldlEntities1 func result entityTable table =
+foldlEntities1 : (EntityId -> a -> result -> result) -> result -> Table a -> EntityTable -> result
+foldlEntities1 func result table entityTable =
     foldlEntityTable
         (\entityId accResult ->
             Maybe.map

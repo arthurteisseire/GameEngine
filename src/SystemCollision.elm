@@ -6,6 +6,11 @@ import EntityTable exposing (..)
 import World exposing (World)
 
 
+type alias InputComponents =
+    { position : ComponentPosition
+    }
+
+
 type alias OutputComponents =
     { position : ComponentPosition
     , velocity : ComponentVelocity
@@ -24,15 +29,18 @@ updateWorld world =
                 }
         , world = world
         , entityTable = world.entities
-
-        -- TODO: Find a way to oblige/avoid mapEntities. Because we need to filter destroyed entities from tables
-        , readTable = mapEntities1 (\_ pos -> pos) world.entities world.positionComponents
-        , writeTable = intersectTable2 OutputComponents world.entities world.positionComponents world.velocityComponents
+        , readTable =
+            InputComponents
+                |> from world.positionComponents
+        , writeTable =
+            OutputComponents
+                |> from world.positionComponents
+                |> join world.velocityComponents
         }
 
 
-collide : EntityId -> Table ComponentPosition -> OutputComponents -> OutputComponents
-collide _ positionTable { position, velocity } =
+collide : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
+collide _ inputTable { position, velocity } =
     let
         movedPos =
             { x = position.x + velocity.x
@@ -40,7 +48,7 @@ collide _ positionTable { position, velocity } =
             }
 
         nextPos =
-            if List.member movedPos (valuesTable positionTable) then
+            if List.member movedPos (List.map .position (valuesTable inputTable)) then
                 position
 
             else
