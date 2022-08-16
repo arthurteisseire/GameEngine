@@ -8,6 +8,7 @@ import World exposing (World)
 
 type alias InputComponents =
     { position : ComponentPosition
+    , maybeVelocity : Maybe ComponentVelocity
     }
 
 
@@ -32,6 +33,7 @@ updateWorld world =
         , readTable =
             InputComponents
                 |> from world.positionComponents
+                |> fullJoin world.velocityComponents
         , writeTable =
             OutputComponents
                 |> from world.positionComponents
@@ -40,19 +42,37 @@ updateWorld world =
 
 
 collide : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
-collide _ inputTable { position, velocity } =
+collide entityId inputComponents { position, velocity } =
     let
-        movedPos =
+        entityMovedPos =
             { x = position.x + velocity.x
             , y = position.y + velocity.y
             }
 
+        otherMovedPos =
+            mapTable
+                (\inputEntityId input ->
+                    if inputEntityId /= entityId then
+                        case input.maybeVelocity of
+                            Just inputVelocity ->
+                                { x = input.position.x + inputVelocity.x
+                                , y = input.position.y + inputVelocity.y
+                                }
+
+                            Nothing ->
+                                input.position
+
+                    else
+                        input.position
+                )
+                inputComponents
+
         nextPos =
-            if List.member movedPos (List.map .position (valuesTable inputTable)) then
+            if List.member entityMovedPos (valuesTable otherMovedPos) then
                 position
 
             else
-                movedPos
+                entityMovedPos
     in
     { position = nextPos
     , velocity = ComponentVelocity.identity

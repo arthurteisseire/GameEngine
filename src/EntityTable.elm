@@ -96,10 +96,20 @@ from table func =
     mapEntities (\_ -> func) table
 
 
-join : Table b -> (EntitySet -> Table (b -> a)) -> EntitySet -> Table a
+join : Table a -> (EntitySet -> Table (a -> result)) -> EntitySet -> Table result
 join table resultTable entityTable =
     foldlEntities2
-        (\entityId keyboardInput func accTable -> insertInTable entityId (func keyboardInput) accTable)
+        (\entityId a func accTable -> insertInTable entityId (func a) accTable)
+        emptyTable
+        table
+        (resultTable entityTable)
+        entityTable
+
+
+fullJoin : Table a -> (EntitySet -> Table (Maybe a -> result)) -> EntitySet -> Table result
+fullJoin table resultTable entityTable =
+    foldlEntities2Full
+        (\entityId a func accTable -> insertInTable entityId (func a) accTable)
         emptyTable
         table
         (resultTable entityTable)
@@ -140,6 +150,29 @@ foldlEntities2 func result tableA tableB entityTable =
                 (\a b -> func entityId a b accResult)
                 (getComponent entityId tableA)
                 (getComponent entityId tableB)
+                |> Maybe.withDefault accResult
+        )
+        result
+        entityTable
+
+
+foldlEntities2Full :
+    (EntityId -> Maybe a -> b -> result -> result)
+    -> result
+    -> Table a
+    -> Table b
+    -> EntitySet
+    -> result
+foldlEntities2Full func result tableA tableB entityTable =
+    foldlEntitySet
+        (\entityId accResult ->
+            (case getComponent entityId tableB of
+                Just b ->
+                    Just <| func entityId (getComponent entityId tableA) b accResult
+
+                Nothing ->
+                    Nothing
+            )
                 |> Maybe.withDefault accResult
         )
         result
