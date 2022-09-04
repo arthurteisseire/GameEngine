@@ -61,6 +61,7 @@ init =
         attackComponents =
             emptyTable
                 |> insertComponent playerId ComponentAttack.identity
+                |> insertComponent enemyId ComponentAttack.identity
 
         aiComponents =
             emptyTable
