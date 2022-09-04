@@ -16,24 +16,3 @@ updateEntity entityId world =
                 Nothing ->
                     world.entities
     }
-
-
-updateWorld : World -> World
-updateWorld world =
-    let
-        updatedEntities : EntitySet
-        updatedEntities =
-            filterEntities
-                (\entityId ->
-                    case getComponent entityId world.lifeComponents of
-                        Just life ->
-                            life.healPoints > 0
-
-                        Nothing ->
-                            True
-                )
-                world.entities
-    in
-    { world
-        | entities = updatedEntities
-    }

@@ -18,30 +18,6 @@ type alias OutputComponents =
     }
 
 
-
---updateWorld : World -> World
---updateWorld world =
---    updateEntitiesWithOthers
---        { updateComponents = collide
---        , updateWorld =
---            \entityId { position, velocity } accWorld ->
---                { accWorld
---                    | positionComponents = setComponent entityId position accWorld.positionComponents
---                    , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
---                }
---        , world = world
---        , entityTable = world.entities
---        , readTable =
---            InputComponents
---                |> from world.positionComponents
---                |> fullJoin world.velocityComponents
---        , writeTable =
---            OutputComponents
---                |> from world.positionComponents
---                |> join world.velocityComponents
---        }
-
-
 updateEntity : EntityId -> World -> World
 updateEntity entityId world =
     Maybe.withDefault world <|
@@ -68,33 +44,15 @@ updateEntity entityId world =
 
 
 collide : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
-collide entityId inputComponents { position, velocity } =
+collide _ inputComponents { position, velocity } =
     let
         entityMovedPos =
             { x = position.x + velocity.x
             , y = position.y + velocity.y
             }
 
-        otherMovedPos =
-            mapTable
-                (\inputEntityId input ->
-                    if inputEntityId /= entityId then
-                        case input.maybeVelocity of
-                            Just inputVelocity ->
-                                { x = input.position.x + inputVelocity.x
-                                , y = input.position.y + inputVelocity.y
-                                }
-
-                            Nothing ->
-                                input.position
-
-                    else
-                        input.position
-                )
-                inputComponents
-
         nextPos =
-            if List.member entityMovedPos (valuesTable otherMovedPos) then
+            if List.member entityMovedPos (List.map (\input -> input.position) (valuesTable inputComponents)) then
                 position
 
             else
