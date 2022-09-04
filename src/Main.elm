@@ -17,6 +17,7 @@ import KeyboardInput exposing (Key, keyDecoder)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
+import SystemAITurn
 import SystemAcceleration
 import SystemAccelerationAI
 import SystemAnimation
@@ -53,8 +54,11 @@ init _ =
 
 
 type Msg
-    = KeyBoardInput Key
-    | Clicked -- TODO: Move Clicked Msg to VisualComponent ?
+    = Tick Float
+    | TogglePause
+    | NextFrame
+    | KeyBoardInput Key
+    | DiscardMsg -- TODO: Move Clicked Msg to VisualComponent ?
     | DisplayDebug EntityId
     | HideDebug
 
@@ -67,18 +71,17 @@ applySystem updateEntity entitySet world =
         entitySet
 
 
-applySystems : Key -> EntitySet -> World -> World
-applySystems key entitySet world =
+applySystems : Float -> EntitySet -> World -> World
+applySystems dt entitySet world =
     world
-        |> applySystem (SystemKeyboardInput.read key) entitySet
         |> applySystem SystemAcceleration.updateEntity entitySet
         |> applySystem SystemAccelerationAI.updateEntity entitySet
         |> applySystem SystemAttack.updateEntity entitySet
         |> applySystem SystemDamage.updateEntity entitySet
         |> applySystem SystemCollision.updateEntity entitySet
+        |> applySystem (SystemAnimation.updateEntity dt) entitySet
         |> applySystem SystemKeyboardInput.clear entitySet
         |> applySystem SystemAcceleration.clearVelocity entitySet
-        |> applySystem SystemAnimation.updateEntity entitySet
         |> applySystem SystemDie.updateEntity entitySet
 
 
@@ -101,10 +104,31 @@ update msg world =
     case msg of
         KeyBoardInput key ->
             ( world
-                |> applySystems key (getPlayers world)
-                |> applySystems key (getAis world)
+                |> applySystem (SystemKeyboardInput.read key) world.entities
+                |> applySystem SystemAITurn.updateEntity world.entities
             , Cmd.none
             )
+
+        Tick dt ->
+            ( world
+                |> applySystems dt (getPlayers world)
+                |> applySystems dt (getAis world)
+            , Cmd.none
+            )
+
+        TogglePause ->
+            ( { world | isPause = not world.isPause }, Cmd.none )
+
+        NextFrame ->
+            if world.isPause then
+                ( world
+                    |> applySystems (1 / 60) (getPlayers world)
+                    |> applySystems (1 / 60) (getAis world)
+                , Cmd.none
+                )
+
+            else
+                ( world, Cmd.none )
 
         DisplayDebug entityId ->
             ( { world | entityIdDebug = Just entityId }
@@ -116,7 +140,7 @@ update msg world =
             , Cmd.none
             )
 
-        Clicked ->
+        DiscardMsg ->
             ( world, Cmd.none )
 
 
@@ -142,7 +166,7 @@ view world =
                     , SA.height "500"
                     , SA.viewBox "0 0 20 20"
                     ]
-                    (systemDraw world.visualComponents world.positionComponents world.entities)
+                    (systemDraw world.visualComponents world.entities)
                 ]
             , systemDisplayDebug world world.entityIdDebug
             ]
@@ -152,25 +176,25 @@ view world =
 
 systemDraw :
     Table ComponentVisual
-    -> Table ComponentPosition
     -> EntitySet
     -> List (Svg Msg)
-systemDraw =
-    foldlEntities2 (\entityId visual position list -> toSvg entityId visual position :: list) []
+systemDraw visualTable entitySet =
+    mapEntities (\entityId visual -> toSvg entityId visual) visualTable entitySet
+        |> valuesTable
 
 
-toSvg : EntityId -> ComponentVisual -> ComponentPosition -> Svg Msg
-toSvg entityId visual position =
+toSvg : EntityId -> ComponentVisual -> Svg Msg
+toSvg entityId visual =
     Svg.map
         (\visualMsg ->
             if visualMsg == ComponentVisual.Clicked then
                 DisplayDebug entityId
 
             else
-                Clicked
+                DiscardMsg
         )
         (visual.shape
-            (visual.attributes ++ visual.posToAttributes position)
+            (visual.attributes ++ visual.posToAttributes visual.position)
             []
         )
 
@@ -252,8 +276,24 @@ displayDebug world entityId =
 
 
 subscriptions : World -> Sub Msg
-subscriptions _ =
+subscriptions world =
     Sub.batch
-        --[ Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
-        [ Sub.map KeyBoardInput (Browser.Events.onKeyDown keyDecoder)
+        [ if world.isPause then
+            Sub.none
+
+          else
+            Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
+        , Sub.map
+            (\key ->
+                case key of
+                    KeyboardInput.Space ->
+                        TogglePause
+
+                    KeyboardInput.KeyN ->
+                        NextFrame
+
+                    _ ->
+                        KeyBoardInput key
+            )
+            (Browser.Events.onKeyDown keyDecoder)
         ]

@@ -32,3 +32,8 @@ apply func left right =
     { x = func left.x right.x
     , y = func left.y right.y
     }
+
+
+toString : Vector2 -> String
+toString vector =
+    "x=" ++ String.fromFloat vector.x ++ ", y=" ++ String.fromFloat vector.y

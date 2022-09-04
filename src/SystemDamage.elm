@@ -51,6 +51,7 @@ updateEntity entityId world =
                             |> from world.attackComponents
                         )
                             world.entities
+                            |> removeInTable entityId
 
                     components =
                         takeDamage entityId inputComponents (OutputComponents position life)

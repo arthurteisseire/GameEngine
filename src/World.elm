@@ -24,6 +24,7 @@ type alias World =
     , aiComponents : Table ComponentAI
     , playerComponents : Table ComponentPlayer
     , entityIdDebug : Maybe EntityId
+    , isPause : Bool
     }
 
 
@@ -68,6 +69,7 @@ init =
         animationComponents =
             emptyTable
                 |> insertComponent playerId ComponentAnimation.identity
+                |> insertComponent enemyId ComponentAnimation.identity
 
         aiComponents =
             emptyTable
@@ -88,4 +90,5 @@ init =
     , aiComponents = aiComponents
     , playerComponents = playerComponents
     , entityIdDebug = Just playerId
+    , isPause = False
     }

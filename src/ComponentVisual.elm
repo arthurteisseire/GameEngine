@@ -14,12 +14,13 @@ type alias ComponentVisual =
     { shape : List (Svg.Attribute Msg) -> List (Svg Msg) -> Svg Msg
     , attributes : List (Svg.Attribute Msg)
     , posToAttributes : Vector2 -> List (Svg.Attribute Msg)
+    , position : Vector2
     }
 
 
 toString : ComponentVisual -> String
-toString _ =
-    "Visual()"
+toString visual =
+    "Visual(position=(" ++ Vector2.toString visual.position ++ "))"
 
 
 defaultRect : ComponentVisual
@@ -36,6 +37,7 @@ defaultRect =
             [ SA.x <| String.fromFloat v.x
             , SA.y <| String.fromFloat v.y
             ]
+    , position = { x = 0, y = 0 }
     }
 
 
@@ -52,4 +54,5 @@ defaultCircle =
             [ SA.cx <| String.fromFloat (v.x + 0.5)
             , SA.cy <| String.fromFloat (v.y + 0.5)
             ]
+    , position = { x = 0, y = 0 }
     }

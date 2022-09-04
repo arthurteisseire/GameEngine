@@ -8,6 +8,8 @@ type Key
     | ArrowRight
     | ArrowUp
     | ArrowDown
+    | Space
+    | KeyN
     | Other
 
 
@@ -31,6 +33,12 @@ toDirection string =
 
         "ArrowDown" ->
             ArrowUp
+
+        " " ->
+            Space
+
+        "n" ->
+            KeyN
 
         _ ->
             Other

@@ -65,7 +65,7 @@ updateAIVelocity _ inputTable { ai, velocity, position } =
                 { x = 0, y = diff.y / abs diff.y }
     in
     if ai.remainingTurnsBeforeMove > 0 then
-        { ai = { ai | remainingTurnsBeforeMove = ai.remainingTurnsBeforeMove - 1 }
+        { ai = ai
         , velocity = velocity
         , position = position
         }

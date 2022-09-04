@@ -257,6 +257,11 @@ insertInTable (EntityId id) a (Table dict) =
     Table (Dict.insert id a dict)
 
 
+removeInTable : EntityId -> Table a -> Table a
+removeInTable (EntityId id) (Table dict) =
+    Table (Dict.remove id dict)
+
+
 foldlTable : (EntityId -> a -> b -> b) -> b -> Table a -> b
 foldlTable func acc (Table dict) =
     Dict.foldl (\id a b -> func (EntityId id) a b) acc dict

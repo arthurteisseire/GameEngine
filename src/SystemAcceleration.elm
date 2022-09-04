@@ -64,5 +64,5 @@ updateVelocityFromKey key velocity =
         KeyboardInput.ArrowDown ->
             { x = velocity.x, y = velocity.y - 1 }
 
-        KeyboardInput.Other ->
+        _ ->
             velocity
