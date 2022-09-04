@@ -11,8 +11,8 @@ read key entityId world =
     { world
         | keyboardInputComponents =
             updateComponent
-                (\_ -> { key = Just key })
                 entityId
+                { key = Just key }
                 world.keyboardInputComponents
     }
 
@@ -22,7 +22,7 @@ clear entityId world =
     { world
         | keyboardInputComponents =
             updateComponent
-                (\_ -> { key = Nothing })
                 entityId
+                { key = Nothing }
                 world.keyboardInputComponents
     }

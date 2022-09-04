@@ -195,11 +195,11 @@ foldlEntities2Full func result tableA tableB entityTable =
         entityTable
 
 
-updateComponent : (a -> a) -> EntityId -> Table a -> Table a
-updateComponent func entityId table =
+updateComponent : EntityId -> a -> Table a -> Table a
+updateComponent entityId component table =
     case getComponent entityId table of
-        Just component ->
-            insertComponent entityId (func component) table
+        Just _ ->
+            insertComponent entityId component table
 
         Nothing ->
             table

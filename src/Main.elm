@@ -19,6 +19,7 @@ import Svg.Attributes as SA
 import Svg.Events as SE
 import SystemAcceleration
 import SystemAccelerationAI
+import SystemAnimation
 import SystemAttack
 import SystemCollision
 import SystemDamage
@@ -77,6 +78,7 @@ applySystems key entitySet world =
         |> applySystem SystemCollision.updateEntity entitySet
         |> applySystem SystemKeyboardInput.clear entitySet
         |> applySystem SystemAcceleration.clearVelocity entitySet
+        |> applySystem SystemAnimation.updateEntity entitySet
         |> applySystem SystemDie.updateEntity entitySet
 
 
