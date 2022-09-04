@@ -18,10 +18,10 @@ updateWorld world =
     updateEntities
         { updateComponents = updatePlayerVelocity
         , updateWorld =
-            \entityId { keyboardInput, velocity } accWorld ->
+            \entityId components accWorld ->
                 { accWorld
-                    | keyboardInputComponents = setComponent entityId keyboardInput accWorld.keyboardInputComponents
-                    , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
+                    | keyboardInputComponents = setComponent entityId components.keyboardInput accWorld.keyboardInputComponents
+                    , velocityComponents = setComponent entityId components.velocity accWorld.velocityComponents
                 }
         , world = world
         , entityTable = world.entities
@@ -33,18 +33,15 @@ updateWorld world =
 
 
 updatePlayerVelocity : EntityId -> Components -> Components
-updatePlayerVelocity _ { keyboardInput, velocity } =
-    let
-        updatedVelocity =
-            case keyboardInput.key of
-                Just key ->
-                    updateVelocityFromKey key velocity
+updatePlayerVelocity _ components =
+    { keyboardInput = components.keyboardInput
+    , velocity =
+        case components.keyboardInput.key of
+            Just key ->
+                updateVelocityFromKey key components.velocity
 
-                Nothing ->
-                    velocity
-    in
-    { keyboardInput = keyboardInput
-    , velocity = updatedVelocity
+            Nothing ->
+                components.velocity
     }
 
 

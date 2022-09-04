@@ -68,7 +68,7 @@ updateEntities :
     -> result
 updateEntities { updateComponents, updateWorld, world, entityTable, componentTables } =
     foldlEntities
-        (\entityId w accResult -> updateWorld entityId (updateComponents entityId w) accResult)
+        (\entityId a accWorld -> updateWorld entityId (updateComponents entityId a) accWorld)
         world
         (componentTables entityTable)
         entityTable
@@ -127,10 +127,17 @@ foldlEntities : (EntityId -> a -> result -> result) -> result -> Table a -> Enti
 foldlEntities func result table entityTable =
     foldlEntitySet
         (\entityId accResult ->
-            Maybe.map
-                (\a -> func entityId a accResult)
-                (getComponent entityId table)
-                |> Maybe.withDefault accResult
+            case getComponent entityId table of
+                Just component ->
+                    func entityId component accResult
+
+                Nothing ->
+                    accResult
+
+            --Maybe.map
+                --(\a -> func entityId a accResult)
+                --(getComponent entityId table)
+                --|> Maybe.withDefault accResult
         )
         result
         entityTable
