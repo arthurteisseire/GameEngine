@@ -20,10 +20,10 @@ import Svg.Events as SE
 import SystemAcceleration
 import SystemAccelerationAI
 import SystemAttack
-import SystemClearKeyboardInputs
 import SystemCollision
 import SystemDamage
 import SystemDie
+import SystemKeyboardInput
 import World exposing (World)
 
 
@@ -58,20 +58,49 @@ type Msg
     | HideDebug
 
 
+applySystem : (EntityId -> World -> World) -> EntitySet -> World -> World
+applySystem updateEntity entitySet world =
+    foldlEntitySet
+        updateEntity
+        world
+        entitySet
+
+
+applySystems : Key -> EntitySet -> World -> World
+applySystems key entitySet world =
+    world
+        |> applySystem (SystemKeyboardInput.read key) entitySet
+        |> applySystem SystemAcceleration.updateEntity entitySet
+        |> applySystem SystemAccelerationAI.updateEntity entitySet
+        |> applySystem SystemAttack.updateEntity entitySet
+        |> applySystem SystemDamage.updateEntity entitySet
+        |> applySystem SystemCollision.updateEntity entitySet
+        |> applySystem SystemKeyboardInput.clear entitySet
+        |> applySystem SystemAcceleration.clearVelocity entitySet
+        |> applySystem SystemDie.updateEntity entitySet
+
+
+getPlayers : World -> EntitySet
+getPlayers world =
+    filterEntities
+        (\entityId -> getComponent entityId world.playerComponents /= Nothing)
+        world.entities
+
+
+getAis : World -> EntitySet
+getAis world =
+    filterEntities
+        (\entityId -> getComponent entityId world.aiComponents /= Nothing)
+        world.entities
+
+
 update : Msg -> World -> ( World, Cmd Msg )
 update msg world =
     case msg of
         KeyBoardInput key ->
             ( world
-                |> (\currentWorld -> { currentWorld | keyboardInputComponents = mapEntities (\_ _ -> { key = Just key }) currentWorld.keyboardInputComponents currentWorld.entities })
-                |> SystemAccelerationAI.updateWorld
-                |> SystemAcceleration.updateWorld
-                |> SystemAttack.updateWorld
-                |> SystemDamage.updateWorld
-                |> SystemCollision.updateWorld
-                |> SystemClearKeyboardInputs.updateWorld
-                |> (\currentWorld -> { currentWorld | velocityComponents = mapEntities (\_ _ -> ComponentVelocity.identity) currentWorld.velocityComponents currentWorld.entities })
-                |> SystemDie.updateWorld
+                |> applySystems key (getPlayers world)
+                |> applySystems key (getAis world)
             , Cmd.none
             )
 

@@ -36,39 +36,39 @@ init =
 
         keyboardInputComponents =
             emptyTable
-                |> setComponent playerId ComponentKeyboardInput.identity
+                |> insertComponent playerId ComponentKeyboardInput.identity
 
         positionComponents =
             emptyTable
-                |> setComponent playerId { x = 4, y = 0 }
-                |> setComponent enemyId { x = 5, y = 0 }
+                |> insertComponent playerId { x = 4, y = 0 }
+                |> insertComponent enemyId { x = 5, y = 0 }
 
         velocityComponents =
             emptyTable
-                |> setComponent playerId ComponentVelocity.identity
-                |> setComponent enemyId ComponentVelocity.identity
+                |> insertComponent playerId ComponentVelocity.identity
+                |> insertComponent enemyId ComponentVelocity.identity
 
         lifeComponents =
             emptyTable
-                |> setComponent playerId { healPoints = 1 }
-                |> setComponent enemyId { healPoints = 5 }
+                |> insertComponent playerId { healPoints = 1 }
+                |> insertComponent enemyId { healPoints = 5 }
 
         visualComponents =
             emptyTable
-                |> setComponent playerId ComponentVisual.defaultRect
-                |> setComponent enemyId ComponentVisual.defaultCircle
+                |> insertComponent playerId ComponentVisual.defaultRect
+                |> insertComponent enemyId ComponentVisual.defaultCircle
 
         attackComponents =
             emptyTable
-                |> setComponent playerId ComponentAttack.identity
+                |> insertComponent playerId ComponentAttack.identity
 
         aiComponents =
             emptyTable
-                |> setComponent enemyId ComponentAI.identity
+                |> insertComponent enemyId ComponentAI.identity
 
         playerComponents =
             emptyTable
-                |> setComponent playerId ComponentPlayer
+                |> insertComponent playerId ComponentPlayer
     in
     { entities = entities2
     , keyboardInputComponents = keyboardInputComponents

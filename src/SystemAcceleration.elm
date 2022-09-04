@@ -1,4 +1,4 @@
-module SystemAcceleration exposing (updateWorld)
+module SystemAcceleration exposing (..)
 
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
@@ -13,23 +13,27 @@ type alias Components =
     }
 
 
-updateWorld : World -> World
-updateWorld world =
-    updateEntities
-        { updateComponents = updatePlayerVelocity
-        , updateWorld =
-            \entityId components accWorld ->
-                { accWorld
-                    | keyboardInputComponents = setComponent entityId components.keyboardInput accWorld.keyboardInputComponents
-                    , velocityComponents = setComponent entityId components.velocity accWorld.velocityComponents
+clearVelocity : EntityId -> World -> World
+clearVelocity entityId world =
+    { world | velocityComponents = insertComponent entityId ComponentVelocity.identity world.velocityComponents }
+
+
+updateEntity : EntityId -> World -> World
+updateEntity entityId world =
+    Maybe.withDefault world <|
+        Maybe.map2
+            (\keyboardInput velocity ->
+                let
+                    components =
+                        updatePlayerVelocity entityId (Components keyboardInput velocity)
+                in
+                { world
+                    | keyboardInputComponents = insertComponent entityId components.keyboardInput world.keyboardInputComponents
+                    , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
                 }
-        , world = world
-        , entityTable = world.entities
-        , componentTables =
-            Components
-                |> from world.keyboardInputComponents
-                |> join world.velocityComponents
-        }
+            )
+            (getComponent entityId world.keyboardInputComponents)
+            (getComponent entityId world.velocityComponents)
 
 
 updatePlayerVelocity : EntityId -> Components -> Components

@@ -15,14 +15,14 @@ suite =
                         emptyEntitySet |> addEntity
 
                     numberTable =
-                        emptyTable |> setComponent entityId 5
+                        emptyTable |> insertComponent entityId 5
 
                     updatedNumberTable =
                         mapEntities (\_ n -> n + 1) entityTable numberTable
                 in
                 Expect.equal
                     updatedNumberTable
-                    (emptyTable |> setComponent entityId 6)
+                    (emptyTable |> insertComponent entityId 6)
             )
         , test "Update each entity 2"
             (\_ ->
@@ -31,18 +31,18 @@ suite =
                         emptyEntitySet |> addEntity
 
                     intTable =
-                        emptyTable |> setComponent entityId 5
+                        emptyTable |> insertComponent entityId 5
 
                     floatTable =
-                        emptyTable |> setComponent entityId 5.5
+                        emptyTable |> insertComponent entityId 5.5
 
                     func _ int float =
                         Tuple2 (int + 1) (float + 2.2)
                 in
                 Expect.equal
                     (updateEachEntity2 func entityTable intTable floatTable)
-                    { tableA = emptyTable |> setComponent entityId 6
-                    , tableB = emptyTable |> setComponent entityId 7.7
+                    { tableA = emptyTable |> insertComponent entityId 6
+                    , tableB = emptyTable |> insertComponent entityId 7.7
                     }
             )
         , test "Update each entity 3"
@@ -53,15 +53,15 @@ suite =
 
                     intTable : Table Int
                     intTable =
-                        emptyTable |> setComponent entityId 5
+                        emptyTable |> insertComponent entityId 5
 
                     floatTable : Table Float
                     floatTable =
-                        emptyTable |> setComponent entityId 5.5
+                        emptyTable |> insertComponent entityId 5.5
 
                     stringTable : Table String
                     stringTable =
-                        emptyTable |> setComponent entityId "yo"
+                        emptyTable |> insertComponent entityId "yo"
 
                     func : EntityId -> Int -> Float -> String -> Tuple3 Int Float String
                     func _ int float string =
@@ -69,6 +69,6 @@ suite =
                 in
                 Expect.equal
                     (mapEntities3 func entityTable intTable floatTable stringTable)
-                    (emptyTable |> setComponent entityId (Tuple3 6 7.7 "yoyo"))
+                    (emptyTable |> insertComponent entityId (Tuple3 6 7.7 "yoyo"))
             )
         ]

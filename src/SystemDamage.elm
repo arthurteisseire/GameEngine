@@ -25,8 +25,8 @@ updateWorld world =
         , updateWorld =
             \entityId { position, life } accWorld ->
                 { accWorld
-                    | positionComponents = setComponent entityId position accWorld.positionComponents
-                    , lifeComponents = setComponent entityId life accWorld.lifeComponents
+                    | positionComponents = insertComponent entityId position accWorld.positionComponents
+                    , lifeComponents = insertComponent entityId life accWorld.lifeComponents
                 }
         , world = world
         , entityTable = world.entities
@@ -38,6 +38,30 @@ updateWorld world =
                 |> from world.positionComponents
                 |> join world.lifeComponents
         }
+
+
+updateEntity : EntityId -> World -> World
+updateEntity entityId world =
+    Maybe.withDefault world <|
+        Maybe.map2
+            (\position life ->
+                let
+                    inputComponents =
+                        (InputComponents
+                            |> from world.attackComponents
+                        )
+                            world.entities
+
+                    components =
+                        takeDamage entityId inputComponents (OutputComponents position life)
+                in
+                { world
+                    | positionComponents = insertComponent entityId components.position world.positionComponents
+                    , lifeComponents = insertComponent entityId components.life world.lifeComponents
+                }
+            )
+            (getComponent entityId world.positionComponents)
+            (getComponent entityId world.lifeComponents)
 
 
 takeDamage : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents

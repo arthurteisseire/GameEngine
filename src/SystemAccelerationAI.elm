@@ -1,4 +1,4 @@
-module SystemAccelerationAI exposing (..)
+module SystemAccelerationAI exposing (updateEntity)
 
 import ComponentAI exposing (ComponentAI)
 import ComponentPlayer exposing (ComponentPlayer)
@@ -21,29 +21,31 @@ type alias OutputComponents =
     }
 
 
-updateWorld : World -> World
-updateWorld world =
-    updateEntitiesWithOthers
-        { updateComponents = updateAIVelocity
-        , updateWorld =
-            \entityId { ai, velocity, position } accWorld ->
-                { accWorld
-                    | aiComponents = setComponent entityId ai accWorld.aiComponents
-                    , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
-                    , positionComponents = setComponent entityId position accWorld.positionComponents
+updateEntity : EntityId -> World -> World
+updateEntity entityId world =
+    Maybe.withDefault world <|
+        Maybe.map3
+            (\ai velocity position ->
+                let
+                    inputComponents =
+                        (InputComponents
+                            |> from world.playerComponents
+                            |> join world.positionComponents
+                        )
+                            world.entities
+
+                    components =
+                        updateAIVelocity entityId inputComponents (OutputComponents ai velocity position)
+                in
+                { world
+                    | aiComponents = insertComponent entityId components.ai world.aiComponents
+                    , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
+                    , positionComponents = insertComponent entityId components.position world.positionComponents
                 }
-        , world = world
-        , entityTable = world.entities
-        , readTable =
-            InputComponents
-                |> from world.playerComponents
-                |> join world.positionComponents
-        , writeTable =
-            OutputComponents
-                |> from world.aiComponents
-                |> join world.velocityComponents
-                |> join world.positionComponents
-        }
+            )
+            (getComponent entityId world.aiComponents)
+            (getComponent entityId world.velocityComponents)
+            (getComponent entityId world.positionComponents)
 
 
 updateAIVelocity : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents

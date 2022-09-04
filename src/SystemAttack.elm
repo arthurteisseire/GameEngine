@@ -1,4 +1,4 @@
-module SystemAttack exposing (updateWorld)
+module SystemAttack exposing (..)
 
 import ComponentAttack exposing (ComponentAttack)
 import ComponentPosition exposing (ComponentPosition)
@@ -14,25 +14,24 @@ type alias Components =
     }
 
 
-updateWorld : World -> World
-updateWorld world =
-    updateEntities
-        { updateComponents = velocityAttack
-        , updateWorld =
-            \entityId { position, velocity, attack } accWorld ->
-                { accWorld
-                    | positionComponents = setComponent entityId position accWorld.positionComponents
-                    , velocityComponents = setComponent entityId velocity accWorld.velocityComponents
-                    , attackComponents = setComponent entityId attack accWorld.attackComponents
+updateEntity : EntityId -> World -> World
+updateEntity entityId world =
+    Maybe.withDefault world <|
+        Maybe.map3
+            (\position velocity attack ->
+                let
+                    components =
+                        velocityAttack entityId (Components position velocity attack)
+                in
+                { world
+                    | positionComponents = insertComponent entityId components.position world.positionComponents
+                    , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
+                    , attackComponents = insertComponent entityId components.attack world.attackComponents
                 }
-        , world = world
-        , entityTable = world.entities
-        , componentTables =
-            Components
-                |> from world.positionComponents
-                |> join world.velocityComponents
-                |> join world.attackComponents
-        }
+            )
+            (getComponent entityId world.positionComponents)
+            (getComponent entityId world.velocityComponents)
+            (getComponent entityId world.attackComponents)
 
 
 velocityAttack : EntityId -> Components -> Components

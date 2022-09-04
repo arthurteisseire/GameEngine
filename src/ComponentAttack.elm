@@ -24,4 +24,4 @@ toString maybeAttack =
                 ++ ")"
 
         Nothing ->
-            ""
+            "Attack()"

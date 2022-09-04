@@ -28,6 +28,20 @@ foldlEntitySet func result (EntitySet _ list) =
         list
 
 
+remove : EntityId -> EntitySet -> EntitySet
+remove entityId (EntitySet lastId list) =
+    EntitySet lastId (List.filter ((/=) entityId) list)
+
+
+removeIf : Bool -> EntityId -> EntitySet -> EntitySet
+removeIf isBad entityId entitySet =
+    if isBad then
+        remove entityId entitySet
+
+    else
+        entitySet
+
+
 filterEntities : (EntityId -> Bool) -> EntitySet -> EntitySet
 filterEntities isGood (EntitySet lastId list) =
     EntitySet lastId (List.filter isGood list)
@@ -133,11 +147,6 @@ foldlEntities func result table entityTable =
 
                 Nothing ->
                     accResult
-
-            --Maybe.map
-                --(\a -> func entityId a accResult)
-                --(getComponent entityId table)
-                --|> Maybe.withDefault accResult
         )
         result
         entityTable
@@ -186,8 +195,18 @@ foldlEntities2Full func result tableA tableB entityTable =
         entityTable
 
 
-setComponent : EntityId -> a -> Table a -> Table a
-setComponent =
+updateComponent : (a -> a) -> EntityId -> Table a -> Table a
+updateComponent func entityId table =
+    case getComponent entityId table of
+        Just component ->
+            insertComponent entityId (func component) table
+
+        Nothing ->
+            table
+
+
+insertComponent : EntityId -> a -> Table a -> Table a
+insertComponent =
     insertInTable
 
 

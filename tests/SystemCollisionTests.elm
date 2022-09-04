@@ -24,14 +24,14 @@ suite =
                         emptyEntitySet |> addEntity
 
                     actualPositionTable =
-                        emptyTable |> setComponent entityId { x = 0, y = 0 }
+                        emptyTable |> insertComponent entityId { x = 0, y = 0 }
 
                     actualVelocityTable =
-                        emptyTable |> setComponent entityId { x = 1, y = 0 }
+                        emptyTable |> insertComponent entityId { x = 1, y = 0 }
 
                     expectedTables =
-                        { tableA = emptyTable |> setComponent entityId { x = 1, y = 0 }
-                        , tableB = emptyTable |> setComponent entityId { x = 0, y = 0 }
+                        { tableA = emptyTable |> insertComponent entityId { x = 1, y = 0 }
+                        , tableB = emptyTable |> insertComponent entityId { x = 0, y = 0 }
                         }
                 in
                 Expect.equal
