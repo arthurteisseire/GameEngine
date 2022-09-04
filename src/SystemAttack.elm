@@ -4,6 +4,7 @@ import ComponentAttack exposing (ComponentAttack)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
+import Vector2
 import World exposing (World)
 
 
@@ -40,7 +41,7 @@ velocityAttack _ { position, velocity, attack } =
     , velocity = velocity
     , attack =
         if velocity /= ComponentVelocity.identity then
-            Just { x = position.x + velocity.x, y = position.y + velocity.y }
+            Just (Vector2.add position velocity)
 
         else
             Nothing

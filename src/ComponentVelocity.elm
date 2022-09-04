@@ -1,10 +1,10 @@
 module ComponentVelocity exposing (..)
 
+import Vector2 exposing (Vector2)
+
 
 type alias ComponentVelocity =
-    { x : Int
-    , y : Int
-    }
+    Vector2
 
 
 identity : ComponentVelocity
@@ -17,7 +17,7 @@ identity =
 toString : ComponentVelocity -> String
 toString velocity =
     "Velocity(x = "
-        ++ String.fromInt velocity.x
+        ++ String.fromFloat velocity.x
         ++ ", y = "
-        ++ String.fromInt velocity.y
+        ++ String.fromFloat velocity.y
         ++ ")"

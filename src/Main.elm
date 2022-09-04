@@ -170,7 +170,7 @@ toSvg entityId visual position =
                 Clicked
         )
         (visual.shape
-            (visual.attributes ++ visual.posToAttributes position.x position.y)
+            (visual.attributes ++ visual.posToAttributes position)
             []
         )
 

@@ -1,11 +1,10 @@
 module ComponentAttack exposing (..)
 
+import Vector2 exposing (Vector2)
+
 
 type alias ComponentAttack =
-    Maybe
-        { x : Int
-        , y : Int
-        }
+    Maybe Vector2
 
 
 identity : ComponentAttack
@@ -18,9 +17,9 @@ toString maybeAttack =
     case maybeAttack of
         Just attack ->
             "Attack(x = "
-                ++ String.fromInt attack.x
+                ++ String.fromFloat attack.x
                 ++ ", y = "
-                ++ String.fromInt attack.y
+                ++ String.fromFloat attack.y
                 ++ ")"
 
         Nothing ->

@@ -59,10 +59,10 @@ updateAIVelocity _ inputTable { ai, velocity, position } =
 
         nextVelocity =
             if abs diff.x > abs diff.y then
-                { x = diff.x // abs diff.x, y = 0 }
+                { x = diff.x / abs diff.x, y = 0 }
 
             else
-                { x = 0, y = diff.y // abs diff.y }
+                { x = 0, y = diff.y / abs diff.y }
     in
     if ai.remainingTurnsBeforeMove > 0 then
         { ai = { ai | remainingTurnsBeforeMove = ai.remainingTurnsBeforeMove - 1 }

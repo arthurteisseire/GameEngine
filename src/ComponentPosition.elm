@@ -1,10 +1,10 @@
 module ComponentPosition exposing (..)
 
+import Vector2 exposing (Vector2)
+
 
 type alias ComponentPosition =
-    { x : Int
-    , y : Int
-    }
+    Vector2
 
 
 identity : ComponentPosition
@@ -17,7 +17,7 @@ identity =
 toString : ComponentPosition -> String
 toString position =
     "Position(x = "
-        ++ String.fromInt position.x
+        ++ String.fromFloat position.x
         ++ ", y = "
-        ++ String.fromInt position.y
+        ++ String.fromFloat position.y
         ++ ")"

@@ -31,5 +31,17 @@ updateEntity entityId world =
 
 
 animate : EntityId -> Components -> Components
-animate entityId components =
-    components
+animate entityId { position, animation } =
+    case animation of
+        Just anim ->
+            { position =
+                { x = position.x + anim.offsetX
+                , y = position.y + anim.offsetY
+                }
+            , animation = animation
+            }
+
+        Nothing ->
+            { position = position
+            , animation = animation
+            }

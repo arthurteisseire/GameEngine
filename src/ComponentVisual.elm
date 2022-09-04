@@ -3,6 +3,7 @@ module ComponentVisual exposing (..)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
+import Vector2 exposing (Vector2)
 
 
 type Msg
@@ -12,7 +13,7 @@ type Msg
 type alias ComponentVisual =
     { shape : List (Svg.Attribute Msg) -> List (Svg Msg) -> Svg Msg
     , attributes : List (Svg.Attribute Msg)
-    , posToAttributes : Int -> Int -> List (Svg.Attribute Msg)
+    , posToAttributes : Vector2 -> List (Svg.Attribute Msg)
     }
 
 
@@ -31,9 +32,9 @@ defaultRect =
         , SE.onClick Clicked
         ]
     , posToAttributes =
-        \x y ->
-            [ SA.x <| String.fromInt x
-            , SA.y <| String.fromInt y
+        \v ->
+            [ SA.x <| String.fromFloat v.x
+            , SA.y <| String.fromFloat v.y
             ]
     }
 
@@ -47,8 +48,8 @@ defaultCircle =
         , SE.onClick Clicked
         ]
     , posToAttributes =
-        \x y ->
-            [ SA.cx <| String.fromFloat (toFloat x + 0.5)
-            , SA.cy <| String.fromFloat (toFloat y + 0.5)
+        \v ->
+            [ SA.cx <| String.fromFloat (v.x + 0.5)
+            , SA.cy <| String.fromFloat (v.y + 0.5)
             ]
     }
