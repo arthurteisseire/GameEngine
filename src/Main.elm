@@ -22,6 +22,7 @@ import SystemAcceleration
 import SystemAccelerationAI
 import SystemAnimation
 import SystemAttack
+import SystemAttackResolver
 import SystemCollision
 import SystemDamage
 import SystemDie
@@ -77,6 +78,7 @@ applySystems dt entitySet world =
         |> applySystem SystemAcceleration.updateEntity entitySet
         |> applySystem SystemAccelerationAI.updateEntity entitySet
         |> applySystem SystemAttack.updateEntity entitySet
+        |> applySystem SystemAttackResolver.updateEntity entitySet
         |> applySystem SystemDamage.updateEntity entitySet
         |> applySystem SystemCollision.updateEntity entitySet
         |> applySystem (SystemAnimation.updateEntity dt) entitySet

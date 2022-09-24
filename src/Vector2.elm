@@ -7,6 +7,11 @@ type alias Vector2 =
     }
 
 
+eq : Vector2 -> Vector2 -> Bool
+eq left right =
+    left.x == right.x && left.y == right.y
+
+
 add : Vector2 -> Vector2 -> Vector2
 add =
     apply (+)

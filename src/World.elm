@@ -3,6 +3,7 @@ module World exposing (..)
 import ComponentAI exposing (ComponentAI)
 import ComponentAnimation exposing (ComponentAnimation)
 import ComponentAttack exposing (ComponentAttack)
+import ComponentDamage exposing (ComponentDamage)
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentLife exposing (ComponentLife)
 import ComponentPlayer exposing (ComponentPlayer)
@@ -20,6 +21,7 @@ type alias World =
     , lifeComponents : Table ComponentLife
     , visualComponents : Table ComponentVisual
     , attackComponents : Table ComponentAttack
+    , damageComponents : Table ComponentDamage
     , animationComponents : Table ComponentAnimation
     , aiComponents : Table ComponentAI
     , playerComponents : Table ComponentPlayer
@@ -66,6 +68,11 @@ init =
                 |> insertComponent playerId ComponentAttack.identity
                 |> insertComponent enemyId ComponentAttack.identity
 
+        damageComponents =
+            emptyTable
+                |> insertComponent playerId ComponentDamage.identity
+                |> insertComponent enemyId ComponentDamage.identity
+
         animationComponents =
             emptyTable
                 |> insertComponent playerId ComponentAnimation.identity
@@ -86,6 +93,7 @@ init =
     , lifeComponents = lifeComponents
     , visualComponents = visualComponents
     , attackComponents = attackComponents
+    , damageComponents = damageComponents
     , animationComponents = animationComponents
     , aiComponents = aiComponents
     , playerComponents = playerComponents
