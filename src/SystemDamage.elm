@@ -2,15 +2,20 @@ module SystemDamage exposing (..)
 
 import ComponentAttack exposing (ComponentAttack)
 import ComponentDamage exposing (ComponentDamage)
-import ComponentLife exposing (ComponentLife)
 import ComponentPosition exposing (ComponentPosition)
 import EntityTable exposing (..)
+import Vector2
 import World exposing (World)
 
 
-type alias Components =
-    { damage : ComponentDamage
-    , life : ComponentLife
+type alias InputComponents =
+    { attack : ComponentAttack
+    }
+
+
+type alias OutputComponents =
+    { position : ComponentPosition
+    , damage : ComponentDamage
     }
 
 
@@ -18,26 +23,47 @@ updateEntity : EntityId -> World -> World
 updateEntity entityId world =
     Maybe.withDefault world <|
         Maybe.map2
-            (\damage life ->
+            (\position life ->
                 let
+                    inputComponents =
+                        (InputComponents
+                            |> from world.attackComponents
+                        )
+                            world.entities
+                            |> removeInTable entityId
+
                     components =
-                        takeDamage entityId (Components damage life)
+                        takeDamage entityId inputComponents (OutputComponents position life)
                 in
                 { world
-                    | damageComponents = insertComponent entityId components.damage world.damageComponents
-                    , lifeComponents = insertComponent entityId components.life world.lifeComponents
+                    | positionComponents = insertComponent entityId components.position world.positionComponents
+                    , damageComponents = insertComponent entityId components.damage world.damageComponents
                 }
             )
+            (getComponent entityId world.positionComponents)
             (getComponent entityId world.damageComponents)
-            (getComponent entityId world.lifeComponents)
 
 
-takeDamage : EntityId -> Components -> Components
-takeDamage _ { damage, life } =
+takeDamage : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
+takeDamage _ attackTable { position, damage } =
     let
-        damages =
-            List.foldl (\dam sum -> sum + dam.damage) 0 damage
+        updatedDamage =
+            foldlTable
+                (\entityId input damages ->
+                    case input.attack of
+                        Just attack ->
+                            if Vector2.eq attack position then
+                                { fromEntity = entityId, damage = 1 } :: damages
+
+                            else
+                                damages
+
+                        Nothing ->
+                            damages
+                )
+                []
+                attackTable
     in
-    { damage = damage
-    , life = { life | healPoints = life.healPoints - damages }
+    { position = position
+    , damage = updatedDamage
     }
