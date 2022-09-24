@@ -17,8 +17,11 @@ identity =
 
 attackAnimation : Vector2 -> ComponentAnimation
 attackAnimation offset =
-    Just
-        { duration = 0.2
-        , timeLeft = 0.2
-        , offset = offset
-        }
+    let
+        duration = 0.05
+    in
+        Just
+            { duration = duration
+            , timeLeft = duration
+            , offset = offset
+            }
