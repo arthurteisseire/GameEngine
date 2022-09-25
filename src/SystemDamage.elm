@@ -52,8 +52,16 @@ takeDamage _ attackTable { position, damage } =
                 (\entityId input damages ->
                     case input.attack of
                         Just attack ->
-                            if Vector2.eq attack position then
-                                { fromEntity = entityId, damage = 1 } :: damages
+                            let
+                                fromDirection =
+                                    Vector2.sub attack.to position
+                            in
+                            if Vector2.isNull fromDirection then
+                                { fromEntity = entityId
+                                , fromDirection = Vector2.sub attack.to attack.from
+                                , points = 1
+                                }
+                                    :: damages
 
                             else
                                 damages

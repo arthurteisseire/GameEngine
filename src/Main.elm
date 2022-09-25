@@ -3,7 +3,9 @@ module Main exposing (main)
 import Browser
 import Browser.Events
 import ComponentAI
+import ComponentAnimation
 import ComponentAttack
+import ComponentDamage
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentLife exposing (ComponentLife)
 import ComponentPlayer
@@ -22,11 +24,12 @@ import SystemAcceleration
 import SystemAccelerationAI
 import SystemAnimation
 import SystemAttack
-import SystemDamage
 import SystemCollision
-import SystemLife
+import SystemDamage
 import SystemDie
 import SystemKeyboardInput
+import SystemLife
+import SystemTriggerAttackAnimation
 import World exposing (World)
 
 
@@ -79,6 +82,7 @@ applySystems dt entitySet world =
         |> applySystem SystemAccelerationAI.updateEntity entitySet
         |> applySystem SystemAttack.updateEntity entitySet
         |> applySystem SystemDamage.updateEntity entitySet
+        |> applySystem SystemTriggerAttackAnimation.updateEntity entitySet
         |> applySystem SystemLife.updateEntity entitySet
         |> applySystem SystemCollision.updateEntity entitySet
         |> applySystem (SystemAnimation.updateEntity dt) entitySet
@@ -238,6 +242,8 @@ displayDebug world entityId =
             , componentToHtml world.velocityComponents ComponentVelocity.toString
             , componentToHtml world.lifeComponents ComponentLife.toString
             , componentToHtml world.attackComponents ComponentAttack.toString
+            , componentToHtml world.damageComponents ComponentDamage.toString
+            , componentToHtml world.animationComponents ComponentAnimation.toString
             , componentToHtml world.aiComponents ComponentAI.toString
             , componentToHtml world.playerComponents ComponentPlayer.toString
             ]

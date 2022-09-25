@@ -7,9 +7,19 @@ type alias Vector2 =
     }
 
 
+identity : Vector2
+identity =
+    { x = 0, y = 0 }
+
+
 eq : Vector2 -> Vector2 -> Bool
 eq left right =
     left.x == right.x && left.y == right.y
+
+
+isNull : Vector2 -> Bool
+isNull vector =
+    eq vector identity
 
 
 add : Vector2 -> Vector2 -> Vector2
@@ -41,4 +51,4 @@ apply func left right =
 
 toString : Vector2 -> String
 toString vector =
-    "x=" ++ String.fromFloat vector.x ++ ", y=" ++ String.fromFloat vector.y
+    "V2(x=" ++ String.fromFloat vector.x ++ ", y=" ++ String.fromFloat vector.y ++ ")"

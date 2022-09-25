@@ -34,7 +34,7 @@ takeDamage : EntityId -> Components -> Components
 takeDamage _ { damage, life } =
     let
         damages =
-            List.foldl (\dam sum -> sum + dam.damage) 0 damage
+            List.foldl (\dam sum -> sum + dam.points) 0 damage
     in
     { damage = damage
     , life = { life | healPoints = life.healPoints - damages }

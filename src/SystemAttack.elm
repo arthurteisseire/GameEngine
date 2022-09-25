@@ -46,11 +46,14 @@ velocityAttack _ components =
         , velocity = components.velocity
         , attack =
             if components.velocity /= ComponentVelocity.identity then
-                Just (Vector2.add components.position components.velocity)
+                Just
+                    { from = components.position
+                    , to = Vector2.add components.position components.velocity
+                    }
 
             else
                 Nothing
-        , animation = ComponentAnimation.attackAnimation (Vector2.div components.velocity { x = 5, y = 5 })
+        , animation = components.animation -- ComponentAnimation.attackAnimation (Vector2.div components.velocity { x = 5, y = 5 })
         }
 
     else

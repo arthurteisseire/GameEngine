@@ -1,15 +1,35 @@
 module ComponentDamage exposing (..)
 
-import EntityTable exposing (EntityId)
+import EntityTable exposing (EntityId, entityIdToString)
+import Vector2 exposing (Vector2)
 
 
 type alias ComponentDamage =
     List
         { fromEntity : EntityId
-        , damage : Int
+        , fromDirection : Vector2
+        , points : Int
         }
 
 
 identity : ComponentDamage
 identity =
     []
+
+
+toString : ComponentDamage -> String
+toString damage =
+    "ComponentDamage("
+        ++ List.foldl
+            (\dam finalString ->
+                finalString
+                    ++ "fromEntity="
+                    ++ entityIdToString dam.fromEntity
+                    ++ ", fromDirection="
+                    ++ Vector2.toString dam.fromDirection
+                    ++ ", points="
+                    ++ String.fromInt dam.points
+            )
+            ""
+            damage
+        ++ ")"
