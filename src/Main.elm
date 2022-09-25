@@ -163,7 +163,8 @@ view world =
             , HA.style "width" "100%"
             , HA.style "height" "600px"
             ]
-            [ Html.div
+            [ if world.isPause then Html.text "Pause" else Html.text ""
+            , Html.div
                 [ HA.id "Game"
                 , HA.style "float" "left"
                 ]
