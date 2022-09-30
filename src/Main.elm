@@ -10,6 +10,7 @@ import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentLife exposing (ComponentLife)
 import ComponentPlayer
 import ComponentPosition exposing (ComponentPosition)
+import ComponentTurn
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
 import EntityTable exposing (..)
@@ -19,17 +20,17 @@ import KeyboardInput exposing (Key, keyDecoder)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
-import SystemAITurn
 import SystemAcceleration
 import SystemAccelerationAI
 import SystemAnimation
 import SystemAttack
 import SystemCollision
-import SystemDamage
 import SystemDie
 import SystemKeyboardInput
 import SystemLife
+import SystemTakeDamage
 import SystemTriggerAttackAnimation
+import SystemTurn
 import World exposing (World)
 
 
@@ -67,58 +68,31 @@ type Msg
     | HideDebug
 
 
-applySystem : (EntityId -> World -> World) -> EntitySet -> World -> World
-applySystem updateEntity entitySet world =
-    foldlEntitySet
-        updateEntity
-        world
-        entitySet
-
-
-applySystems : Float -> EntitySet -> World -> World
-applySystems dt entitySet world =
-    world
-        |> applySystem SystemAcceleration.updateEntity entitySet
-        |> applySystem SystemAccelerationAI.updateEntity entitySet
-        |> applySystem SystemAttack.updateEntity entitySet
-        |> applySystem SystemDamage.updateEntity entitySet
-        |> applySystem SystemTriggerAttackAnimation.updateEntity entitySet
-        |> applySystem SystemLife.updateEntity entitySet
-        |> applySystem SystemCollision.updateEntity entitySet
-        |> applySystem (SystemAnimation.updateEntity dt) entitySet
-        |> applySystem SystemKeyboardInput.clear entitySet
-        |> applySystem SystemAcceleration.clearVelocity entitySet
-        |> applySystem SystemDie.updateEntity entitySet
-
-
-getPlayers : World -> EntitySet
-getPlayers world =
-    filterEntities
-        (\entityId -> getComponent entityId world.playerComponents /= Nothing)
-        world.entities
-
-
-getAis : World -> EntitySet
-getAis world =
-    filterEntities
-        (\entityId -> getComponent entityId world.aiComponents /= Nothing)
-        world.entities
-
-
 update : Msg -> World -> ( World, Cmd Msg )
 update msg world =
     case msg of
         KeyBoardInput key ->
-            ( world
+            ( let
+                players =
+                    getPlayers world
+
+                ais =
+                    getAis world
+              in
+              world
                 |> applySystem (SystemKeyboardInput.read key) world.entities
-                |> applySystem SystemAITurn.updateEntity world.entities
+                |> applySystem SystemTurn.updateEntity world.entities
+                |> applySystem SystemAcceleration.updateEntity players
+                |> playTurn players ais
+                |> applySystem SystemAccelerationAI.updateEntity ais
+                |> playTurn ais players
             , Cmd.none
             )
 
         Tick dt ->
             ( world
-                |> applySystems dt (getPlayers world)
-                |> applySystems dt (getAis world)
+                |> applyTickSystems dt (getPlayers world)
+                |> applyTickSystems dt (getAis world)
             , Cmd.none
             )
 
@@ -128,8 +102,8 @@ update msg world =
         NextFrame ->
             if world.isPause then
                 ( world
-                    |> applySystems (1 / 60) (getPlayers world)
-                    |> applySystems (1 / 60) (getAis world)
+                  --|> applySystems (getPlayers world)
+                  --|> applySystems (getAis world)
                 , Cmd.none
                 )
 
@@ -150,6 +124,47 @@ update msg world =
             ( world, Cmd.none )
 
 
+playTurn : EntitySet -> EntitySet -> World -> World
+playTurn playingEntities otherEntities world =
+    world
+        |> applySystem SystemAttack.updateEntity playingEntities
+        |> applySystem SystemTakeDamage.updateEntity otherEntities
+        |> applySystem SystemTriggerAttackAnimation.updateEntity playingEntities
+        |> applySystem SystemLife.updateEntity otherEntities
+        |> applySystem SystemCollision.updateEntity playingEntities
+        |> applySystem SystemKeyboardInput.clear playingEntities
+        |> applySystem SystemAcceleration.clearVelocity playingEntities
+        |> applySystem SystemDie.updateEntity otherEntities
+
+
+applyTickSystems : Float -> EntitySet -> World -> World
+applyTickSystems dt entitySet world =
+    world
+        |> applySystem (SystemAnimation.updateEntity dt) entitySet
+
+
+applySystem : (EntityId -> World -> World) -> EntitySet -> World -> World
+applySystem updateEntity entitySet world =
+    foldlEntitySet
+        updateEntity
+        world
+        entitySet
+
+
+getPlayers : World -> EntitySet
+getPlayers world =
+    filterEntities
+        (\entityId -> getComponent entityId world.playerComponents /= Nothing)
+        world.entities
+
+
+getAis : World -> EntitySet
+getAis world =
+    filterEntities
+        (\entityId -> getComponent entityId world.aiComponents /= Nothing)
+        world.entities
+
+
 
 -- View
 
@@ -163,7 +178,11 @@ view world =
             , HA.style "width" "100%"
             , HA.style "height" "600px"
             ]
-            [ if world.isPause then Html.text "Pause" else Html.text ""
+            [ if world.isPause then
+                Html.text "Pause"
+
+              else
+                Html.text ""
             , Html.div
                 [ HA.id "Game"
                 , HA.style "float" "left"
@@ -245,6 +264,7 @@ displayDebug world entityId =
             , componentToHtml world.attackComponents ComponentAttack.toString
             , componentToHtml world.damageComponents ComponentDamage.toString
             , componentToHtml world.animationComponents ComponentAnimation.toString
+            , componentToHtml world.turnComponents ComponentTurn.toString
             , componentToHtml world.aiComponents ComponentAI.toString
             , componentToHtml world.playerComponents ComponentPlayer.toString
             ]

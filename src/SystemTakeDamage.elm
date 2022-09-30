@@ -1,4 +1,4 @@
-module SystemDamage exposing (..)
+module SystemTakeDamage exposing (..)
 
 import ComponentAttack exposing (ComponentAttack)
 import ComponentDamage exposing (ComponentDamage)

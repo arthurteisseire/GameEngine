@@ -8,6 +8,7 @@ import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentLife exposing (ComponentLife)
 import ComponentPlayer exposing (ComponentPlayer)
 import ComponentPosition exposing (ComponentPosition)
+import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
 import EntityTable exposing (..)
@@ -23,6 +24,7 @@ type alias World =
     , attackComponents : Table ComponentAttack
     , damageComponents : Table ComponentDamage
     , animationComponents : Table ComponentAnimation
+    , turnComponents : Table ComponentTurn
     , aiComponents : Table ComponentAI
     , playerComponents : Table ComponentPlayer
     , entityIdDebug : Maybe EntityId
@@ -78,6 +80,11 @@ init =
                 |> insertComponent playerId ComponentAnimation.identity
                 |> insertComponent enemyId ComponentAnimation.identity
 
+        turnComponents =
+            emptyTable
+                |> insertComponent playerId { turnsToPlay = 0, remainingTurns = 0 }
+                |> insertComponent enemyId { turnsToPlay = 3, remainingTurns = 3 }
+
         aiComponents =
             emptyTable
                 |> insertComponent enemyId ComponentAI.identity
@@ -95,6 +102,7 @@ init =
     , attackComponents = attackComponents
     , damageComponents = damageComponents
     , animationComponents = animationComponents
+    , turnComponents = turnComponents
     , aiComponents = aiComponents
     , playerComponents = playerComponents
     , entityIdDebug = Just playerId

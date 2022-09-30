@@ -53,7 +53,7 @@ velocityAttack _ components =
 
             else
                 Nothing
-        , animation = components.animation -- ComponentAnimation.attackAnimation (Vector2.div components.velocity { x = 5, y = 5 })
+        , animation = components.animation
         }
 
     else

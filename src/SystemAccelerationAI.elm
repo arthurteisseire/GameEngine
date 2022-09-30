@@ -1,6 +1,6 @@
 module SystemAccelerationAI exposing (updateEntity)
 
-import ComponentAI exposing (ComponentAI)
+import ComponentTurn exposing (ComponentTurn)
 import ComponentPlayer exposing (ComponentPlayer)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
@@ -15,7 +15,7 @@ type alias InputComponents =
 
 
 type alias OutputComponents =
-    { ai : ComponentAI
+    { turn : ComponentTurn
     , velocity : ComponentVelocity
     , position : ComponentPosition
     }
@@ -25,7 +25,7 @@ updateEntity : EntityId -> World -> World
 updateEntity entityId world =
     Maybe.withDefault world <|
         Maybe.map3
-            (\ai velocity position ->
+            (\turn velocity position ->
                 let
                     inputComponents =
                         (InputComponents
@@ -35,21 +35,21 @@ updateEntity entityId world =
                             world.entities
 
                     components =
-                        updateAIVelocity entityId inputComponents (OutputComponents ai velocity position)
+                        updateAIVelocity entityId inputComponents (OutputComponents turn velocity position)
                 in
                 { world
-                    | aiComponents = insertComponent entityId components.ai world.aiComponents
+                    | turnComponents = insertComponent entityId components.turn world.turnComponents
                     , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
                     , positionComponents = insertComponent entityId components.position world.positionComponents
                 }
             )
-            (getComponent entityId world.aiComponents)
+            (getComponent entityId world.turnComponents)
             (getComponent entityId world.velocityComponents)
             (getComponent entityId world.positionComponents)
 
 
 updateAIVelocity : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
-updateAIVelocity _ inputTable { ai, velocity, position } =
+updateAIVelocity _ inputTable { turn, velocity, position } =
     let
         playerPos =
             Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))
@@ -64,14 +64,14 @@ updateAIVelocity _ inputTable { ai, velocity, position } =
             else
                 { x = 0, y = diff.y / abs diff.y }
     in
-    if ai.remainingTurnsBeforeMove > 0 then
-        { ai = ai
-        , velocity = velocity
+    if turn.remainingTurns <= 0 then
+        { turn = turn
+        , velocity = nextVelocity
         , position = position
         }
 
     else
-        { ai = { ai | remainingTurnsBeforeMove = 4 }
-        , velocity = nextVelocity
+        { turn = turn
+        , velocity = velocity
         , position = position
         }
