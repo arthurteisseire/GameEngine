@@ -57,12 +57,7 @@ triggerAnimation entityId damageTable { animation } =
                                 )
                                 damages
                     in
-                    animations
-                 --if List.filter (\input -> input.fromEntity == entityId) input.damage then
-                 --    True :: list
-                 --
-                 --else
-                 --    list
+                    list ++ animations
                 )
                 []
                 damageTable
