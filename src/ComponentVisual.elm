@@ -41,12 +41,12 @@ defaultRect =
     }
 
 
-defaultCircle : ComponentVisual
-defaultCircle =
+circle : String -> ComponentVisual
+circle color =
     { shape = Svg.circle
     , attributes =
         [ SA.r "0.5"
-        , SA.fill "red"
+        , SA.fill color
         , SE.onClick Clicked
         ]
     , posToAttributes =

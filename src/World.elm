@@ -74,7 +74,9 @@ init =
         visualComponents =
             emptyTable
                 |> insertComponent playerId ComponentVisual.defaultRect
-                |> insertComponentForEntities enemies ComponentVisual.defaultCircle
+                |> insertComponent enemy1Id (ComponentVisual.circle "purple")
+                |> insertComponent enemy2Id (ComponentVisual.circle "orange")
+                |> insertComponent enemy3Id (ComponentVisual.circle "red")
 
         attackComponents =
             emptyTable
