@@ -24,6 +24,7 @@ import SystemAcceleration
 import SystemAccelerationAI
 import SystemAnimation
 import SystemAttack
+import SystemCollision
 import SystemMove
 import SystemDie
 import SystemKeyboardInput
@@ -132,6 +133,7 @@ playTurn playingEntities otherEntities world =
         |> applySystem SystemTriggerAttackAnimation.updateEntity playingEntities
         |> applySystem SystemLife.updateEntity otherEntities
         |> applySystem SystemMove.updateEntity playingEntities
+        |> applySystem SystemCollision.updateEntity playingEntities
         |> applySystem SystemKeyboardInput.clear playingEntities
         |> applySystem SystemAcceleration.clearVelocity playingEntities
         |> applySystem SystemDie.updateEntity otherEntities

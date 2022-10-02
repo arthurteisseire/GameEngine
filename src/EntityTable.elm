@@ -291,6 +291,14 @@ mapTable func (Table dict) =
         |> Table
 
 
+hasValueInTable : a -> Table a -> Bool
+hasValueInTable a table =
+    filterTable
+        (\_ value -> a == value)
+        table
+        /= emptyTable
+
+
 fromDictTable : Dict Int a -> Table a
 fromDictTable dict =
     Dict.foldl
