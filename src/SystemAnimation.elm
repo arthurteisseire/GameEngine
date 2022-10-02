@@ -60,13 +60,13 @@ animate dt _ { visual, animation, position } =
                 }
 
             else
-                { visual = { visual | position = position }
+                { visual = { visual | position = position.currentPos }
                 , animation = Nothing
                 , position = position
                 }
 
         Nothing ->
-            { visual = { visual | position = position }
+            { visual = { visual | position = position.currentPos }
             , animation = animation
             , position = position
             }

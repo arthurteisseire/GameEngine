@@ -4,20 +4,27 @@ import Vector2 exposing (Vector2)
 
 
 type alias ComponentPosition =
-    Vector2
+    { previousPos : Vector2
+    , currentPos : Vector2
+    }
 
 
 identity : ComponentPosition
 identity =
-    { x = 0
-    , y = 0
+    init Vector2.identity
+
+
+init : Vector2 -> ComponentPosition
+init vec =
+    { previousPos = vec
+    , currentPos = vec
     }
 
 
 toString : ComponentPosition -> String
 toString position =
-    "Position(x = "
-        ++ String.fromFloat position.x
-        ++ ", y = "
-        ++ String.fromFloat position.y
+    "Position(currentPos="
+        ++ Vector2.toString position.currentPos
+        ++ ", previousPos="
+        ++ Vector2.toString position.previousPos
         ++ ")"

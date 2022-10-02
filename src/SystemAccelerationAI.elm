@@ -1,10 +1,11 @@
 module SystemAccelerationAI exposing (updateEntity)
 
-import ComponentTurn exposing (ComponentTurn)
 import ComponentPlayer exposing (ComponentPlayer)
 import ComponentPosition exposing (ComponentPosition)
+import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
+import Vector2
 import World exposing (World)
 
 
@@ -55,7 +56,7 @@ updateAIVelocity _ inputTable { turn, velocity, position } =
             Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))
 
         diff =
-            { x = playerPos.x - position.x, y = playerPos.y - position.y }
+            Vector2.sub playerPos.currentPos position.currentPos
 
         nextVelocity =
             if abs diff.x > abs diff.y then

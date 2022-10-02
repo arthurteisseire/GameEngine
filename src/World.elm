@@ -38,8 +38,17 @@ init =
         ( entities, playerId ) =
             addEntity emptyEntitySet
 
-        ( entities2, enemyId ) =
+        ( entities2, enemy1Id ) =
             addEntity entities
+
+        ( entities3, enemy2Id ) =
+            addEntity entities2
+
+        ( entities4, enemy3Id ) =
+            addEntity entities3
+
+        enemies =
+            [ enemy1Id, enemy2Id, enemy3Id ]
 
         keyboardInputComponents =
             emptyTable
@@ -47,53 +56,55 @@ init =
 
         positionComponents =
             emptyTable
-                |> insertComponent playerId { x = 4, y = 0 }
-                |> insertComponent enemyId { x = 5, y = 0 }
+                |> insertComponent playerId (ComponentPosition.init { x = 4, y = 0 })
+                |> insertComponent enemy1Id (ComponentPosition.init { x = 5, y = 0 })
+                |> insertComponent enemy2Id (ComponentPosition.init { x = 0, y = 0 })
+                |> insertComponent enemy3Id (ComponentPosition.init { x = 3, y = 3 })
 
         velocityComponents =
             emptyTable
                 |> insertComponent playerId ComponentVelocity.identity
-                |> insertComponent enemyId ComponentVelocity.identity
+                |> insertComponentForEntities enemies ComponentVelocity.identity
 
         lifeComponents =
             emptyTable
                 |> insertComponent playerId { healPoints = 1 }
-                |> insertComponent enemyId { healPoints = 5 }
+                |> insertComponentForEntities enemies { healPoints = 5 }
 
         visualComponents =
             emptyTable
                 |> insertComponent playerId ComponentVisual.defaultRect
-                |> insertComponent enemyId ComponentVisual.defaultCircle
+                |> insertComponentForEntities enemies ComponentVisual.defaultCircle
 
         attackComponents =
             emptyTable
                 |> insertComponent playerId ComponentAttack.identity
-                |> insertComponent enemyId ComponentAttack.identity
+                |> insertComponentForEntities enemies ComponentAttack.identity
 
         damageComponents =
             emptyTable
                 |> insertComponent playerId ComponentDamage.identity
-                |> insertComponent enemyId ComponentDamage.identity
+                |> insertComponentForEntities enemies ComponentDamage.identity
 
         animationComponents =
             emptyTable
                 |> insertComponent playerId ComponentAnimation.identity
-                |> insertComponent enemyId ComponentAnimation.identity
+                |> insertComponentForEntities enemies ComponentAnimation.identity
 
         turnComponents =
             emptyTable
                 |> insertComponent playerId { turnsToPlay = 0, remainingTurns = 0 }
-                |> insertComponent enemyId { turnsToPlay = 3, remainingTurns = 3 }
+                |> insertComponentForEntities enemies { turnsToPlay = 3, remainingTurns = 3 }
 
         aiComponents =
             emptyTable
-                |> insertComponent enemyId ComponentAI.identity
+                |> insertComponentForEntities enemies ComponentAI.identity
 
         playerComponents =
             emptyTable
                 |> insertComponent playerId ComponentPlayer
     in
-    { entities = entities2
+    { entities = entities4
     , keyboardInputComponents = keyboardInputComponents
     , positionComponents = positionComponents
     , velocityComponents = velocityComponents
@@ -108,3 +119,11 @@ init =
     , entityIdDebug = Just playerId
     , isPause = False
     }
+
+
+insertComponentForEntities : List EntityId -> a -> Table a -> Table a
+insertComponentForEntities entities component table =
+    List.foldl
+        (\entity accTable -> insertComponent entity component accTable)
+        table
+        entities

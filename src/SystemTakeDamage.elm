@@ -54,7 +54,7 @@ takeDamage _ attackTable { position, damage } =
                         Just attack ->
                             let
                                 fromDirection =
-                                    Vector2.sub attack.to position
+                                    Vector2.sub attack.to position.currentPos
                             in
                             if Vector2.isNull fromDirection then
                                 { fromEntity = entityId

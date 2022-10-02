@@ -2,7 +2,7 @@ module SystemCollisionTests exposing (..)
 
 import EntityTable exposing (..)
 import Expect exposing (..)
-import SystemCollision
+import SystemMove
 import Test exposing (..)
 
 
@@ -13,7 +13,7 @@ suite =
             "Update empty table"
             (\_ ->
                 Expect.equal
-                    (SystemCollision.updateWorld emptyEntitySet emptyTable emptyTable emptyTable)
+                    (SystemMove.updateWorld emptyEntitySet emptyTable emptyTable emptyTable)
                     { tableA = emptyTable, tableB = emptyTable }
             )
         , test
@@ -35,7 +35,7 @@ suite =
                         }
                 in
                 Expect.equal
-                    (SystemCollision.updateWorld
+                    (SystemMove.updateWorld
                         entityTable
                         actualPositionTable
                         actualPositionTable

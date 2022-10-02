@@ -47,8 +47,8 @@ velocityAttack _ components =
         , attack =
             if components.velocity /= ComponentVelocity.identity then
                 Just
-                    { from = components.position
-                    , to = Vector2.add components.position components.velocity
+                    { from = components.position.currentPos
+                    , to = Vector2.add components.position.currentPos components.velocity
                     }
 
             else
