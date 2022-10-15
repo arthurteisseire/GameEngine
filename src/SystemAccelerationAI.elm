@@ -60,10 +60,16 @@ updateAIVelocity _ inputTable { turn, velocity, position } =
 
         nextVelocity =
             if abs diff.x > abs diff.y then
-                { x = diff.x / abs diff.x, y = 0 }
+                if diff.x == 0 then
+                    Vector2.identity
+                else
+                    { x = diff.x / abs diff.x, y = 0 }
 
             else
-                { x = 0, y = diff.y / abs diff.y }
+                if diff.y == 0 then
+                    Vector2.identity
+                else
+                    { x = 0, y = diff.y / abs diff.y }
     in
     if turn.remainingTurns <= 0 then
         { turn = turn
