@@ -19,9 +19,38 @@ type alias OutputComponents =
     }
 
 
-updateEntity : EntityId -> World -> World
+updateEntities : EntitySet -> World -> World
+updateEntities entitySet world =
+    let
+        ( entitiesWhoDidntMoved, newWorld ) =
+            foldlEntitySet
+                (\entityId ( currentEntitiesWhoDidntMoved, currentWorld ) ->
+                    let
+                        ( thisEntityMoved, newCurrentWorld ) =
+                            updateEntity entityId currentWorld
+
+                        newEntitiesWhoDidntMoved =
+                            if thisEntityMoved then
+                                filterEntities (\id -> entityId /= id) currentEntitiesWhoDidntMoved
+
+                            else
+                                currentEntitiesWhoDidntMoved
+                    in
+                    ( newEntitiesWhoDidntMoved, newCurrentWorld )
+                )
+                ( entitySet, world )
+                entitySet
+    in
+    if entitiesWhoDidntMoved /= entitySet then
+        updateEntities entitiesWhoDidntMoved newWorld
+
+    else
+        newWorld
+
+
+updateEntity : EntityId -> World -> ( Bool, World )
 updateEntity entityId world =
-    Maybe.withDefault world <|
+    Maybe.withDefault ( False, world ) <|
         Maybe.map2
             (\position velocity ->
                 let
@@ -33,19 +62,21 @@ updateEntity entityId world =
                             world.entities
                             |> removeInTable entityId
 
-                    components =
+                    ( hasMoved, components ) =
                         collide entityId inputComponents (OutputComponents position velocity)
                 in
-                { world
+                ( hasMoved
+                , { world
                     | positionComponents = insertComponent entityId components.position world.positionComponents
                     , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
-                }
+                  }
+                )
             )
             (getComponent entityId world.positionComponents)
             (getComponent entityId world.velocityComponents)
 
 
-collide : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
+collide : EntityId -> Table InputComponents -> OutputComponents -> ( Bool, OutputComponents )
 collide _ otherComponents components =
     let
         otherPositions =
@@ -55,14 +86,13 @@ collide _ otherComponents components =
 
         nextPosition =
             Vector2.add components.position.currentPos components.velocity
-
-        movedPosition =
-            if hasValueInTable nextPosition otherPositions then
-                components.position.currentPos
-
-            else
-                nextPosition
     in
-    { position = ComponentPosition.init movedPosition
-    , velocity = Vector2.identity
-    }
+    if components.velocity == Vector2.identity || hasValueInTable nextPosition otherPositions then
+        ( False, components )
+
+    else
+        ( True
+        , { position = ComponentPosition.init nextPosition
+          , velocity = Vector2.identity
+          }
+        )

@@ -131,7 +131,7 @@ playTurn playingEntities otherEntities world =
         |> applySystem SystemTakeDamage.updateEntity otherEntities
         |> applySystem SystemTriggerAttackAnimation.updateEntity playingEntities
         |> applySystem SystemLife.updateEntity otherEntities
-        |> applySystem SystemCollision.updateEntity playingEntities
+        |> SystemCollision.updateEntities playingEntities
         |> applySystem SystemKeyboardInput.clear playingEntities
         |> applySystem SystemAcceleration.clearVelocity playingEntities
         |> applySystem SystemDie.updateEntity otherEntities
