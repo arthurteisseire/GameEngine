@@ -292,9 +292,14 @@ mapTable func (Table dict) =
 
 
 hasValueInTable : a -> Table a -> Bool
-hasValueInTable a table =
+hasValueInTable =
+    hasValueInTableIf (==)
+
+
+hasValueInTableIf : (a -> a -> Bool) -> a -> Table a -> Bool
+hasValueInTableIf predicate a table =
     filterTable
-        (\_ value -> a == value)
+        (\_ value -> predicate a value)
         table
         /= emptyTable
 
