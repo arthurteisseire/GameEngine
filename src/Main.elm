@@ -122,7 +122,7 @@ confront : EntitySet -> World -> World
 confront playingEntities world =
     world
         |> applySystem SystemAttack.updateEntity playingEntities
-        |> SystemCollision.updateEntities playingEntities
+        |> SystemCollision.updateEntities world.entities
         |> applySystem SystemTakeDamage.updateEntity world.entities
         |> applySystem SystemLife.updateEntity world.entities
         |> applySystem SystemTriggerAttackAnimation.updateEntity world.entities
