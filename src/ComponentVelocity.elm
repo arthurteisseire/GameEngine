@@ -4,7 +4,7 @@ import Vector2 exposing (Vector2)
 
 
 type alias ComponentVelocity =
-    Vector2
+    Vector2 Float
 
 
 identity : ComponentVelocity

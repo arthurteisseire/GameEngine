@@ -5,8 +5,8 @@ import Vector2 exposing (Vector2)
 
 type alias ComponentAttack =
     Maybe
-        { from : Vector2
-        , to : Vector2
+        { from : Vector2 Float
+        , to : Vector2 Float
         }
 
 
@@ -20,9 +20,9 @@ toString maybeAttack =
     case maybeAttack of
         Just attack ->
             "Attack(from="
-                ++ Vector2.toString attack.from
+                ++ Vector2.vectorFloatToString attack.from
                 ++ ", to="
-                ++ Vector2.toString attack.to
+                ++ Vector2.vectorFloatToString attack.to
                 ++ ")"
 
         Nothing ->

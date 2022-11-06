@@ -11,7 +11,7 @@ updateEntity entityId world =
         | entities =
             case getComponent entityId world.lifeComponents of
                 Just life ->
-                    removeIf (life.healPoints <= 0) entityId world.entities
+                    removeEntityIf (life.healPoints <= 0) entityId world.entities
 
                 Nothing ->
                     world.entities

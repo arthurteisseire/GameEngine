@@ -7,7 +7,7 @@ import Vector2 exposing (Vector2)
 type alias ComponentDamage =
     List
         { fromEntity : EntityId
-        , fromDirection : Vector2
+        , fromDirection : Vector2 Float
         , points : Int
         }
 
@@ -26,7 +26,7 @@ toString damage =
                     ++ "fromEntity="
                     ++ entityIdToString dam.fromEntity
                     ++ ", fromDirection="
-                    ++ Vector2.toString dam.fromDirection
+                    ++ Vector2.vectorFloatToString dam.fromDirection
                     ++ ", points="
                     ++ String.fromInt dam.points
             )

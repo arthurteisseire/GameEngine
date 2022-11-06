@@ -20,6 +20,14 @@ type EntitySet
     = EntitySet Int (List EntityId)
 
 
+mapEntitySet : (EntityId -> result) -> EntitySet -> List result
+mapEntitySet func entitySet =
+    foldlEntitySet
+        (\entityId acc -> func entityId :: acc)
+        []
+        entitySet
+
+
 foldlEntitySet : (EntityId -> result -> result) -> result -> EntitySet -> result
 foldlEntitySet func result (EntitySet _ list) =
     List.foldl
@@ -28,15 +36,15 @@ foldlEntitySet func result (EntitySet _ list) =
         list
 
 
-remove : EntityId -> EntitySet -> EntitySet
-remove entityId (EntitySet lastId list) =
+removeEntity : EntityId -> EntitySet -> EntitySet
+removeEntity entityId (EntitySet lastId list) =
     EntitySet lastId (List.filter ((/=) entityId) list)
 
 
-removeIf : Bool -> EntityId -> EntitySet -> EntitySet
-removeIf isBad entityId entitySet =
+removeEntityIf : Bool -> EntityId -> EntitySet -> EntitySet
+removeEntityIf isBad entityId entitySet =
     if isBad then
-        remove entityId entitySet
+        removeEntity entityId entitySet
 
     else
         entitySet

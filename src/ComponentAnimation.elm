@@ -7,7 +7,7 @@ type alias ComponentAnimation =
     Maybe
         { duration : Float
         , timeLeft : Float
-        , offset : Vector2
+        , offset : Vector2 Float
         }
 
 
@@ -16,7 +16,7 @@ identity =
     Nothing
 
 
-attackAnimation : Vector2 -> ComponentAnimation
+attackAnimation : Vector2 Float -> ComponentAnimation
 attackAnimation offset =
     let
         duration =
@@ -40,7 +40,7 @@ toString maybeAnimation =
                         ++ ", timeLeft="
                         ++ String.fromFloat animation.timeLeft
                         ++ ", offset="
-                        ++ Vector2.toString animation.offset
+                        ++ Vector2.vectorFloatToString animation.offset
 
                 Nothing ->
                     ""

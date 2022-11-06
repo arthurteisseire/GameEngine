@@ -183,21 +183,50 @@ view world =
 
               else
                 Html.text ""
-            , Html.div
-                [ HA.id "Game"
-                , HA.style "float" "left"
-                ]
-                [ Svg.svg
-                    [ SA.width "500"
-                    , SA.height "500"
-                    , SA.viewBox "0 0 20 20"
-                    ]
-                    (systemDraw world.visualComponents world.entities)
-                ]
+            , level1Visual world
             , systemDisplayDebug world world.entityIdDebug
             ]
         ]
     }
+
+
+level1Visual : World -> Html Msg
+level1Visual world =
+    let
+        terrains =
+            mapEntitySet
+                (\entityId ->
+                    Maybe.withDefault (Html.text "") <|
+                        Maybe.map2
+                            (\terrain position ->
+                                Svg.svg
+                                    [ SA.transform <|
+                                        "translate("
+                                            ++ String.fromFloat position.currentPos.x
+                                            ++ ", "
+                                            ++ String.fromFloat position.currentPos.y
+                                            ++ ")"
+                                    , SA.width <| String.fromInt (terrain.dimensions.x * terrain.sizeFactor)
+                                    , SA.height <| String.fromInt (terrain.dimensions.y * terrain.sizeFactor)
+                                    , SA.viewBox
+                                        ("0 0 "
+                                            ++ String.fromInt terrain.dimensions.x
+                                            ++ " "
+                                            ++ String.fromInt terrain.dimensions.y
+                                        )
+                                    ]
+                                    (systemDraw world.visualComponents world.entities)
+                            )
+                            (getComponent entityId world.terrainComponents)
+                            (getComponent entityId world.positionComponents)
+                )
+                world.entities
+    in
+    Html.div
+        [ HA.id "Level1"
+        , HA.style "float" "left"
+        ]
+        terrains
 
 
 systemDraw :
