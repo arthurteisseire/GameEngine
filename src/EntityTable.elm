@@ -72,6 +72,25 @@ addEntity (EntitySet nextId entities) =
     )
 
 
+addNEntities : Int -> EntitySet -> ( EntitySet, List EntityId )
+addNEntities n entitySet =
+    let
+        func : Int -> EntitySet -> List EntityId -> ( EntitySet, List EntityId )
+        func currentN currentEntitySet currentEntityIds =
+            case currentN of
+                0 ->
+                    ( currentEntitySet, currentEntityIds )
+
+                _ ->
+                    let
+                        ( newSet, entityId ) =
+                            addEntity currentEntitySet
+                    in
+                    func (currentN - 1) newSet (entityId :: currentEntityIds)
+    in
+    func n entitySet []
+
+
 
 -- Component Table
 

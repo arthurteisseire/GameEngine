@@ -9,7 +9,7 @@ import ComponentPlayer
 import ComponentPosition
 import ComponentVelocity
 import ComponentVisual
-import EntityTable exposing (EntityId, Table, addEntity, emptyEntitySet, emptyTable, getComponent, insertComponent, mapEntitySet)
+import EntityTable exposing (EntityId, Table, addEntity, addNEntities, emptyEntitySet, emptyTable, getComponent, insertComponent, mapEntitySet)
 import Event exposing (Msg)
 import Html exposing (Html)
 import Html.Attributes as HA
@@ -22,36 +22,33 @@ import World exposing (World)
 init : World
 init =
     let
-        ( entities, playerId ) =
+        ( entities1, playerId ) =
             addEntity emptyEntitySet
 
-        ( entities2, enemy1Id ) =
-            addEntity entities
+        ( entities2, terrain ) =
+            addEntity entities1
 
-        ( entities3, enemy2Id ) =
-            addEntity entities2
-
-        ( entities4, enemy3Id ) =
-            addEntity entities3
-
-        ( entities5, terrain ) =
-            addEntity entities4
-
-        enemies =
-            [ enemy1Id, enemy2Id, enemy3Id ]
+        ( entities3, enemies ) =
+            addNEntities 20 entities2
     in
     { entities =
-        entities5
+        entities3
     , keyboardInputComponents =
         emptyTable
             |> insertComponent playerId ComponentKeyboardInput.identity
     , positionComponents =
         emptyTable
-            |> insertComponent playerId (ComponentPosition.init { x = 4, y = 0 })
-            |> insertComponent enemy1Id (ComponentPosition.init { x = 5, y = 0 })
-            |> insertComponent enemy2Id (ComponentPosition.init { x = 0, y = 0 })
-            |> insertComponent enemy3Id (ComponentPosition.init { x = 3, y = 3 })
+            |> insertComponent playerId (ComponentPosition.init { x = 6, y = 6 })
             |> insertComponent terrain (ComponentPosition.init { x = 100, y = 100 })
+            |> (\posTable ->
+                    List.foldl
+                        (\( entityId, pos ) table -> insertComponent entityId (ComponentPosition.init pos) table)
+                        posTable
+                        (List.indexedMap
+                            (\idx entityId -> ( entityId, { x = toFloat (modBy 5 idx), y = toFloat (idx // 5) } ))
+                            enemies
+                        )
+               )
     , velocityComponents =
         emptyTable
             |> insertComponent playerId ComponentVelocity.identity
@@ -63,9 +60,12 @@ init =
     , visualComponents =
         emptyTable
             |> insertComponent playerId ComponentVisual.defaultRect
-            |> insertComponent enemy1Id (ComponentVisual.circle "purple")
-            |> insertComponent enemy2Id (ComponentVisual.circle "orange")
-            |> insertComponent enemy3Id (ComponentVisual.circle "red")
+            |> (\visualTable ->
+                    List.foldl
+                        (\entityId table -> insertComponent entityId (ComponentVisual.circle "orange") table)
+                        visualTable
+                        enemies
+               )
             |> insertComponent terrain ComponentVisual.terrain
     , attackComponents =
         emptyTable
