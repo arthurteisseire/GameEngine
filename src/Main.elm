@@ -113,22 +113,23 @@ playTurn world =
     world
         |> applySystem SystemTurn.updateEntity world.entities
         |> applySystem SystemAcceleration.updateEntity players
-        |> confront players ais
+        |> confront players
         |> applySystem SystemAccelerationAI.updateEntity ais
-        |> confront ais players
+        |> confront ais
 
 
-confront : EntitySet -> EntitySet -> World -> World
-confront playingEntities otherEntities world =
+confront : EntitySet -> World -> World
+confront playingEntities world =
     world
         |> applySystem SystemAttack.updateEntity playingEntities
-        |> applySystem SystemTakeDamage.updateEntity otherEntities
-        |> applySystem SystemTriggerAttackAnimation.updateEntity playingEntities
-        |> applySystem SystemLife.updateEntity otherEntities
         |> SystemCollision.updateEntities playingEntities
+        |> applySystem SystemTakeDamage.updateEntity world.entities
+        |> applySystem SystemLife.updateEntity world.entities
+        |> applySystem SystemTriggerAttackAnimation.updateEntity world.entities
         |> applySystem SystemKeyboardInput.clear playingEntities
-        |> applySystem SystemAcceleration.clearVelocity playingEntities
-        |> applySystem SystemDie.updateEntity otherEntities
+        |> applySystem SystemAcceleration.clearVelocity world.entities
+        |> applySystem SystemAttack.clear world.entities
+        |> applySystem SystemDie.updateEntity world.entities
 
 
 applyTickSystems : Float -> EntitySet -> World -> World

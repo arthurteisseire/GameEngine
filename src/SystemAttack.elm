@@ -62,3 +62,14 @@ velocityAttack _ components =
         , attack = Nothing
         , animation = components.animation
         }
+
+
+clear : EntityId -> World -> World
+clear entityId world =
+    { world
+        | attackComponents =
+            updateComponent
+                entityId
+                Nothing
+                world.attackComponents
+    }

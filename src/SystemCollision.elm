@@ -88,11 +88,13 @@ collide _ otherComponents components =
             Vector2.add components.position.currentPos components.velocity
     in
     if components.velocity == Vector2.identity || hasValueInTable nextPosition otherPositions then
-        ( False, components )
+        ( False
+        , components
+        )
 
     else
         ( True
         , { position = ComponentPosition.init nextPosition
-          , velocity = Vector2.identity
+          , velocity = components.velocity
           }
         )
