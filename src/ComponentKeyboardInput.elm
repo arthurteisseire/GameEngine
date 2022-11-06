@@ -15,5 +15,10 @@ identity =
 
 
 toString : ComponentKeyboardInput -> String
-toString _ =
-    "KeyboardInput()"
+toString input =
+    case input.key of
+        Just key ->
+            "KeyboardInput(" ++ KeyboardInput.toString key ++ ")"
+
+        Nothing ->
+            "KeyboardInput()"

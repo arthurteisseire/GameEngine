@@ -1,4 +1,4 @@
-module KeyboardInput exposing (Key(..), keyDecoder)
+module KeyboardInput exposing (Key(..), keyDecoder, toString)
 
 import Json.Decode as Decode
 
@@ -42,3 +42,28 @@ toDirection string =
 
         _ ->
             Other
+
+
+toString : Key -> String
+toString key =
+    case key of
+        ArrowLeft ->
+            "ArrowLeft"
+
+        ArrowRight ->
+            "ArrowRight"
+
+        ArrowDown ->
+            "ArrowUp"
+
+        ArrowUp ->
+            "ArrowDown"
+
+        Space ->
+            "Space"
+
+        KeyN ->
+            "n"
+
+        Other ->
+            ""

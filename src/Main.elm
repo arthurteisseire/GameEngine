@@ -51,27 +51,22 @@ update : Msg -> World -> ( World, Cmd Msg )
 update msg world =
     case msg of
         KeyBoardInput key ->
-            ( let
-                players =
-                    getPlayers world
+            if world.isPause then
+                ( world
+                    |> applySystem (SystemKeyboardInput.read key) world.entities
+                , Cmd.none
+                )
 
-                ais =
-                    getAis world
-              in
-              world
-                |> applySystem (SystemKeyboardInput.read key) world.entities
-                |> applySystem SystemTurn.updateEntity world.entities
-                |> applySystem SystemAcceleration.updateEntity players
-                |> playTurn players ais
-                |> applySystem SystemAccelerationAI.updateEntity ais
-                |> playTurn ais players
-            , Cmd.none
-            )
+            else
+                ( world
+                    |> applySystem (SystemKeyboardInput.read key) world.entities
+                    |> playTurn
+                , Cmd.none
+                )
 
         Tick dt ->
             ( world
-                |> applyTickSystems dt (getPlayers world)
-                |> applyTickSystems dt (getAis world)
+                |> applyTickSystems dt world.entities
             , Cmd.none
             )
 
@@ -80,9 +75,7 @@ update msg world =
 
         NextFrame ->
             if world.isPause then
-                ( world
-                  --|> applySystems (getPlayers world)
-                  --|> applySystems (getAis world)
+                ( playTurn world
                 , Cmd.none
                 )
 
@@ -106,8 +99,25 @@ update msg world =
             ( world, Cmd.none )
 
 
-playTurn : EntitySet -> EntitySet -> World -> World
-playTurn playingEntities otherEntities world =
+playTurn : World -> World
+playTurn world =
+    let
+        players =
+            getPlayers world
+
+        ais =
+            getAis world
+    in
+    world
+        |> applySystem SystemTurn.updateEntity world.entities
+        |> applySystem SystemAcceleration.updateEntity players
+        |> confront players ais
+        |> applySystem SystemAccelerationAI.updateEntity ais
+        |> confront ais players
+
+
+confront : EntitySet -> EntitySet -> World -> World
+confront playingEntities otherEntities world =
     world
         |> applySystem SystemAttack.updateEntity playingEntities
         |> applySystem SystemTakeDamage.updateEntity otherEntities
@@ -177,13 +187,9 @@ view world =
 
 
 subscriptions : World -> Sub Msg
-subscriptions world =
+subscriptions _ =
     Sub.batch
-        [ if world.isPause then
-            Sub.none
-
-          else
-            Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
+        [ Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
         , Sub.map
             (\key ->
                 case key of
