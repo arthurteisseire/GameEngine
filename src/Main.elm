@@ -38,7 +38,7 @@ main =
 
 init : () -> ( World, Cmd Msg )
 init _ =
-    ( World.init
+    ( Level1.init
     , Cmd.none
     )
 
