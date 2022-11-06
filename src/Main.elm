@@ -6,6 +6,8 @@ import EntityTable exposing (..)
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
+import Html.Events as HE
+import Json.Decode
 import KeyboardInput exposing (Key, keyDecoder)
 import Level1
 import SystemAcceleration
@@ -168,7 +170,8 @@ view world =
         [ Html.div
             [ HA.id "MainWindow"
             , HA.style "width" "100%"
-            , HA.style "height" "600px"
+            , HA.style "height" "955px"
+            , HA.style "background-color" "#b3b3b3"
             ]
             [ if world.isPause then
                 Html.text "Pause"
@@ -190,17 +193,22 @@ subscriptions : World -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Browser.Events.onAnimationFrameDelta (\millis -> Tick (millis / 1000))
-        , Sub.map
-            (\key ->
-                case key of
-                    KeyboardInput.Space ->
-                        TogglePause
-
-                    KeyboardInput.KeyN ->
-                        NextFrame
-
-                    _ ->
-                        KeyBoardInput key
-            )
-            (Browser.Events.onKeyDown keyDecoder)
+        , Browser.Events.onKeyDown keyDecoderToMsgDecoder
         ]
+
+
+keyDecoderToMsgDecoder : Json.Decode.Decoder Msg
+keyDecoderToMsgDecoder =
+    Json.Decode.map
+        (\key ->
+            case key of
+                KeyboardInput.Space ->
+                    TogglePause
+
+                KeyboardInput.KeyN ->
+                    NextFrame
+
+                _ ->
+                    KeyBoardInput key
+        )
+        keyDecoder

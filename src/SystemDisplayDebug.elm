@@ -36,7 +36,7 @@ displayDebug world entityId =
         hideButton =
             Html.button
                 [ SE.onClick HideDebug
-                , SA.fill "blue"
+                , SA.style "background-color: #b3b3b3; border-color: #cccccc;"
                 ]
                 [ Html.text "Hide" ]
 
