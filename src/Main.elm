@@ -127,8 +127,8 @@ confront playingEntities world =
         |> applySystem SystemLife.updateEntity world.entities
         |> applySystem SystemTriggerAttackAnimation.updateEntity world.entities
         |> applySystem SystemKeyboardInput.clear playingEntities
-        |> applySystem SystemAcceleration.clearVelocity world.entities
-        |> applySystem SystemAttack.clear world.entities
+        |> applySystem SystemAcceleration.clearVelocity playingEntities
+        |> applySystem SystemAttack.clear playingEntities
         |> applySystem SystemDie.updateEntity world.entities
 
 
