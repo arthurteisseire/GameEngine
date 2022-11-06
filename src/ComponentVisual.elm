@@ -1,13 +1,10 @@
 module ComponentVisual exposing (..)
 
+import Event exposing (Msg(..))
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
 import Vector2 exposing (Vector2)
-
-
-type Msg
-    = Clicked
 
 
 type alias ComponentVisual =
