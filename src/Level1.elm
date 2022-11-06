@@ -91,7 +91,7 @@ init =
             |> insertComponent playerId ComponentPlayer.identity
     , terrainComponents =
         emptyTable
-            |> insertComponent terrain { dimensions = { x = 8, y = 8 }, sizeFactor = 100 }
+            |> insertComponent terrain { dimensions = { x = 16, y = 16 }, sizeFactor = 50 }
     , entityIdDebug =
         Just playerId
     , isPause =
