@@ -32,3 +32,111 @@ type alias World =
     , entityIdDebug : Maybe EntityId
     , isPause : Bool
     }
+
+
+keyboardInputComponent =
+    ( tableModifier
+        { get = .keyboardInputComponents
+        , set = \table world -> { world | keyboardInputComponents = table }
+        }
+    , .keyboardInput
+    )
+
+
+positionComponent =
+    ( tableModifier
+        { get = .positionComponents
+        , set = \table world -> { world | positionComponents = table }
+        }
+    , .position
+    )
+
+
+velocityComponent =
+    ( tableModifier
+        { get = .velocityComponents
+        , set = \table world -> { world | velocityComponents = table }
+        }
+    , .velocity
+    )
+
+
+lifeComponent =
+    ( tableModifier
+        { get = .lifeComponents
+        , set = \table world -> { world | lifeComponents = table }
+        }
+    , .life
+    )
+
+
+visualComponent =
+    ( tableModifier
+        { get = .visualComponents
+        , set = \table world -> { world | visualComponents = table }
+        }
+    , .visual
+    )
+
+
+attackComponent =
+    ( tableModifier
+        { get = .attackComponents
+        , set = \table world -> { world | attackComponents = table }
+        }
+    , .attack
+    )
+
+
+damageComponent =
+    ( tableModifier
+        { get = .damageComponents
+        , set = \table world -> { world | damageComponents = table }
+        }
+    , .damage
+    )
+
+
+animationComponent =
+    ( tableModifier
+        { get = .animationComponents
+        , set = \table world -> { world | animationComponents = table }
+        }
+    , .animation
+    )
+
+
+turnComponent =
+    ( tableModifier
+        { get = .turnComponents
+        , set = \table world -> { world | turnComponents = table }
+        }
+    , .turn
+    )
+
+
+terrainComponent =
+    ( tableModifier
+        { get = .terrainComponents
+        , set = \table world -> { world | terrainComponents = table }
+        }
+    , .terrain
+    )
+
+
+aiComponent =
+    ( tableModifier
+        { get = .aiComponents
+        , set = \table world -> { world | aiComponents = table }
+        }
+    , .ai
+    )
+
+
+playerComponent =
+    ( tableModifier
+        { get = .playerComponents
+        , set = \table world -> { world | playerComponents = table }
+        }
+    , .player
+    )

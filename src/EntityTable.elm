@@ -4,6 +4,146 @@ import Dict exposing (Dict)
 
 
 
+-- Database
+
+
+type alias SimpleModifier a b =
+    { get : b -> a
+    , set : a -> b -> b
+    }
+
+
+type alias Modifier a b =
+    { get : b -> a
+    , set : a -> b -> b
+    , map : (a -> a) -> b -> b
+    }
+
+
+tableModifier : SimpleModifier a b -> Modifier a b
+tableModifier =
+    embellishedModifier
+
+
+embellishedModifier : SimpleModifier a b -> Modifier a b
+embellishedModifier modifier =
+    { get = modifier.get
+    , set = modifier.set
+    , map = \func b -> modifier.set (func (modifier.get b)) b
+    }
+
+
+update1Component :
+    (EntityId -> components -> components)
+    -> (a -> components)
+    -> ( Modifier (Table a) db, components -> a )
+    -> EntityId
+    -> db
+    -> db
+update1Component updateComponents toComponents ( tableA, getA ) entityId world =
+    Maybe.map
+        toComponents
+        (getComponent entityId (tableA.get world))
+        |> Maybe.map
+            (\components ->
+                let
+                    updatedComponents =
+                        updateComponents entityId components
+                in
+                world
+                    |> tableA.map (updateComponent entityId (getA updatedComponents))
+            )
+        |> Maybe.withDefault world
+
+
+update2Components :
+    (EntityId -> components -> components)
+    -> (a -> b -> components)
+    -> ( Modifier (Table a) db, components -> a )
+    -> ( Modifier (Table b) db, components -> b )
+    -> EntityId
+    -> db
+    -> db
+update2Components updateComponents toComponents ( tableA, getA ) ( tableB, getB ) entityId world =
+    Maybe.map2
+        toComponents
+        (getComponent entityId (tableA.get world))
+        (getComponent entityId (tableB.get world))
+        |> Maybe.map
+            (\components ->
+                let
+                    updatedComponents =
+                        updateComponents entityId components
+                in
+                world
+                    |> tableA.map (updateComponent entityId (getA updatedComponents))
+                    |> tableB.map (updateComponent entityId (getB updatedComponents))
+            )
+        |> Maybe.withDefault world
+
+
+update3Components :
+    (EntityId -> components -> components)
+    -> (a -> b -> c -> components)
+    -> ( Modifier (Table a) db, components -> a )
+    -> ( Modifier (Table b) db, components -> b )
+    -> ( Modifier (Table c) db, components -> c )
+    -> EntityId
+    -> db
+    -> db
+update3Components updateComponents toComponents ( tableA, getA ) ( tableB, getB ) ( tableC, getC ) entityId world =
+    Maybe.map3
+        toComponents
+        (getComponent entityId (tableA.get world))
+        (getComponent entityId (tableB.get world))
+        (getComponent entityId (tableC.get world))
+        |> Maybe.map
+            (\components ->
+                let
+                    updatedComponents =
+                        updateComponents entityId components
+                in
+                world
+                    |> tableA.map (updateComponent entityId (getA updatedComponents))
+                    |> tableB.map (updateComponent entityId (getB updatedComponents))
+                    |> tableC.map (updateComponent entityId (getC updatedComponents))
+            )
+        |> Maybe.withDefault world
+
+
+update4Components :
+    (EntityId -> components -> components)
+    -> (a -> b -> c -> d -> components)
+    -> ( Modifier (Table a) db, components -> a )
+    -> ( Modifier (Table b) db, components -> b )
+    -> ( Modifier (Table c) db, components -> c )
+    -> ( Modifier (Table d) db, components -> d )
+    -> EntityId
+    -> db
+    -> db
+update4Components updateComponents toComponents ( tableA, getA ) ( tableB, getB ) ( tableC, getC ) ( tableD, getD ) entityId world =
+    Maybe.map4
+        toComponents
+        (getComponent entityId (tableA.get world))
+        (getComponent entityId (tableB.get world))
+        (getComponent entityId (tableC.get world))
+        (getComponent entityId (tableD.get world))
+        |> Maybe.map
+            (\components ->
+                let
+                    updatedComponents =
+                        updateComponents entityId components
+                in
+                world
+                    |> tableA.map (updateComponent entityId (getA updatedComponents))
+                    |> tableB.map (updateComponent entityId (getB updatedComponents))
+                    |> tableC.map (updateComponent entityId (getC updatedComponents))
+                    |> tableD.map (updateComponent entityId (getD updatedComponents))
+            )
+        |> Maybe.withDefault world
+
+
+
 -- Entity Table
 
 
@@ -99,84 +239,100 @@ type Table a
     = Table (Dict Int a)
 
 
-updateEntities :
-    { updateComponents : EntityId -> w -> w
-    , updateWorld : EntityId -> w -> result -> result
-    , world : result
-    , entityTable : EntitySet
-    , componentTables : EntitySet -> Table w
-    }
-    -> result
-updateEntities { updateComponents, updateWorld, world, entityTable, componentTables } =
-    foldlEntities
-        (\entityId a accWorld -> updateWorld entityId (updateComponents entityId a) accWorld)
-        world
-        (componentTables entityTable)
-        entityTable
-
-
-updateEntitiesWithOthers :
-    { updateComponents : EntityId -> Table r -> w -> w
-    , updateWorld : EntityId -> w -> result -> result
-    , world : result
-    , entityTable : EntitySet
-    , readTable : EntitySet -> Table r
-    , writeTable : EntitySet -> Table w
-    }
-    -> result
-updateEntitiesWithOthers { updateComponents, updateWorld, world, entityTable, readTable, writeTable } =
-    foldlEntities
-        (\entityId w accResult -> updateWorld entityId (updateComponents entityId (readTable entityTable) w) accResult)
-        world
-        (writeTable entityTable)
-        entityTable
-
-
-from : Table a -> (a -> result) -> EntitySet -> Table result
-from table func =
-    mapEntities (\_ -> func) table
-
-
-join : Table a -> (EntitySet -> Table (a -> result)) -> EntitySet -> Table result
-join table resultTable entityTable =
-    foldlEntities2
-        (\entityId a func accTable -> insertInTable entityId (func a) accTable)
-        emptyTable
-        table
-        (resultTable entityTable)
-        entityTable
-
-
-fullJoin : Table a -> (EntitySet -> Table (Maybe a -> result)) -> EntitySet -> Table result
-fullJoin table resultTable entityTable =
-    foldlEntities2Full
-        (\entityId a func accTable -> insertInTable entityId (func a) accTable)
-        emptyTable
-        table
-        (resultTable entityTable)
-        entityTable
-
-
 mapEntities : (EntityId -> a -> result) -> Table a -> EntitySet -> Table result
-mapEntities func =
-    foldlEntities
-        (\entityId a accTable -> insertInTable entityId (func entityId a) accTable)
-        emptyTable
+mapEntities func table entityTable =
+    mapTable func (filterEntitiesInTable entityTable table)
 
 
-foldlEntities : (EntityId -> a -> result -> result) -> result -> Table a -> EntitySet -> result
-foldlEntities func result table entityTable =
+select : a -> a
+select =
+    identity
+
+
+using : EntitySet -> a -> Table a
+using entities func =
     foldlEntitySet
-        (\entityId accResult ->
-            case getComponent entityId table of
-                Just component ->
-                    func entityId component accResult
+        (\entityId table -> updateComponent entityId func table)
+        emptyTable
+        entities
+
+
+andFrom : Table a -> Table (a -> result) -> Table result
+andFrom =
+    mapTable2 (|>)
+
+
+fullJoin : Table a -> Table (Maybe a -> result) -> Table result
+fullJoin =
+    mapTable2Full (|>)
+
+
+mapTable2 :
+    (a -> b -> result)
+    -> Table a
+    -> Table b
+    -> Table result
+mapTable2 func tableA tableB =
+    foldlTable2
+        (\entityId a b result -> updateComponent entityId (func a b) result)
+        emptyTable
+        tableA
+        tableB
+
+
+foldlTable2 :
+    (EntityId -> a -> b -> result -> result)
+    -> result
+    -> Table a
+    -> Table b
+    -> result
+foldlTable2 func result tableA tableB =
+    foldlTable
+        (\entityId a accResult ->
+            case getComponent entityId tableB of
+                Just b ->
+                    func entityId a b accResult
 
                 Nothing ->
                     accResult
         )
         result
-        entityTable
+        tableA
+
+
+mapTable2Full :
+    (Maybe a -> b -> result)
+    -> Table a
+    -> Table b
+    -> Table result
+mapTable2Full func tableA tableB =
+    foldlTable2Full
+        (\entityId a b result -> updateComponent entityId (func a b) result)
+        emptyTable
+        tableA
+        tableB
+
+
+foldlTable2Full :
+    (EntityId -> Maybe a -> b -> result -> result)
+    -> result
+    -> Table a
+    -> Table b
+    -> result
+foldlTable2Full func result tableA tableB =
+    foldlTable
+        (\entityId a accResult ->
+            (case getComponent entityId tableB of
+                Just b ->
+                    Just <| func entityId (Just a) b accResult
+
+                Nothing ->
+                    Nothing
+            )
+                |> Maybe.withDefault accResult
+        )
+        result
+        tableA
 
 
 foldlEntities2 :
@@ -222,24 +378,24 @@ foldlEntities2Full func result tableA tableB entityTable =
         entityTable
 
 
-updateComponent : EntityId -> a -> Table a -> Table a
-updateComponent entityId component table =
-    case getComponent entityId table of
-        Just _ ->
-            insertComponent entityId component table
-
-        Nothing ->
-            table
-
-
 insertComponent : EntityId -> a -> Table a -> Table a
 insertComponent =
-    insertInTable
+    updateComponent
 
 
 getComponent : EntityId -> Table a -> Maybe a
 getComponent (EntityId id) (Table dict) =
     Dict.get id dict
+
+
+mapComponent : (a -> a) -> EntityId -> Table a -> Table a
+mapComponent func entityId table =
+    case getComponent entityId table of
+        Just component ->
+            updateComponent entityId (func component) table
+
+        Nothing ->
+            table
 
 
 
@@ -279,13 +435,13 @@ filterTable isGood (Table dict) =
     Table (Dict.filter (\id a -> isGood (EntityId id) a) dict)
 
 
-insertInTable : EntityId -> a -> Table a -> Table a
-insertInTable (EntityId id) a (Table dict) =
+updateComponent : EntityId -> a -> Table a -> Table a
+updateComponent (EntityId id) a (Table dict) =
     Table (Dict.insert id a dict)
 
 
-removeInTable : EntityId -> Table a -> Table a
-removeInTable (EntityId id) (Table dict) =
+remove : EntityId -> Table a -> Table a
+remove (EntityId id) (Table dict) =
     Table (Dict.remove id dict)
 
 
@@ -334,7 +490,7 @@ hasValueInTableIf predicate a table =
 fromDictTable : Dict Int a -> Table a
 fromDictTable dict =
     Dict.foldl
-        (\id a table -> insertInTable (EntityId id) a table)
+        (\id a table -> updateComponent (EntityId id) a table)
         emptyTable
         dict
 

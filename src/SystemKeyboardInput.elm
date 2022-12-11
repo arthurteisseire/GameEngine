@@ -10,10 +10,7 @@ read : Key -> EntityId -> World -> World
 read key entityId world =
     { world
         | keyboardInputComponents =
-            updateComponent
-                entityId
-                { key = Just key }
-                world.keyboardInputComponents
+            updateComponent entityId { key = Just key } world.keyboardInputComponents
     }
 
 
@@ -21,8 +18,5 @@ clear : EntityId -> World -> World
 clear entityId world =
     { world
         | keyboardInputComponents =
-            updateComponent
-                entityId
-                { key = Nothing }
-                world.keyboardInputComponents
+            updateComponent entityId { key = Nothing } world.keyboardInputComponents
     }

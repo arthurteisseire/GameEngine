@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.ao.J === region.az.J)
+	if (region.ar.J === region.aC.J)
 	{
-		return 'on line ' + region.ao.J;
+		return 'on line ' + region.ar.J;
 	}
-	return 'on lines ' + region.ao.J + ' through ' + region.az.J;
+	return 'on lines ' + region.ar.J + ' through ' + region.aC.J;
 }
 
 
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bE,
-		impl.b7,
-		impl.b1,
+		impl.bD,
+		impl.b6,
+		impl.b$,
 		function() { return function() {} }
 	);
 });
@@ -2704,9 +2704,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		v: func(record.v),
-		ap: record.ap,
-		ak: record.ak
+		x: func(record.x),
+		as: record.as,
+		an: record.an
 	}
 });
 
@@ -2974,11 +2974,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.v;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.ap;
+		var message = !tag ? value : tag < 3 ? value.a : value.x;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.as;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.ak) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.an) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3928,11 +3928,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bE,
-		impl.b7,
-		impl.b1,
+		impl.bD,
+		impl.b6,
+		impl.b$,
 		function(sendToApp, initialModel) {
-			var view = impl.b9;
+			var view = impl.b8;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3964,12 +3964,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bE,
-		impl.b7,
-		impl.b1,
+		impl.bD,
+		impl.b6,
+		impl.b$,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.an && impl.an(sendToApp)
-			var view = impl.b9;
+			var divertHrefToApp = impl.aq && impl.aq(sendToApp)
+			var view = impl.b8;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3982,7 +3982,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.b4) && (_VirtualDom_doc.title = title = doc.b4);
+				(title !== doc.b3) && (_VirtualDom_doc.title = title = doc.b3);
 			});
 		}
 	);
@@ -4038,12 +4038,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.bS;
-	var onUrlRequest = impl.bT;
+	var onUrlChange = impl.bR;
+	var onUrlRequest = impl.bS;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		an: function(sendToApp)
+		aq: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4059,9 +4059,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.aS === next.aS
-							&& curr.aG === next.aG
-							&& curr.aO.a === next.aO.a
+							&& curr.aU === next.aU
+							&& curr.aI === next.aI
+							&& curr.aQ.a === next.aQ.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4069,13 +4069,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		bE: function(flags)
+		bD: function(flags)
 		{
-			return A3(impl.bE, flags, _Browser_getUrl(), key);
+			return A3(impl.bD, flags, _Browser_getUrl(), key);
 		},
-		b9: impl.b9,
-		b7: impl.b7,
-		b1: impl.b1
+		b8: impl.b8,
+		b6: impl.b6,
+		b$: impl.b$
 	});
 }
 
@@ -4141,17 +4141,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { bC: 'hidden', bl: 'visibilitychange' }
+		? { bB: 'hidden', bl: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { bC: 'mozHidden', bl: 'mozvisibilitychange' }
+		? { bB: 'mozHidden', bl: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { bC: 'msHidden', bl: 'msvisibilitychange' }
+		? { bB: 'msHidden', bl: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { bC: 'webkitHidden', bl: 'webkitvisibilitychange' }
-		: { bC: 'hidden', bl: 'visibilitychange' };
+		? { bB: 'webkitHidden', bl: 'webkitvisibilitychange' }
+		: { bB: 'hidden', bl: 'visibilitychange' };
 }
 
 
@@ -4232,12 +4232,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		aY: _Browser_getScene(),
+		a_: _Browser_getScene(),
 		a7: {
-			bb: _Browser_window.pageXOffset,
-			bc: _Browser_window.pageYOffset,
+			ba: _Browser_window.pageXOffset,
+			bb: _Browser_window.pageYOffset,
 			a9: _Browser_doc.documentElement.clientWidth,
-			aF: _Browser_doc.documentElement.clientHeight
+			aH: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4248,7 +4248,7 @@ function _Browser_getScene()
 	var elem = _Browser_doc.documentElement;
 	return {
 		a9: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		aF: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		aH: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4271,15 +4271,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			aY: {
+			a_: {
 				a9: node.scrollWidth,
-				aF: node.scrollHeight
+				aH: node.scrollHeight
 			},
 			a7: {
-				bb: node.scrollLeft,
-				bc: node.scrollTop,
+				ba: node.scrollLeft,
+				bb: node.scrollTop,
 				a9: node.clientWidth,
-				aF: node.clientHeight
+				aH: node.clientHeight
 			}
 		};
 	});
@@ -4309,18 +4309,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			aY: _Browser_getScene(),
+			a_: _Browser_getScene(),
 			a7: {
-				bb: x,
-				bc: y,
+				ba: x,
+				bb: y,
 				a9: _Browser_doc.documentElement.clientWidth,
-				aF: _Browser_doc.documentElement.clientHeight
+				aH: _Browser_doc.documentElement.clientHeight
 			},
-			bs: {
-				bb: x + rect.left,
-				bc: y + rect.top,
+			br: {
+				ba: x + rect.left,
+				bb: y + rect.top,
 				a9: rect.width,
-				aF: rect.height
+				aH: rect.height
 			}
 		};
 	});
@@ -4859,7 +4859,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {aC: fragment, aG: host, aM: path, aO: port_, aS: protocol, aT: query};
+		return {aE: fragment, aI: host, aO: path, aQ: port_, aU: protocol, aV: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5204,23 +5204,23 @@ var $elm$svg$Svg$Events$onClick = function (msg) {
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var $author$project$ComponentVisual$circle = function (color) {
 	return {
-		U: _List_fromArray(
+		T: _List_fromArray(
 			[
 				$elm$svg$Svg$Attributes$r('0.5'),
 				$elm$svg$Svg$Attributes$fill(color),
 				$elm$svg$Svg$Events$onClick($author$project$Event$Clicked)
 			]),
-		Z: function (v) {
+		X: function (v) {
 			return _List_fromArray(
 				[
 					$elm$svg$Svg$Attributes$cx(
-					$elm$core$String$fromFloat(v.bb + 0.5)),
+					$elm$core$String$fromFloat(v.ba + 0.5)),
 					$elm$svg$Svg$Attributes$cy(
-					$elm$core$String$fromFloat(v.bc + 0.5))
+					$elm$core$String$fromFloat(v.bb + 0.5))
 				]);
 		},
-		M: {bb: 0, bc: 0},
-		aa: $elm$svg$Svg$circle
+		M: {ba: 0, bb: 0},
+		Z: $elm$svg$Svg$circle
 	};
 };
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
@@ -5229,24 +5229,24 @@ var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var $author$project$ComponentVisual$defaultRect = {
-	U: _List_fromArray(
+	T: _List_fromArray(
 		[
 			$elm$svg$Svg$Attributes$width('1'),
 			$elm$svg$Svg$Attributes$height('1'),
 			$elm$svg$Svg$Attributes$fill('blue'),
 			$elm$svg$Svg$Events$onClick($author$project$Event$Clicked)
 		]),
-	Z: function (v) {
+	X: function (v) {
 		return _List_fromArray(
 			[
 				$elm$svg$Svg$Attributes$x(
-				$elm$core$String$fromFloat(v.bb)),
+				$elm$core$String$fromFloat(v.ba)),
 				$elm$svg$Svg$Attributes$y(
-				$elm$core$String$fromFloat(v.bc))
+				$elm$core$String$fromFloat(v.bb))
 			]);
 	},
-	M: {bb: 0, bc: 0},
-	aa: $elm$svg$Svg$rect
+	M: {ba: 0, bb: 0},
+	Z: $elm$svg$Svg$rect
 };
 var $author$project$EntityTable$emptyEntitySet = A2($author$project$EntityTable$EntitySet, 0, _List_Nil);
 var $author$project$EntityTable$Table = $elm$core$Basics$identity;
@@ -5257,11 +5257,10 @@ var $author$project$ComponentAI$identity = {};
 var $author$project$ComponentAnimation$identity = $elm$core$Maybe$Nothing;
 var $author$project$ComponentAttack$identity = $elm$core$Maybe$Nothing;
 var $author$project$ComponentDamage$identity = _List_Nil;
-var $author$project$ComponentKeyboardInput$identity = {ag: $elm$core$Maybe$Nothing};
 var $author$project$ComponentPlayer$identity = {};
-var $author$project$ComponentVelocity$identity = {bb: 0, bc: 0};
+var $author$project$ComponentVelocity$identity = {ba: 0, bb: 0};
 var $author$project$ComponentPosition$init = function (vec) {
-	return {ab: vec, al: vec};
+	return {ac: vec, ao: vec};
 };
 var $elm$core$Dict$Black = 1;
 var $elm$core$Dict$RBNode_elm_builtin = F5(
@@ -5372,13 +5371,13 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
-var $author$project$EntityTable$insertInTable = F3(
+var $author$project$EntityTable$updateComponent = F3(
 	function (_v0, a, _v1) {
 		var id = _v0;
 		var dict = _v1;
 		return A3($elm$core$Dict$insert, id, a, dict);
 	});
-var $author$project$EntityTable$insertComponent = $author$project$EntityTable$insertInTable;
+var $author$project$EntityTable$insertComponent = $author$project$EntityTable$updateComponent;
 var $author$project$Level1$insertComponentForEntities = F3(
 	function (entities, component, table) {
 		return A3(
@@ -5394,7 +5393,7 @@ var $elm$core$Basics$modBy = _Basics_modBy;
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
 var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
 var $author$project$ComponentVisual$terrain = {
-	U: _List_fromArray(
+	T: _List_fromArray(
 		[
 			$elm$svg$Svg$Attributes$width('100%'),
 			$elm$svg$Svg$Attributes$height('100%'),
@@ -5403,17 +5402,17 @@ var $author$project$ComponentVisual$terrain = {
 			$elm$svg$Svg$Attributes$strokeWidth('0.05'),
 			$elm$svg$Svg$Events$onClick($author$project$Event$Clicked)
 		]),
-	Z: function (v) {
+	X: function (v) {
 		return _List_fromArray(
 			[
 				$elm$svg$Svg$Attributes$x(
-				$elm$core$String$fromFloat(v.bb)),
+				$elm$core$String$fromFloat(v.ba)),
 				$elm$svg$Svg$Attributes$y(
-				$elm$core$String$fromFloat(v.bc))
+				$elm$core$String$fromFloat(v.bb))
 			]);
 	},
-	M: {bb: 0, bc: 0},
-	aa: $elm$svg$Svg$rect
+	M: {ba: 0, bb: 0},
+	Z: $elm$svg$Svg$rect
 };
 var $author$project$Level1$init = function () {
 	var _v0 = $author$project$EntityTable$addEntity($author$project$EntityTable$emptyEntitySet);
@@ -5437,26 +5436,26 @@ var $author$project$Level1$init = function () {
 			enemies,
 			$author$project$ComponentAttack$identity,
 			A3($author$project$EntityTable$insertComponent, playerId, $author$project$ComponentAttack$identity, $author$project$EntityTable$emptyTable)),
-		bo: A3(
+		bn: A3(
 			$author$project$Level1$insertComponentForEntities,
 			enemies,
 			$author$project$ComponentDamage$identity,
 			A3($author$project$EntityTable$insertComponent, playerId, $author$project$ComponentDamage$identity, $author$project$EntityTable$emptyTable)),
-		ad: entities3,
-		bt: $elm$core$Maybe$Just(playerId),
-		bF: false,
-		bG: A3($author$project$EntityTable$insertComponent, playerId, $author$project$ComponentKeyboardInput$identity, $author$project$EntityTable$emptyTable),
-		bH: A3(
+		af: entities3,
+		bs: $elm$core$Maybe$Just(playerId),
+		bE: false,
+		bF: $author$project$EntityTable$emptyTable,
+		bG: A3(
 			$author$project$Level1$insertComponentForEntities,
 			enemies,
-			{ae: 5},
+			{ag: 5},
 			A3(
 				$author$project$EntityTable$insertComponent,
 				playerId,
-				{ae: 1},
+				{ag: 1},
 				$author$project$EntityTable$emptyTable)),
-		bX: A3($author$project$EntityTable$insertComponent, playerId, $author$project$ComponentPlayer$identity, $author$project$EntityTable$emptyTable),
-		aP: function (posTable) {
+		bW: A3($author$project$EntityTable$insertComponent, playerId, $author$project$ComponentPlayer$identity, $author$project$EntityTable$emptyTable),
+		aR: function (posTable) {
 			return A3(
 				$elm$core$List$foldl,
 				F2(
@@ -5477,8 +5476,8 @@ var $author$project$Level1$init = function () {
 							return _Utils_Tuple2(
 								entityId,
 								{
-									bb: A2($elm$core$Basics$modBy, 5, idx),
-									bc: (idx / 5) | 0
+									ba: A2($elm$core$Basics$modBy, 5, idx),
+									bb: (idx / 5) | 0
 								});
 						}),
 					enemies));
@@ -5487,31 +5486,31 @@ var $author$project$Level1$init = function () {
 				$author$project$EntityTable$insertComponent,
 				terrain,
 				$author$project$ComponentPosition$init(
-					{bb: 100, bc: 100}),
+					{ba: 100, bb: 100}),
 				A3(
 					$author$project$EntityTable$insertComponent,
 					playerId,
 					$author$project$ComponentPosition$init(
-						{bb: 6, bc: 6}),
+						{ba: 6, bb: 6}),
 					$author$project$EntityTable$emptyTable))),
-		a2: A3(
+		a4: A3(
 			$author$project$EntityTable$insertComponent,
 			terrain,
 			{
-				bq: {bb: 8, bc: 8},
-				b0: 100
+				bp: {ba: 16, bb: 16},
+				b_: 50
 			},
 			$author$project$EntityTable$emptyTable),
-		b6: A3(
+		b5: A3(
 			$author$project$Level1$insertComponentForEntities,
 			enemies,
-			{am: 3, a4: 3},
+			{ap: 3, a6: 3},
 			A3(
 				$author$project$EntityTable$insertComponent,
 				playerId,
-				{am: 0, a4: 0},
+				{ap: 0, a6: 0},
 				$author$project$EntityTable$emptyTable)),
-		b8: A3(
+		b7: A3(
 			$author$project$Level1$insertComponentForEntities,
 			enemies,
 			$author$project$ComponentVelocity$identity,
@@ -5600,7 +5599,7 @@ var $elm$browser$Browser$AnimationManager$Delta = function (a) {
 };
 var $elm$browser$Browser$AnimationManager$State = F3(
 	function (subs, request, oldTime) {
-		return {aj: oldTime, aV: request, a0: subs};
+		return {am: oldTime, aX: request, a2: subs};
 	});
 var $elm$browser$Browser$AnimationManager$init = $elm$core$Task$succeed(
 	A3($elm$browser$Browser$AnimationManager$State, _List_Nil, $elm$core$Maybe$Nothing, 0));
@@ -5611,8 +5610,8 @@ var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$core$Process$spawn = _Scheduler_spawn;
 var $elm$browser$Browser$AnimationManager$onEffects = F3(
 	function (router, subs, _v0) {
-		var request = _v0.aV;
-		var oldTime = _v0.aj;
+		var request = _v0.aX;
+		var oldTime = _v0.am;
 		var _v1 = _Utils_Tuple2(request, subs);
 		if (_v1.a.$ === 1) {
 			if (!_v1.b.b) {
@@ -5660,8 +5659,8 @@ var $elm$time$Time$Posix = $elm$core$Basics$identity;
 var $elm$time$Time$millisToPosix = $elm$core$Basics$identity;
 var $elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 	function (router, newTime, _v0) {
-		var subs = _v0.a0;
-		var oldTime = _v0.aj;
+		var subs = _v0.a2;
+		var oldTime = _v0.am;
 		var send = function (sub) {
 			if (!sub.$) {
 				var tagger = sub.a;
@@ -5734,7 +5733,7 @@ var $elm$browser$Browser$Events$MySub = F3(
 	});
 var $elm$browser$Browser$Events$State = F2(
 	function (subs, pids) {
-		return {aN: pids, a0: subs};
+		return {aP: pids, a2: subs};
 	});
 var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
 	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
@@ -5854,7 +5853,7 @@ var $elm$core$Dict$merge = F6(
 	});
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
-		return {aB: event, ag: key};
+		return {aD: event, ai: key};
 	});
 var $elm$browser$Browser$Events$spawn = F3(
 	function (router, key, _v0) {
@@ -5928,7 +5927,7 @@ var $elm$browser$Browser$Events$onEffects = F3(
 			stepLeft,
 			stepBoth,
 			stepRight,
-			state.aN,
+			state.aP,
 			$elm$core$Dict$fromList(newSubs),
 			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
 		var deadPids = _v0.a;
@@ -5974,8 +5973,8 @@ var $elm$core$List$filterMap = F2(
 	});
 var $elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _v0, state) {
-		var key = _v0.ag;
-		var event = _v0.aB;
+		var key = _v0.ai;
+		var event = _v0.aD;
 		var toMessage = function (_v2) {
 			var subKey = _v2.a;
 			var _v3 = _v2.b;
@@ -5984,7 +5983,7 @@ var $elm$browser$Browser$Events$onSelfMsg = F3(
 			var decoder = _v3.c;
 			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
 		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.a0);
+		var messages = A2($elm$core$List$filterMap, toMessage, state.a2);
 		return A2(
 			$elm$core$Task$andThen,
 			function (_v1) {
@@ -6044,41 +6043,88 @@ var $author$project$Main$applySystem = F3(
 	});
 var $author$project$SystemAnimation$Components = F3(
 	function (visual, animation, position) {
-		return {C: animation, M: position, G: visual};
+		return {I: animation, M: position, S: visual};
 	});
 var $author$project$SystemAnimation$animate = F3(
 	function (dt, _v0, _v1) {
-		var visual = _v1.G;
-		var animation = _v1.C;
+		var visual = _v1.S;
+		var animation = _v1.I;
 		var position = _v1.M;
 		if (!animation.$) {
 			var anim = animation.a;
-			var timeLeft = anim.a3 - dt;
+			var timeLeft = anim.a5 - dt;
 			return (timeLeft > 0) ? {
-				C: $elm$core$Maybe$Just(
-					{ay: anim.ay, aL: anim.aL, a3: timeLeft}),
+				I: $elm$core$Maybe$Just(
+					{aB: anim.aB, aN: anim.aN, a5: timeLeft}),
 				M: position,
-				G: _Utils_update(
+				S: _Utils_update(
 					visual,
 					{
-						M: {bb: visual.M.bb + ((anim.aL.bb * dt) / anim.ay), bc: visual.M.bc + ((anim.aL.bc * dt) / anim.ay)}
+						M: {ba: visual.M.ba + ((anim.aN.ba * dt) / anim.aB), bb: visual.M.bb + ((anim.aN.bb * dt) / anim.aB)}
 					})
 			} : {
-				C: $elm$core$Maybe$Nothing,
+				I: $elm$core$Maybe$Nothing,
 				M: position,
-				G: _Utils_update(
+				S: _Utils_update(
 					visual,
-					{M: position.ab})
+					{M: position.ac})
 			};
 		} else {
 			return {
-				C: animation,
+				I: animation,
 				M: position,
-				G: _Utils_update(
+				S: _Utils_update(
 					visual,
-					{M: position.ab})
+					{M: position.ac})
 			};
 		}
+	});
+var $author$project$EntityTable$embellishedModifier = function (modifier) {
+	return {
+		g: modifier.g,
+		o: F2(
+			function (func, b) {
+				return A2(
+					modifier.N,
+					func(
+						modifier.g(b)),
+					b);
+			}),
+		N: modifier.N
+	};
+};
+var $author$project$EntityTable$tableModifier = $author$project$EntityTable$embellishedModifier;
+var $author$project$World$animationComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.bg;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{bg: table});
+				})
+		}),
+	function ($) {
+		return $.I;
+	});
+var $author$project$World$positionComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.aR;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{aR: table});
+				})
+		}),
+	function ($) {
+		return $.M;
 	});
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
@@ -6117,6 +6163,16 @@ var $author$project$EntityTable$getComponent = F2(
 		var dict = _v1;
 		return A2($elm$core$Dict$get, id, dict);
 	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (!maybe.$) {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
 var $elm$core$Maybe$map3 = F4(
 	function (func, ma, mb, mc) {
 		if (ma.$ === 1) {
@@ -6137,15 +6193,6 @@ var $elm$core$Maybe$map3 = F4(
 			}
 		}
 	});
-var $author$project$EntityTable$updateComponent = F3(
-	function (entityId, component, table) {
-		var _v0 = A2($author$project$EntityTable$getComponent, entityId, table);
-		if (!_v0.$) {
-			return A3($author$project$EntityTable$insertComponent, entityId, component, table);
-		} else {
-			return table;
-		}
-	});
 var $elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (!maybe.$) {
@@ -6155,32 +6202,82 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$SystemAnimation$updateEntity = F3(
-	function (dt, entityId, world) {
+var $author$project$EntityTable$update3Components = F7(
+	function (updateComponents, toComponents, _v0, _v1, _v2, entityId, world) {
+		var tableA = _v0.a;
+		var getA = _v0.b;
+		var tableB = _v1.a;
+		var getB = _v1.b;
+		var tableC = _v2.a;
+		var getC = _v2.b;
 		return A2(
 			$elm$core$Maybe$withDefault,
 			world,
-			A4(
-				$elm$core$Maybe$map3,
-				F3(
-					function (visual, animation, position) {
-						var components = A3(
-							$author$project$SystemAnimation$animate,
-							dt,
+			A2(
+				$elm$core$Maybe$map,
+				function (components) {
+					var updatedComponents = A2(updateComponents, entityId, components);
+					return A2(
+						tableC.o,
+						A2(
+							$author$project$EntityTable$updateComponent,
 							entityId,
-							A3($author$project$SystemAnimation$Components, visual, animation, position));
-						return _Utils_update(
-							world,
-							{
-								bg: A3($author$project$EntityTable$updateComponent, entityId, components.C, world.bg),
-								aP: A3($author$project$EntityTable$updateComponent, entityId, components.M, world.aP),
-								a8: A3($author$project$EntityTable$updateComponent, entityId, components.G, world.a8)
-							});
-					}),
-				A2($author$project$EntityTable$getComponent, entityId, world.a8),
-				A2($author$project$EntityTable$getComponent, entityId, world.bg),
-				A2($author$project$EntityTable$getComponent, entityId, world.aP)));
+							getC(updatedComponents)),
+						A2(
+							tableB.o,
+							A2(
+								$author$project$EntityTable$updateComponent,
+								entityId,
+								getB(updatedComponents)),
+							A2(
+								tableA.o,
+								A2(
+									$author$project$EntityTable$updateComponent,
+									entityId,
+									getA(updatedComponents)),
+								world)));
+				},
+				A4(
+					$elm$core$Maybe$map3,
+					toComponents,
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableA.g(world)),
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableB.g(world)),
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableC.g(world)))));
 	});
+var $author$project$World$visualComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.a8;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{a8: table});
+				})
+		}),
+	function ($) {
+		return $.S;
+	});
+var $author$project$SystemAnimation$updateEntity = function (dt) {
+	return A5(
+		$author$project$EntityTable$update3Components,
+		$author$project$SystemAnimation$animate(dt),
+		$author$project$SystemAnimation$Components,
+		$author$project$World$visualComponent,
+		$author$project$World$animationComponent,
+		$author$project$World$positionComponent);
+};
 var $author$project$Main$applyTickSystems = F3(
 	function (dt, entitySet, world) {
 		return A3(
@@ -6190,16 +6287,24 @@ var $author$project$Main$applyTickSystems = F3(
 			world);
 	});
 var $elm$core$Basics$not = _Basics_not;
+var $author$project$SystemAttack$clear = F2(
+	function (entityId, world) {
+		return _Utils_update(
+			world,
+			{
+				bi: A3($author$project$EntityTable$updateComponent, entityId, $elm$core$Maybe$Nothing, world.bi)
+			});
+	});
 var $author$project$SystemKeyboardInput$clear = F2(
 	function (entityId, world) {
 		return _Utils_update(
 			world,
 			{
-				bG: A3(
+				bF: A3(
 					$author$project$EntityTable$updateComponent,
 					entityId,
-					{ag: $elm$core$Maybe$Nothing},
-					world.bG)
+					{ai: $elm$core$Maybe$Nothing},
+					world.bF)
 			});
 	});
 var $author$project$SystemAcceleration$clearVelocity = F2(
@@ -6207,7 +6312,7 @@ var $author$project$SystemAcceleration$clearVelocity = F2(
 		return _Utils_update(
 			world,
 			{
-				b8: A3($author$project$EntityTable$insertComponent, entityId, $author$project$ComponentVelocity$identity, world.b8)
+				b7: A3($author$project$EntityTable$insertComponent, entityId, $author$project$ComponentVelocity$identity, world.b7)
 			});
 	});
 var $elm$core$List$filter = F2(
@@ -6233,17 +6338,63 @@ var $author$project$EntityTable$filterEntities = F2(
 var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$SystemCollision$InputComponents = F2(
 	function (position, velocity) {
-		return {M: position, S: velocity};
+		return {M: position, aa: velocity};
 	});
 var $author$project$SystemCollision$OutputComponents = F2(
 	function (position, velocity) {
-		return {M: position, S: velocity};
+		return {M: position, aa: velocity};
 	});
+var $author$project$EntityTable$foldlTable = F3(
+	function (func, acc, _v0) {
+		var dict = _v0;
+		return A3(
+			$elm$core$Dict$foldl,
+			F3(
+				function (id, a, b) {
+					return A3(func, id, a, b);
+				}),
+			acc,
+			dict);
+	});
+var $author$project$EntityTable$foldlTable2 = F4(
+	function (func, result, tableA, tableB) {
+		return A3(
+			$author$project$EntityTable$foldlTable,
+			F3(
+				function (entityId, a, accResult) {
+					var _v0 = A2($author$project$EntityTable$getComponent, entityId, tableB);
+					if (!_v0.$) {
+						var b = _v0.a;
+						return A4(func, entityId, a, b, accResult);
+					} else {
+						return accResult;
+					}
+				}),
+			result,
+			tableA);
+	});
+var $author$project$EntityTable$mapTable2 = F3(
+	function (func, tableA, tableB) {
+		return A4(
+			$author$project$EntityTable$foldlTable2,
+			F4(
+				function (entityId, a, b, result) {
+					return A3(
+						$author$project$EntityTable$updateComponent,
+						entityId,
+						A2(func, a, b),
+						result);
+				}),
+			$author$project$EntityTable$emptyTable,
+			tableA,
+			tableB);
+	});
+var $author$project$EntityTable$andFrom = $author$project$EntityTable$mapTable2($elm$core$Basics$apR);
 var $author$project$Vector2$apply = F3(
 	function (func, left, right) {
 		return {
-			bb: A2(func, left.bb, right.bb),
-			bc: A2(func, left.bc, right.bc)
+			ba: A2(func, left.ba, right.ba),
+			bb: A2(func, left.bb, right.bb)
 		};
 	});
 var $author$project$Vector2$add = $author$project$Vector2$apply($elm$core$Basics$add);
@@ -6282,7 +6433,7 @@ var $author$project$EntityTable$hasValueInTableIf = F3(
 			$author$project$EntityTable$emptyTable);
 	});
 var $author$project$EntityTable$hasValueInTable = $author$project$EntityTable$hasValueInTableIf($elm$core$Basics$eq);
-var $author$project$Vector2$identity = {bb: 0, bc: 0};
+var $author$project$Vector2$identity = {ba: 0, bb: 0};
 var $elm$core$Dict$map = F2(
 	function (func, dict) {
 		if (dict.$ === -2) {
@@ -6313,62 +6464,23 @@ var $author$project$EntityTable$mapTable = F2(
 			dict);
 	});
 var $author$project$SystemCollision$collide = F3(
-	function (_v0, otherComponents, components) {
+	function (otherComponents, _v0, components) {
 		var otherPositions = A2(
 			$author$project$EntityTable$mapTable,
 			F2(
 				function (_v1, _v2) {
 					var position = _v2.M;
-					var velocity = _v2.S;
-					return position.ab;
+					var velocity = _v2.aa;
+					return position.ac;
 				}),
 			otherComponents);
-		var nextPosition = A2($author$project$Vector2$add, components.M.ab, components.S);
-		return (_Utils_eq(components.S, $author$project$Vector2$identity) || A2($author$project$EntityTable$hasValueInTable, nextPosition, otherPositions)) ? _Utils_Tuple2(false, components) : _Utils_Tuple2(
+		var nextPosition = A2($author$project$Vector2$add, components.M.ac, components.aa);
+		return (_Utils_eq(components.aa, $author$project$Vector2$identity) || A2($author$project$EntityTable$hasValueInTable, nextPosition, otherPositions)) ? _Utils_Tuple2(false, components) : _Utils_Tuple2(
 			true,
 			{
 				M: $author$project$ComponentPosition$init(nextPosition),
-				S: $author$project$Vector2$identity
+				aa: components.aa
 			});
-	});
-var $author$project$EntityTable$foldlEntities = F4(
-	function (func, result, table, entityTable) {
-		return A3(
-			$author$project$EntityTable$foldlEntitySet,
-			F2(
-				function (entityId, accResult) {
-					var _v0 = A2($author$project$EntityTable$getComponent, entityId, table);
-					if (!_v0.$) {
-						var component = _v0.a;
-						return A3(func, entityId, component, accResult);
-					} else {
-						return accResult;
-					}
-				}),
-			result,
-			entityTable);
-	});
-var $author$project$EntityTable$mapEntities = function (func) {
-	return A2(
-		$author$project$EntityTable$foldlEntities,
-		F3(
-			function (entityId, a, accTable) {
-				return A3(
-					$author$project$EntityTable$insertInTable,
-					entityId,
-					A2(func, entityId, a),
-					accTable);
-			}),
-		$author$project$EntityTable$emptyTable);
-};
-var $author$project$EntityTable$from = F2(
-	function (table, func) {
-		return A2(
-			$author$project$EntityTable$mapEntities,
-			function (_v0) {
-				return func;
-			},
-			table);
 	});
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
@@ -6384,44 +6496,6 @@ var $elm$core$Maybe$map2 = F3(
 					A2(func, a, b));
 			}
 		}
-	});
-var $author$project$EntityTable$foldlEntities2 = F5(
-	function (func, result, tableA, tableB, entityTable) {
-		return A3(
-			$author$project$EntityTable$foldlEntitySet,
-			F2(
-				function (entityId, accResult) {
-					return A2(
-						$elm$core$Maybe$withDefault,
-						accResult,
-						A3(
-							$elm$core$Maybe$map2,
-							F2(
-								function (a, b) {
-									return A4(func, entityId, a, b, accResult);
-								}),
-							A2($author$project$EntityTable$getComponent, entityId, tableA),
-							A2($author$project$EntityTable$getComponent, entityId, tableB)));
-				}),
-			result,
-			entityTable);
-	});
-var $author$project$EntityTable$join = F3(
-	function (table, resultTable, entityTable) {
-		return A5(
-			$author$project$EntityTable$foldlEntities2,
-			F4(
-				function (entityId, a, func, accTable) {
-					return A3(
-						$author$project$EntityTable$insertInTable,
-						entityId,
-						func(a),
-						accTable);
-				}),
-			$author$project$EntityTable$emptyTable,
-			table,
-			resultTable(entityTable),
-			entityTable);
 	});
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
@@ -6785,11 +6859,22 @@ var $elm$core$Dict$remove = F2(
 			return x;
 		}
 	});
-var $author$project$EntityTable$removeInTable = F2(
+var $author$project$EntityTable$remove = F2(
 	function (_v0, _v1) {
 		var id = _v0;
 		var dict = _v1;
 		return A2($elm$core$Dict$remove, id, dict);
+	});
+var $author$project$EntityTable$using = F2(
+	function (entities, func) {
+		return A3(
+			$author$project$EntityTable$foldlEntitySet,
+			F2(
+				function (entityId, table) {
+					return A3($author$project$EntityTable$updateComponent, entityId, func, table);
+				}),
+			$author$project$EntityTable$emptyTable,
+			entities);
 	});
 var $author$project$SystemCollision$updateEntity = F2(
 	function (entityId, world) {
@@ -6800,17 +6885,19 @@ var $author$project$SystemCollision$updateEntity = F2(
 				$elm$core$Maybe$map2,
 				F2(
 					function (position, velocity) {
-						var inputComponents = A2(
-							$author$project$EntityTable$removeInTable,
-							entityId,
-							A2(
-								$author$project$EntityTable$join,
-								world.b8,
-								A2($author$project$EntityTable$from, world.aP, $author$project$SystemCollision$InputComponents))(world.ad));
 						var _v0 = A3(
 							$author$project$SystemCollision$collide,
+							A2(
+								$author$project$EntityTable$andFrom,
+								world.b7,
+								A2(
+									$author$project$EntityTable$andFrom,
+									world.aR,
+									A2(
+										$author$project$EntityTable$remove,
+										entityId,
+										A2($author$project$EntityTable$using, world.af, $author$project$SystemCollision$InputComponents)))),
 							entityId,
-							inputComponents,
 							A2($author$project$SystemCollision$OutputComponents, position, velocity));
 						var hasMoved = _v0.a;
 						var components = _v0.b;
@@ -6819,12 +6906,12 @@ var $author$project$SystemCollision$updateEntity = F2(
 							_Utils_update(
 								world,
 								{
-									aP: A3($author$project$EntityTable$insertComponent, entityId, components.M, world.aP),
-									b8: A3($author$project$EntityTable$insertComponent, entityId, components.S, world.b8)
+									aR: A3($author$project$EntityTable$insertComponent, entityId, components.M, world.aR),
+									b7: A3($author$project$EntityTable$insertComponent, entityId, components.aa, world.b7)
 								}));
 					}),
-				A2($author$project$EntityTable$getComponent, entityId, world.aP),
-				A2($author$project$EntityTable$getComponent, entityId, world.b8)));
+				A2($author$project$EntityTable$getComponent, entityId, world.aR),
+				A2($author$project$EntityTable$getComponent, entityId, world.b7)));
 	});
 var $author$project$SystemCollision$updateEntities = F2(
 	function (entitySet, world) {
@@ -6864,7 +6951,23 @@ var $author$project$SystemCollision$updateEntities = F2(
 	});
 var $author$project$SystemAttack$Components = F4(
 	function (position, velocity, attack, animation) {
-		return {C: animation, T: attack, M: position, S: velocity};
+		return {I: animation, ab: attack, M: position, aa: velocity};
+	});
+var $author$project$World$attackComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.bi;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{bi: table});
+				})
+		}),
+	function ($) {
+		return $.ab;
 	});
 var $elm$core$Maybe$map4 = F5(
 	function (func, ma, mb, mc, md) {
@@ -6891,46 +6994,103 @@ var $elm$core$Maybe$map4 = F5(
 			}
 		}
 	});
-var $author$project$SystemAttack$velocityAttack = F2(
-	function (_v0, components) {
-		return (!_Utils_eq(components.S, $author$project$ComponentVelocity$identity)) ? {
-			C: components.C,
-			T: (!_Utils_eq(components.S, $author$project$ComponentVelocity$identity)) ? $elm$core$Maybe$Just(
-				{
-					bz: components.M.ab,
-					b5: A2($author$project$Vector2$add, components.M.ab, components.S)
-				}) : $elm$core$Maybe$Nothing,
-			M: components.M,
-			S: components.S
-		} : {C: components.C, T: $elm$core$Maybe$Nothing, M: components.M, S: components.S};
-	});
-var $author$project$SystemAttack$updateEntity = F2(
-	function (entityId, world) {
+var $author$project$EntityTable$update4Components = F8(
+	function (updateComponents, toComponents, _v0, _v1, _v2, _v3, entityId, world) {
+		var tableA = _v0.a;
+		var getA = _v0.b;
+		var tableB = _v1.a;
+		var getB = _v1.b;
+		var tableC = _v2.a;
+		var getC = _v2.b;
+		var tableD = _v3.a;
+		var getD = _v3.b;
 		return A2(
 			$elm$core$Maybe$withDefault,
 			world,
-			A5(
-				$elm$core$Maybe$map4,
-				F4(
-					function (position, velocity, attack, animation) {
-						var components = A2(
-							$author$project$SystemAttack$velocityAttack,
+			A2(
+				$elm$core$Maybe$map,
+				function (components) {
+					var updatedComponents = A2(updateComponents, entityId, components);
+					return A2(
+						tableD.o,
+						A2(
+							$author$project$EntityTable$updateComponent,
 							entityId,
-							A4($author$project$SystemAttack$Components, position, velocity, attack, animation));
-						return _Utils_update(
-							world,
-							{
-								bg: A3($author$project$EntityTable$insertComponent, entityId, components.C, world.bg),
-								bi: A3($author$project$EntityTable$insertComponent, entityId, components.T, world.bi),
-								aP: A3($author$project$EntityTable$insertComponent, entityId, components.M, world.aP),
-								b8: A3($author$project$EntityTable$insertComponent, entityId, components.S, world.b8)
-							});
-					}),
-				A2($author$project$EntityTable$getComponent, entityId, world.aP),
-				A2($author$project$EntityTable$getComponent, entityId, world.b8),
-				A2($author$project$EntityTable$getComponent, entityId, world.bi),
-				A2($author$project$EntityTable$getComponent, entityId, world.bg)));
+							getD(updatedComponents)),
+						A2(
+							tableC.o,
+							A2(
+								$author$project$EntityTable$updateComponent,
+								entityId,
+								getC(updatedComponents)),
+							A2(
+								tableB.o,
+								A2(
+									$author$project$EntityTable$updateComponent,
+									entityId,
+									getB(updatedComponents)),
+								A2(
+									tableA.o,
+									A2(
+										$author$project$EntityTable$updateComponent,
+										entityId,
+										getA(updatedComponents)),
+									world))));
+				},
+				A5(
+					$elm$core$Maybe$map4,
+					toComponents,
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableA.g(world)),
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableB.g(world)),
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableC.g(world)),
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableD.g(world)))));
 	});
+var $author$project$SystemAttack$velocityAttack = F2(
+	function (_v0, _v1) {
+		var position = _v1.M;
+		var velocity = _v1.aa;
+		var attack = _v1.ab;
+		var animation = _v1.I;
+		return {
+			I: animation,
+			ab: (!_Utils_eq(velocity, $author$project$ComponentVelocity$identity)) ? $elm$core$Maybe$Just(
+				{
+					by: position.ac,
+					b4: A2($author$project$Vector2$add, position.ac, velocity)
+				}) : $elm$core$Maybe$Nothing,
+			M: position,
+			aa: velocity
+		};
+	});
+var $author$project$World$velocityComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.b7;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{b7: table});
+				})
+		}),
+	function ($) {
+		return $.aa;
+	});
+var $author$project$SystemAttack$updateEntity = A6($author$project$EntityTable$update4Components, $author$project$SystemAttack$velocityAttack, $author$project$SystemAttack$Components, $author$project$World$positionComponent, $author$project$World$velocityComponent, $author$project$World$attackComponent, $author$project$World$animationComponent);
 var $author$project$EntityTable$removeEntity = F2(
 	function (entityId, _v0) {
 		var lastId = _v0.a;
@@ -6952,108 +7112,146 @@ var $author$project$SystemDie$updateEntity = F2(
 		return _Utils_update(
 			world,
 			{
-				ad: function () {
-					var _v0 = A2($author$project$EntityTable$getComponent, entityId, world.bH);
+				af: function () {
+					var _v0 = A2($author$project$EntityTable$getComponent, entityId, world.bG);
 					if (!_v0.$) {
 						var life = _v0.a;
-						return A3($author$project$EntityTable$removeEntityIf, life.ae <= 0, entityId, world.ad);
+						return A3($author$project$EntityTable$removeEntityIf, life.ag <= 0, entityId, world.af);
 					} else {
-						return world.ad;
+						return world.af;
 					}
 				}()
 			});
 	});
 var $author$project$SystemLife$Components = F2(
 	function (damage, life) {
-		return {V: damage, W: life};
+		return {ad: damage, aj: life};
+	});
+var $author$project$World$damageComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.bn;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{bn: table});
+				})
+		}),
+	function ($) {
+		return $.ad;
+	});
+var $author$project$World$lifeComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.bG;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{bG: table});
+				})
+		}),
+	function ($) {
+		return $.aj;
 	});
 var $author$project$SystemLife$takeDamage = F2(
 	function (_v0, _v1) {
-		var damage = _v1.V;
-		var life = _v1.W;
+		var damage = _v1.ad;
+		var life = _v1.aj;
 		var damages = A3(
 			$elm$core$List$foldl,
 			F2(
 				function (dam, sum) {
-					return sum + dam.bY;
+					return sum + dam.bX;
 				}),
 			0,
 			damage);
 		return {
-			V: damage,
-			W: _Utils_update(
+			ad: damage,
+			aj: _Utils_update(
 				life,
-				{ae: life.ae - damages})
+				{ag: life.ag - damages})
 		};
 	});
-var $author$project$SystemLife$updateEntity = F2(
-	function (entityId, world) {
+var $author$project$EntityTable$update2Components = F6(
+	function (updateComponents, toComponents, _v0, _v1, entityId, world) {
+		var tableA = _v0.a;
+		var getA = _v0.b;
+		var tableB = _v1.a;
+		var getB = _v1.b;
 		return A2(
 			$elm$core$Maybe$withDefault,
 			world,
-			A3(
-				$elm$core$Maybe$map2,
-				F2(
-					function (damage, life) {
-						var components = A2(
-							$author$project$SystemLife$takeDamage,
+			A2(
+				$elm$core$Maybe$map,
+				function (components) {
+					var updatedComponents = A2(updateComponents, entityId, components);
+					return A2(
+						tableB.o,
+						A2(
+							$author$project$EntityTable$updateComponent,
 							entityId,
-							A2($author$project$SystemLife$Components, damage, life));
-						return _Utils_update(
-							world,
-							{
-								bo: A3($author$project$EntityTable$insertComponent, entityId, components.V, world.bo),
-								bH: A3($author$project$EntityTable$insertComponent, entityId, components.W, world.bH)
-							});
-					}),
-				A2($author$project$EntityTable$getComponent, entityId, world.bo),
-				A2($author$project$EntityTable$getComponent, entityId, world.bH)));
+							getB(updatedComponents)),
+						A2(
+							tableA.o,
+							A2(
+								$author$project$EntityTable$updateComponent,
+								entityId,
+								getA(updatedComponents)),
+							world));
+				},
+				A3(
+					$elm$core$Maybe$map2,
+					toComponents,
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableA.g(world)),
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableB.g(world)))));
 	});
+var $author$project$SystemLife$updateEntity = A4($author$project$EntityTable$update2Components, $author$project$SystemLife$takeDamage, $author$project$SystemLife$Components, $author$project$World$damageComponent, $author$project$World$lifeComponent);
 var $author$project$SystemTakeDamage$InputComponents = function (attack) {
-	return {T: attack};
+	return {ab: attack};
 };
 var $author$project$SystemTakeDamage$OutputComponents = F2(
 	function (position, damage) {
-		return {V: damage, M: position};
+		return {ad: damage, M: position};
 	});
-var $author$project$EntityTable$foldlTable = F3(
-	function (func, acc, _v0) {
-		var dict = _v0;
-		return A3(
-			$elm$core$Dict$foldl,
-			F3(
-				function (id, a, b) {
-					return A3(func, id, a, b);
-				}),
-			acc,
-			dict);
-	});
+var $author$project$EntityTable$select = $elm$core$Basics$identity;
 var $author$project$Vector2$eq = F2(
 	function (left, right) {
-		return _Utils_eq(left.bb, right.bb) && _Utils_eq(left.bc, right.bc);
+		return _Utils_eq(left.ba, right.ba) && _Utils_eq(left.bb, right.bb);
 	});
 var $author$project$Vector2$isNull = function (vector) {
 	return A2($author$project$Vector2$eq, vector, $author$project$Vector2$identity);
 };
 var $author$project$Vector2$sub = $author$project$Vector2$apply($elm$core$Basics$sub);
 var $author$project$SystemTakeDamage$takeDamage = F3(
-	function (_v0, attackTable, _v1) {
+	function (attackTable, _v0, _v1) {
 		var position = _v1.M;
-		var damage = _v1.V;
+		var damage = _v1.ad;
 		var updatedDamage = A3(
 			$author$project$EntityTable$foldlTable,
 			F3(
 				function (entityId, input, damages) {
-					var _v2 = input.T;
+					var _v2 = input.ab;
 					if (!_v2.$) {
 						var attack = _v2.a;
-						var fromDirection = A2($author$project$Vector2$sub, attack.b5, position.ab);
+						var fromDirection = A2($author$project$Vector2$sub, attack.b4, position.ac);
 						return $author$project$Vector2$isNull(fromDirection) ? A2(
 							$elm$core$List$cons,
 							{
-								bA: A2($author$project$Vector2$sub, attack.b5, attack.bz),
-								bB: entityId,
-								bY: 1
+								bz: A2($author$project$Vector2$sub, attack.b4, attack.by),
+								bA: entityId,
+								bX: 1
 							},
 							damages) : damages;
 					} else {
@@ -7062,56 +7260,39 @@ var $author$project$SystemTakeDamage$takeDamage = F3(
 				}),
 			_List_Nil,
 			attackTable);
-		return {V: updatedDamage, M: position};
+		return {ad: updatedDamage, M: position};
 	});
 var $author$project$SystemTakeDamage$updateEntity = F2(
 	function (entityId, world) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			world,
-			A3(
-				$elm$core$Maybe$map2,
-				F2(
-					function (position, life) {
-						var inputComponents = A2(
-							$author$project$EntityTable$removeInTable,
-							entityId,
-							A2($author$project$EntityTable$from, world.bi, $author$project$SystemTakeDamage$InputComponents)(world.ad));
-						var components = A3(
-							$author$project$SystemTakeDamage$takeDamage,
-							entityId,
-							inputComponents,
-							A2($author$project$SystemTakeDamage$OutputComponents, position, life));
-						return _Utils_update(
-							world,
-							{
-								bo: A3($author$project$EntityTable$insertComponent, entityId, components.V, world.bo),
-								aP: A3($author$project$EntityTable$insertComponent, entityId, components.M, world.aP)
-							});
-					}),
-				A2($author$project$EntityTable$getComponent, entityId, world.aP),
-				A2($author$project$EntityTable$getComponent, entityId, world.bo)));
+		return A6(
+			$author$project$EntityTable$update2Components,
+			$author$project$SystemTakeDamage$takeDamage(
+				A2(
+					$author$project$EntityTable$andFrom,
+					world.bi,
+					A2(
+						$author$project$EntityTable$remove,
+						entityId,
+						A2(
+							$author$project$EntityTable$using,
+							world.af,
+							$author$project$EntityTable$select($author$project$SystemTakeDamage$InputComponents))))),
+			$author$project$SystemTakeDamage$OutputComponents,
+			$author$project$World$positionComponent,
+			$author$project$World$damageComponent,
+			entityId,
+			world);
 	});
 var $author$project$SystemTriggerAttackAnimation$InputComponents = function (damage) {
-	return {V: damage};
+	return {ad: damage};
 };
 var $author$project$SystemTriggerAttackAnimation$OutputComponents = function (animation) {
-	return {C: animation};
+	return {I: animation};
 };
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (!maybe.$) {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $author$project$ComponentAnimation$attackAnimation = function (offset) {
 	var duration = 0.05;
 	return $elm$core$Maybe$Just(
-		{ay: duration, aL: offset, a3: duration});
+		{aB: duration, aN: offset, a5: duration});
 };
 var $elm$core$List$head = function (list) {
 	if (list.b) {
@@ -7123,8 +7304,8 @@ var $elm$core$List$head = function (list) {
 	}
 };
 var $author$project$SystemTriggerAttackAnimation$triggerAnimation = F3(
-	function (entityId, damageTable, _v0) {
-		var animation = _v0.C;
+	function (damageTable, entityId, _v0) {
+		var animation = _v0.I;
 		var allAnimations = A3(
 			$author$project$EntityTable$foldlTable,
 			F3(
@@ -7132,13 +7313,13 @@ var $author$project$SystemTriggerAttackAnimation$triggerAnimation = F3(
 					var damages = A2(
 						$elm$core$List$filter,
 						function (dam) {
-							return _Utils_eq(dam.bB, entityId);
+							return _Utils_eq(dam.bA, entityId);
 						},
-						input.V);
+						input.ad);
 					var animations = A2(
 						$elm$core$List$map,
 						function (dam) {
-							return $author$project$ComponentAnimation$attackAnimation(dam.bA);
+							return $author$project$ComponentAnimation$attackAnimation(dam.bz);
 						},
 						damages);
 					return _Utils_ap(list, animations);
@@ -7154,63 +7335,89 @@ var $author$project$SystemTriggerAttackAnimation$triggerAnimation = F3(
 				return animation;
 			}
 		}();
-		return {C: anim};
+		return {I: anim};
 	});
-var $author$project$SystemTriggerAttackAnimation$updateEntity = F2(
-	function (entityId, world) {
+var $author$project$EntityTable$update1Component = F5(
+	function (updateComponents, toComponents, _v0, entityId, world) {
+		var tableA = _v0.a;
+		var getA = _v0.b;
 		return A2(
 			$elm$core$Maybe$withDefault,
 			world,
 			A2(
 				$elm$core$Maybe$map,
-				function (animation) {
-					var inputComponents = A2(
-						$author$project$EntityTable$removeInTable,
-						entityId,
-						A2($author$project$EntityTable$from, world.bo, $author$project$SystemTriggerAttackAnimation$InputComponents)(world.ad));
-					var components = A3(
-						$author$project$SystemTriggerAttackAnimation$triggerAnimation,
-						entityId,
-						inputComponents,
-						$author$project$SystemTriggerAttackAnimation$OutputComponents(animation));
-					return _Utils_update(
-						world,
-						{
-							bg: A3($author$project$EntityTable$insertComponent, entityId, components.C, world.bg)
-						});
+				function (components) {
+					var updatedComponents = A2(updateComponents, entityId, components);
+					return A2(
+						tableA.o,
+						A2(
+							$author$project$EntityTable$updateComponent,
+							entityId,
+							getA(updatedComponents)),
+						world);
 				},
-				A2($author$project$EntityTable$getComponent, entityId, world.bg)));
+				A2(
+					$elm$core$Maybe$map,
+					toComponents,
+					A2(
+						$author$project$EntityTable$getComponent,
+						entityId,
+						tableA.g(world)))));
 	});
-var $author$project$Main$confront = F3(
-	function (playingEntities, otherEntities, world) {
+var $author$project$SystemTriggerAttackAnimation$updateEntity = F2(
+	function (entityId, world) {
+		return A5(
+			$author$project$EntityTable$update1Component,
+			$author$project$SystemTriggerAttackAnimation$triggerAnimation(
+				A2(
+					$author$project$EntityTable$andFrom,
+					world.bn,
+					A2(
+						$author$project$EntityTable$remove,
+						entityId,
+						A2(
+							$author$project$EntityTable$using,
+							world.af,
+							$author$project$EntityTable$select($author$project$SystemTriggerAttackAnimation$InputComponents))))),
+			$author$project$SystemTriggerAttackAnimation$OutputComponents,
+			$author$project$World$animationComponent,
+			entityId,
+			world);
+	});
+var $author$project$Main$confront = F2(
+	function (playingEntities, world) {
 		return A3(
 			$author$project$Main$applySystem,
 			$author$project$SystemDie$updateEntity,
-			otherEntities,
+			world.af,
 			A3(
 				$author$project$Main$applySystem,
-				$author$project$SystemAcceleration$clearVelocity,
+				$author$project$SystemAttack$clear,
 				playingEntities,
 				A3(
 					$author$project$Main$applySystem,
-					$author$project$SystemKeyboardInput$clear,
+					$author$project$SystemAcceleration$clearVelocity,
 					playingEntities,
-					A2(
-						$author$project$SystemCollision$updateEntities,
+					A3(
+						$author$project$Main$applySystem,
+						$author$project$SystemKeyboardInput$clear,
 						playingEntities,
 						A3(
 							$author$project$Main$applySystem,
-							$author$project$SystemLife$updateEntity,
-							otherEntities,
+							$author$project$SystemTriggerAttackAnimation$updateEntity,
+							world.af,
 							A3(
 								$author$project$Main$applySystem,
-								$author$project$SystemTriggerAttackAnimation$updateEntity,
-								playingEntities,
+								$author$project$SystemLife$updateEntity,
+								world.af,
 								A3(
 									$author$project$Main$applySystem,
 									$author$project$SystemTakeDamage$updateEntity,
-									otherEntities,
-									A3($author$project$Main$applySystem, $author$project$SystemAttack$updateEntity, playingEntities, world))))))));
+									world.af,
+									A2(
+										$author$project$SystemCollision$updateEntities,
+										world.af,
+										A3($author$project$Main$applySystem, $author$project$SystemAttack$updateEntity, playingEntities, world)))))))));
 	});
 var $author$project$Main$getAis = function (world) {
 	return A2(
@@ -7220,33 +7427,49 @@ var $author$project$Main$getAis = function (world) {
 				A2($author$project$EntityTable$getComponent, entityId, world.bf),
 				$elm$core$Maybe$Nothing);
 		},
-		world.ad);
+		world.af);
 };
 var $author$project$Main$getPlayers = function (world) {
 	return A2(
 		$author$project$EntityTable$filterEntities,
 		function (entityId) {
 			return !_Utils_eq(
-				A2($author$project$EntityTable$getComponent, entityId, world.bX),
+				A2($author$project$EntityTable$getComponent, entityId, world.bW),
 				$elm$core$Maybe$Nothing);
 		},
-		world.ad);
+		world.af);
 };
 var $author$project$SystemAcceleration$Components = F2(
 	function (keyboardInput, velocity) {
-		return {I: keyboardInput, S: velocity};
+		return {U: keyboardInput, aa: velocity};
+	});
+var $author$project$World$keyboardInputComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.bF;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{bF: table});
+				})
+		}),
+	function ($) {
+		return $.U;
 	});
 var $author$project$SystemAcceleration$updateVelocityFromKey = F2(
 	function (key, velocity) {
 		switch (key) {
 			case 0:
-				return {bb: velocity.bb - 1, bc: velocity.bc};
+				return {ba: velocity.ba - 1, bb: velocity.bb};
 			case 1:
-				return {bb: velocity.bb + 1, bc: velocity.bc};
+				return {ba: velocity.ba + 1, bb: velocity.bb};
 			case 2:
-				return {bb: velocity.bb, bc: velocity.bc + 1};
+				return {ba: velocity.ba, bb: velocity.bb + 1};
 			case 3:
-				return {bb: velocity.bb, bc: velocity.bc - 1};
+				return {ba: velocity.ba, bb: velocity.bb - 1};
 			default:
 				return velocity;
 		}
@@ -7254,48 +7477,42 @@ var $author$project$SystemAcceleration$updateVelocityFromKey = F2(
 var $author$project$SystemAcceleration$updatePlayerVelocity = F2(
 	function (_v0, components) {
 		return {
-			I: components.I,
-			S: function () {
-				var _v1 = components.I.ag;
+			U: components.U,
+			aa: function () {
+				var _v1 = components.U.ai;
 				if (!_v1.$) {
 					var key = _v1.a;
-					return A2($author$project$SystemAcceleration$updateVelocityFromKey, key, components.S);
+					return A2($author$project$SystemAcceleration$updateVelocityFromKey, key, components.aa);
 				} else {
-					return components.S;
+					return components.aa;
 				}
 			}()
 		};
 	});
-var $author$project$SystemAcceleration$updateEntity = F2(
-	function (entityId, world) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			world,
-			A3(
-				$elm$core$Maybe$map2,
-				F2(
-					function (keyboardInput, velocity) {
-						var components = A2(
-							$author$project$SystemAcceleration$updatePlayerVelocity,
-							entityId,
-							A2($author$project$SystemAcceleration$Components, keyboardInput, velocity));
-						return _Utils_update(
-							world,
-							{
-								bG: A3($author$project$EntityTable$insertComponent, entityId, components.I, world.bG),
-								b8: A3($author$project$EntityTable$insertComponent, entityId, components.S, world.b8)
-							});
-					}),
-				A2($author$project$EntityTable$getComponent, entityId, world.bG),
-				A2($author$project$EntityTable$getComponent, entityId, world.b8)));
-	});
+var $author$project$SystemAcceleration$updateEntity = A4($author$project$EntityTable$update2Components, $author$project$SystemAcceleration$updatePlayerVelocity, $author$project$SystemAcceleration$Components, $author$project$World$keyboardInputComponent, $author$project$World$velocityComponent);
 var $author$project$SystemAccelerationAI$InputComponents = F2(
 	function (player, position) {
-		return {bW: player, M: position};
+		return {bV: player, M: position};
 	});
 var $author$project$SystemAccelerationAI$OutputComponents = F3(
 	function (turn, velocity, position) {
-		return {M: position, P: turn, S: velocity};
+		return {M: position, _: turn, aa: velocity};
+	});
+var $author$project$World$turnComponent = _Utils_Tuple2(
+	$author$project$EntityTable$tableModifier(
+		{
+			g: function ($) {
+				return $.b5;
+			},
+			N: F2(
+				function (table, world) {
+					return _Utils_update(
+						world,
+						{b5: table});
+				})
+		}),
+	function ($) {
+		return $._;
 	});
 var $elm$core$Basics$negate = function (n) {
 	return -n;
@@ -7319,9 +7536,9 @@ var $author$project$EntityTable$valuesTable = function (_v0) {
 	return $elm$core$Dict$values(dict);
 };
 var $author$project$SystemAccelerationAI$updateAIVelocity = F3(
-	function (_v0, inputTable, _v1) {
-		var turn = _v1.P;
-		var velocity = _v1.S;
+	function (inputTable, _v0, _v1) {
+		var turn = _v1._;
+		var velocity = _v1.aa;
 		var position = _v1.M;
 		var playerPos = A2(
 			$elm$core$Maybe$withDefault,
@@ -7333,121 +7550,91 @@ var $author$project$SystemAccelerationAI$updateAIVelocity = F3(
 						return $.M;
 					},
 					$author$project$EntityTable$valuesTable(inputTable))));
-		var diff = A2($author$project$Vector2$sub, playerPos.ab, position.ab);
+		var diff = A2($author$project$Vector2$sub, playerPos.ac, position.ac);
 		var nextVelocity = (_Utils_cmp(
-			$elm$core$Basics$abs(diff.bb),
-			$elm$core$Basics$abs(diff.bc)) > 0) ? ((!diff.bb) ? $author$project$Vector2$identity : {
-			bb: diff.bb / $elm$core$Basics$abs(diff.bb),
-			bc: 0
-		}) : ((!diff.bc) ? $author$project$Vector2$identity : {
-			bb: 0,
-			bc: diff.bc / $elm$core$Basics$abs(diff.bc)
+			$elm$core$Basics$abs(diff.ba),
+			$elm$core$Basics$abs(diff.bb)) > 0) ? ((!diff.ba) ? $author$project$Vector2$identity : {
+			ba: diff.ba / $elm$core$Basics$abs(diff.ba),
+			bb: 0
+		}) : ((!diff.bb) ? $author$project$Vector2$identity : {
+			ba: 0,
+			bb: diff.bb / $elm$core$Basics$abs(diff.bb)
 		});
-		return (turn.am <= 0) ? {M: position, P: turn, S: nextVelocity} : {M: position, P: turn, S: velocity};
+		return (turn.ap <= 0) ? {M: position, _: turn, aa: nextVelocity} : {M: position, _: turn, aa: velocity};
 	});
 var $author$project$SystemAccelerationAI$updateEntity = F2(
 	function (entityId, world) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			world,
-			A4(
-				$elm$core$Maybe$map3,
-				F3(
-					function (turn, velocity, position) {
-						var inputComponents = A2(
-							$author$project$EntityTable$join,
-							world.aP,
-							A2($author$project$EntityTable$from, world.bX, $author$project$SystemAccelerationAI$InputComponents))(world.ad);
-						var components = A3(
-							$author$project$SystemAccelerationAI$updateAIVelocity,
+		return A7(
+			$author$project$EntityTable$update3Components,
+			$author$project$SystemAccelerationAI$updateAIVelocity(
+				A2(
+					$author$project$EntityTable$andFrom,
+					world.aR,
+					A2(
+						$author$project$EntityTable$andFrom,
+						world.bW,
+						A2(
+							$author$project$EntityTable$remove,
 							entityId,
-							inputComponents,
-							A3($author$project$SystemAccelerationAI$OutputComponents, turn, velocity, position));
-						return _Utils_update(
-							world,
-							{
-								aP: A3($author$project$EntityTable$insertComponent, entityId, components.M, world.aP),
-								b6: A3($author$project$EntityTable$insertComponent, entityId, components.P, world.b6),
-								b8: A3($author$project$EntityTable$insertComponent, entityId, components.S, world.b8)
-							});
-					}),
-				A2($author$project$EntityTable$getComponent, entityId, world.b6),
-				A2($author$project$EntityTable$getComponent, entityId, world.b8),
-				A2($author$project$EntityTable$getComponent, entityId, world.aP)));
+							A2(
+								$author$project$EntityTable$using,
+								world.af,
+								$author$project$EntityTable$select($author$project$SystemAccelerationAI$InputComponents)))))),
+			$author$project$SystemAccelerationAI$OutputComponents,
+			$author$project$World$turnComponent,
+			$author$project$World$velocityComponent,
+			$author$project$World$positionComponent,
+			entityId,
+			world);
 	});
 var $author$project$SystemTurn$Components = function (turn) {
-	return {P: turn};
+	return {_: turn};
 };
 var $author$project$SystemTurn$playTurn = F2(
-	function (_v0, components) {
-		var turn = components.P;
-		return (!components.P.am) ? _Utils_update(
-			components,
-			{
-				P: _Utils_update(
-					turn,
-					{am: components.P.a4})
-			}) : _Utils_update(
-			components,
-			{
-				P: _Utils_update(
-					turn,
-					{am: components.P.am - 1})
-			});
+	function (_v0, _v1) {
+		var turn = _v1._;
+		return (!turn.ap) ? {
+			_: _Utils_update(
+				turn,
+				{ap: turn.a6})
+		} : {
+			_: _Utils_update(
+				turn,
+				{ap: turn.ap - 1})
+		};
 	});
-var $author$project$SystemTurn$updateEntity = F2(
-	function (entityId, world) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			world,
-			A2(
-				$elm$core$Maybe$map,
-				function (turn) {
-					var components = A2(
-						$author$project$SystemTurn$playTurn,
-						entityId,
-						$author$project$SystemTurn$Components(turn));
-					return _Utils_update(
-						world,
-						{
-							b6: A3($author$project$EntityTable$insertComponent, entityId, components.P, world.b6)
-						});
-				},
-				A2($author$project$EntityTable$getComponent, entityId, world.b6)));
-	});
+var $author$project$SystemTurn$updateEntity = A3($author$project$EntityTable$update1Component, $author$project$SystemTurn$playTurn, $author$project$SystemTurn$Components, $author$project$World$turnComponent);
 var $author$project$Main$playTurn = function (world) {
 	var players = $author$project$Main$getPlayers(world);
 	var ais = $author$project$Main$getAis(world);
-	return A3(
+	return A2(
 		$author$project$Main$confront,
 		ais,
-		players,
 		A3(
 			$author$project$Main$applySystem,
 			$author$project$SystemAccelerationAI$updateEntity,
 			ais,
-			A3(
+			A2(
 				$author$project$Main$confront,
 				players,
-				ais,
 				A3(
 					$author$project$Main$applySystem,
 					$author$project$SystemAcceleration$updateEntity,
 					players,
-					A3($author$project$Main$applySystem, $author$project$SystemTurn$updateEntity, world.ad, world)))));
+					A3($author$project$Main$applySystem, $author$project$SystemTurn$updateEntity, world.af, world)))));
 };
 var $author$project$SystemKeyboardInput$read = F3(
 	function (key, entityId, world) {
 		return _Utils_update(
 			world,
 			{
-				bG: A3(
+				bF: A3(
 					$author$project$EntityTable$updateComponent,
 					entityId,
 					{
-						ag: $elm$core$Maybe$Just(key)
+						ai: $elm$core$Maybe$Just(key)
 					},
-					world.bG)
+					world.bF)
 			});
 	});
 var $author$project$Main$update = F2(
@@ -7455,33 +7642,33 @@ var $author$project$Main$update = F2(
 		switch (msg.$) {
 			case 3:
 				var key = msg.a;
-				return world.bF ? _Utils_Tuple2(
+				return world.bE ? _Utils_Tuple2(
 					A3(
 						$author$project$Main$applySystem,
 						$author$project$SystemKeyboardInput$read(key),
-						world.ad,
+						world.af,
 						world),
 					$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
 					$author$project$Main$playTurn(
 						A3(
 							$author$project$Main$applySystem,
 							$author$project$SystemKeyboardInput$read(key),
-							world.ad,
+							world.af,
 							world)),
 					$elm$core$Platform$Cmd$none);
 			case 0:
 				var dt = msg.a;
 				return _Utils_Tuple2(
-					A3($author$project$Main$applyTickSystems, dt, world.ad, world),
+					A3($author$project$Main$applyTickSystems, dt, world.af, world),
 					$elm$core$Platform$Cmd$none);
 			case 1:
 				return _Utils_Tuple2(
 					_Utils_update(
 						world,
-						{bF: !world.bF}),
+						{bE: !world.bE}),
 					$elm$core$Platform$Cmd$none);
 			case 2:
-				return world.bF ? _Utils_Tuple2(
+				return world.bE ? _Utils_Tuple2(
 					$author$project$Main$playTurn(world),
 					$elm$core$Platform$Cmd$none) : _Utils_Tuple2(world, $elm$core$Platform$Cmd$none);
 			case 6:
@@ -7490,14 +7677,14 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						world,
 						{
-							bt: $elm$core$Maybe$Just(entityId)
+							bs: $elm$core$Maybe$Just(entityId)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 7:
 				return _Utils_Tuple2(
 					_Utils_update(
 						world,
-						{bt: $elm$core$Maybe$Nothing}),
+						{bs: $elm$core$Maybe$Nothing}),
 					$elm$core$Platform$Cmd$none);
 			case 5:
 				return _Utils_Tuple2(world, $elm$core$Platform$Cmd$none);
@@ -7532,14 +7719,14 @@ var $author$project$ComponentAI$toString = function (_v0) {
 };
 var $author$project$Vector2$toString = F2(
 	function (func, vector) {
-		return 'V2(x=' + (func(vector.bb) + (', y=' + (func(vector.bc) + ')')));
+		return 'V2(x=' + (func(vector.ba) + (', y=' + (func(vector.bb) + ')')));
 	});
 var $author$project$Vector2$vectorFloatToString = $author$project$Vector2$toString($elm$core$String$fromFloat);
 var $author$project$ComponentAnimation$toString = function (maybeAnimation) {
 	var content = function () {
 		if (!maybeAnimation.$) {
 			var animation = maybeAnimation.a;
-			return 'duration=' + ($elm$core$String$fromFloat(animation.ay) + (', timeLeft=' + ($elm$core$String$fromFloat(animation.a3) + (', offset=' + $author$project$Vector2$vectorFloatToString(animation.aL)))));
+			return 'duration=' + ($elm$core$String$fromFloat(animation.aB) + (', timeLeft=' + ($elm$core$String$fromFloat(animation.a5) + (', offset=' + $author$project$Vector2$vectorFloatToString(animation.aN)))));
 		} else {
 			return '';
 		}
@@ -7549,7 +7736,7 @@ var $author$project$ComponentAnimation$toString = function (maybeAnimation) {
 var $author$project$ComponentAttack$toString = function (maybeAttack) {
 	if (!maybeAttack.$) {
 		var attack = maybeAttack.a;
-		return 'Attack(from=' + ($author$project$Vector2$vectorFloatToString(attack.bz) + (', to=' + ($author$project$Vector2$vectorFloatToString(attack.b5) + ')')));
+		return 'Attack(from=' + ($author$project$Vector2$vectorFloatToString(attack.by) + (', to=' + ($author$project$Vector2$vectorFloatToString(attack.b4) + ')')));
 	} else {
 		return 'Attack()';
 	}
@@ -7559,7 +7746,7 @@ var $author$project$ComponentDamage$toString = function (damage) {
 		$elm$core$List$foldl,
 		F2(
 			function (dam, finalString) {
-				return finalString + ('fromEntity=' + ($author$project$EntityTable$entityIdToString(dam.bB) + (', fromDirection=' + ($author$project$Vector2$vectorFloatToString(dam.bA) + (', points=' + $elm$core$String$fromInt(dam.bY))))));
+				return finalString + ('fromEntity=' + ($author$project$EntityTable$entityIdToString(dam.bA) + (', fromDirection=' + ($author$project$Vector2$vectorFloatToString(dam.bz) + (', points=' + $elm$core$String$fromInt(dam.bX))))));
 			}),
 		'',
 		damage) + ')');
@@ -7583,7 +7770,7 @@ var $author$project$KeyboardInput$toString = function (key) {
 	}
 };
 var $author$project$ComponentKeyboardInput$toString = function (input) {
-	var _v0 = input.ag;
+	var _v0 = input.ai;
 	if (!_v0.$) {
 		var key = _v0.a;
 		return 'KeyboardInput(' + ($author$project$KeyboardInput$toString(key) + ')');
@@ -7592,19 +7779,19 @@ var $author$project$ComponentKeyboardInput$toString = function (input) {
 	}
 };
 var $author$project$ComponentLife$toString = function (life) {
-	return 'Life(healPoints = ' + ($elm$core$String$fromInt(life.ae) + ')');
+	return 'Life(healPoints = ' + ($elm$core$String$fromInt(life.ag) + ')');
 };
 var $author$project$ComponentPlayer$toString = function (_v0) {
 	return 'ComponentPlayer()';
 };
 var $author$project$ComponentPosition$toString = function (position) {
-	return 'Position(currentPos=' + ($author$project$Vector2$vectorFloatToString(position.ab) + (', previousPos=' + ($author$project$Vector2$vectorFloatToString(position.al) + ')')));
+	return 'Position(currentPos=' + ($author$project$Vector2$vectorFloatToString(position.ac) + (', previousPos=' + ($author$project$Vector2$vectorFloatToString(position.ao) + ')')));
 };
 var $author$project$ComponentTurn$toString = function (turn) {
-	return 'ComponentTurn(remainingTurns=' + ($elm$core$String$fromInt(turn.am) + ')');
+	return 'ComponentTurn(remainingTurns=' + ($elm$core$String$fromInt(turn.ap) + ')');
 };
 var $author$project$ComponentVelocity$toString = function (velocity) {
-	return 'Velocity(x = ' + ($elm$core$String$fromFloat(velocity.bb) + (', y = ' + ($elm$core$String$fromFloat(velocity.bc) + ')')));
+	return 'Velocity(x = ' + ($elm$core$String$fromFloat(velocity.ba) + (', y = ' + ($elm$core$String$fromFloat(velocity.bb) + ')')));
 };
 var $author$project$ComponentVisual$toString = function (visual) {
 	return 'Visual(position=(' + ($author$project$Vector2$vectorFloatToString(visual.M) + '))');
@@ -7637,17 +7824,17 @@ var $author$project$SystemDisplayDebug$displayDebug = F2(
 			[
 				$elm$html$Html$text(
 				'EntityId(' + ($author$project$EntityTable$entityIdToString(entityId) + ')')),
-				A2(componentToHtml, world.bG, $author$project$ComponentKeyboardInput$toString),
+				A2(componentToHtml, world.bF, $author$project$ComponentKeyboardInput$toString),
 				A2(componentToHtml, world.a8, $author$project$ComponentVisual$toString),
-				A2(componentToHtml, world.aP, $author$project$ComponentPosition$toString),
-				A2(componentToHtml, world.b8, $author$project$ComponentVelocity$toString),
-				A2(componentToHtml, world.bH, $author$project$ComponentLife$toString),
+				A2(componentToHtml, world.aR, $author$project$ComponentPosition$toString),
+				A2(componentToHtml, world.b7, $author$project$ComponentVelocity$toString),
+				A2(componentToHtml, world.bG, $author$project$ComponentLife$toString),
 				A2(componentToHtml, world.bi, $author$project$ComponentAttack$toString),
-				A2(componentToHtml, world.bo, $author$project$ComponentDamage$toString),
+				A2(componentToHtml, world.bn, $author$project$ComponentDamage$toString),
 				A2(componentToHtml, world.bg, $author$project$ComponentAnimation$toString),
-				A2(componentToHtml, world.b6, $author$project$ComponentTurn$toString),
+				A2(componentToHtml, world.b5, $author$project$ComponentTurn$toString),
 				A2(componentToHtml, world.bf, $author$project$ComponentAI$toString),
-				A2(componentToHtml, world.bX, $author$project$ComponentPlayer$toString)
+				A2(componentToHtml, world.bW, $author$project$ComponentPlayer$toString)
 			]);
 		return A2(
 			$elm$html$Html$div,
@@ -7715,6 +7902,58 @@ var $author$project$EntityTable$mapEntitySet = F2(
 var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
 var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
 var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $author$project$EntityTable$doesEntityExist = F2(
+	function (entityId, _v0) {
+		var list = _v0.b;
+		return A2($elm$core$List$member, entityId, list);
+	});
+var $author$project$EntityTable$filterEntitiesInTable = F2(
+	function (entities, table) {
+		return A2(
+			$author$project$EntityTable$filterTable,
+			F2(
+				function (entityId, _v0) {
+					return A2($author$project$EntityTable$doesEntityExist, entityId, entities);
+				}),
+			table);
+	});
+var $author$project$EntityTable$mapEntities = F3(
+	function (func, table, entityTable) {
+		return A2(
+			$author$project$EntityTable$mapTable,
+			func,
+			A2($author$project$EntityTable$filterEntitiesInTable, entityTable, table));
+	});
 var $author$project$Event$DiscardMsg = {$: 4};
 var $author$project$Event$DisplayDebug = function (a) {
 	return {$: 6, a: a};
@@ -7729,10 +7968,10 @@ var $author$project$SystemDraw$toSvg = F2(
 				return _Utils_eq(visualMsg, $author$project$Event$Clicked) ? $author$project$Event$DisplayDebug(entityId) : $author$project$Event$DiscardMsg;
 			},
 			A2(
-				visual.aa,
+				visual.Z,
 				_Utils_ap(
-					visual.U,
-					visual.Z(visual.M)),
+					visual.T,
+					visual.X(visual.M)),
 				_List_Nil));
 	});
 var $author$project$SystemDraw$visualToSvg = F2(
@@ -7763,20 +8002,20 @@ var $author$project$Level1$visual = function (world) {
 								_List_fromArray(
 									[
 										$elm$svg$Svg$Attributes$transform(
-										'translate(' + ($elm$core$String$fromFloat(position.ab.bb) + (', ' + ($elm$core$String$fromFloat(position.ab.bc) + ')')))),
+										'translate(' + ($elm$core$String$fromFloat(position.ac.ba) + (', ' + ($elm$core$String$fromFloat(position.ac.bb) + ')')))),
 										$elm$svg$Svg$Attributes$width(
-										$elm$core$String$fromInt(terrain.bq.bb * terrain.b0)),
+										$elm$core$String$fromInt(terrain.bp.ba * terrain.b_)),
 										$elm$svg$Svg$Attributes$height(
-										$elm$core$String$fromInt(terrain.bq.bc * terrain.b0)),
+										$elm$core$String$fromInt(terrain.bp.bb * terrain.b_)),
 										$elm$svg$Svg$Attributes$viewBox(
-										'0 0 ' + ($elm$core$String$fromInt(terrain.bq.bb) + (' ' + $elm$core$String$fromInt(terrain.bq.bc))))
+										'0 0 ' + ($elm$core$String$fromInt(terrain.bp.ba) + (' ' + $elm$core$String$fromInt(terrain.bp.bb))))
 									]),
-								A2($author$project$SystemDraw$visualToSvg, world.a8, world.ad));
+								A2($author$project$SystemDraw$visualToSvg, world.a8, world.af));
 						}),
-					A2($author$project$EntityTable$getComponent, entityId, world.a2),
-					A2($author$project$EntityTable$getComponent, entityId, world.aP)));
+					A2($author$project$EntityTable$getComponent, entityId, world.a4),
+					A2($author$project$EntityTable$getComponent, entityId, world.aR)));
 		},
-		world.ad);
+		world.af);
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -7801,15 +8040,15 @@ var $author$project$Main$view = function (world) {
 					]),
 				_List_fromArray(
 					[
-						world.bF ? $elm$html$Html$text('Pause') : $elm$html$Html$text(''),
+						world.bE ? $elm$html$Html$text('Pause') : $elm$html$Html$text(''),
 						$author$project$Level1$visual(world),
-						A2($author$project$SystemDisplayDebug$display, world, world.bt)
+						A2($author$project$SystemDisplayDebug$display, world, world.bs)
 					]))
 			]),
-		b4: 'ECS'
+		b3: 'ECS'
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$document(
-	{bE: $author$project$Main$init, b1: $author$project$Main$subscriptions, b7: $author$project$Main$update, b9: $author$project$Main$view});
+	{bD: $author$project$Main$init, b$: $author$project$Main$subscriptions, b6: $author$project$Main$update, b8: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(0))(0)}});}(this));

@@ -3,8 +3,7 @@ module SystemTriggerAttackAnimation exposing (..)
 import ComponentAnimation exposing (ComponentAnimation)
 import ComponentDamage exposing (ComponentDamage)
 import EntityTable exposing (..)
-import Vector2
-import World exposing (World)
+import World exposing (..)
 
 
 type alias InputComponents =
@@ -19,29 +18,22 @@ type alias OutputComponents =
 
 updateEntity : EntityId -> World -> World
 updateEntity entityId world =
-    Maybe.withDefault world <|
-        Maybe.map
-            (\animation ->
-                let
-                    inputComponents =
-                        (InputComponents
-                            |> from world.damageComponents
-                        )
-                            world.entities
-                            |> removeInTable entityId
-
-                    components =
-                        triggerAnimation entityId inputComponents (OutputComponents animation)
-                in
-                { world
-                    | animationComponents = insertComponent entityId components.animation world.animationComponents
-                }
+    update1Component
+        (triggerAnimation
+            (select InputComponents
+                |> using world.entities
+                |> remove entityId
+                |> andFrom world.damageComponents
             )
-            (getComponent entityId world.animationComponents)
+        )
+        OutputComponents
+        animationComponent
+        entityId
+        world
 
 
-triggerAnimation : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
-triggerAnimation entityId damageTable { animation } =
+triggerAnimation : Table InputComponents -> EntityId -> OutputComponents -> OutputComponents
+triggerAnimation damageTable entityId { animation } =
     let
         allAnimations =
             foldlTable

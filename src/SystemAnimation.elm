@@ -4,7 +4,7 @@ import ComponentAnimation exposing (ComponentAnimation)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVisual exposing (ComponentVisual)
 import EntityTable exposing (..)
-import World exposing (World)
+import World exposing (..)
 
 
 type alias Components =
@@ -15,23 +15,13 @@ type alias Components =
 
 
 updateEntity : Float -> EntityId -> World -> World
-updateEntity dt entityId world =
-    Maybe.withDefault world <|
-        Maybe.map3
-            (\visual animation position ->
-                let
-                    components =
-                        animate dt entityId (Components visual animation position)
-                in
-                { world
-                    | visualComponents = updateComponent entityId components.visual world.visualComponents
-                    , animationComponents = updateComponent entityId components.animation world.animationComponents
-                    , positionComponents = updateComponent entityId components.position world.positionComponents
-                }
-            )
-            (getComponent entityId world.visualComponents)
-            (getComponent entityId world.animationComponents)
-            (getComponent entityId world.positionComponents)
+updateEntity dt =
+    update3Components
+        (animate dt)
+        Components
+        visualComponent
+        animationComponent
+        positionComponent
 
 
 animate : Float -> EntityId -> Components -> Components

@@ -6,7 +6,7 @@ import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
 import Vector2
-import World exposing (World)
+import World exposing (..)
 
 
 type alias InputComponents =
@@ -24,33 +24,25 @@ type alias OutputComponents =
 
 updateEntity : EntityId -> World -> World
 updateEntity entityId world =
-    Maybe.withDefault world <|
-        Maybe.map3
-            (\turn velocity position ->
-                let
-                    inputComponents =
-                        (InputComponents
-                            |> from world.playerComponents
-                            |> join world.positionComponents
-                        )
-                            world.entities
-
-                    components =
-                        updateAIVelocity entityId inputComponents (OutputComponents turn velocity position)
-                in
-                { world
-                    | turnComponents = insertComponent entityId components.turn world.turnComponents
-                    , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
-                    , positionComponents = insertComponent entityId components.position world.positionComponents
-                }
+    update3Components
+        (updateAIVelocity
+            (select InputComponents
+                |> using world.entities
+                |> remove entityId
+                |> andFrom world.playerComponents
+                |> andFrom world.positionComponents
             )
-            (getComponent entityId world.turnComponents)
-            (getComponent entityId world.velocityComponents)
-            (getComponent entityId world.positionComponents)
+        )
+        OutputComponents
+        turnComponent
+        velocityComponent
+        positionComponent
+        entityId
+        world
 
 
-updateAIVelocity : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
-updateAIVelocity _ inputTable { turn, velocity, position } =
+updateAIVelocity : Table InputComponents -> EntityId -> OutputComponents -> OutputComponents
+updateAIVelocity inputTable _ { turn, velocity, position } =
     let
         playerPos =
             Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))
@@ -62,14 +54,15 @@ updateAIVelocity _ inputTable { turn, velocity, position } =
             if abs diff.x > abs diff.y then
                 if diff.x == 0 then
                     Vector2.identity
+
                 else
                     { x = diff.x / abs diff.x, y = 0 }
 
+            else if diff.y == 0 then
+                Vector2.identity
+
             else
-                if diff.y == 0 then
-                    Vector2.identity
-                else
-                    { x = 0, y = diff.y / abs diff.y }
+                { x = 0, y = diff.y / abs diff.y }
     in
     if turn.remainingTurns <= 0 then
         { turn = turn

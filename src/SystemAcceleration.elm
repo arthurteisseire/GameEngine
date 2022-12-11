@@ -4,7 +4,7 @@ import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
 import KeyboardInput exposing (Key)
-import World exposing (World)
+import World exposing (..)
 
 
 type alias Components =
@@ -19,21 +19,12 @@ clearVelocity entityId world =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
-    Maybe.withDefault world <|
-        Maybe.map2
-            (\keyboardInput velocity ->
-                let
-                    components =
-                        updatePlayerVelocity entityId (Components keyboardInput velocity)
-                in
-                { world
-                    | keyboardInputComponents = insertComponent entityId components.keyboardInput world.keyboardInputComponents
-                    , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
-                }
-            )
-            (getComponent entityId world.keyboardInputComponents)
-            (getComponent entityId world.velocityComponents)
+updateEntity =
+    update2Components
+        updatePlayerVelocity
+        Components
+        keyboardInputComponent
+        velocityComponent
 
 
 updatePlayerVelocity : EntityId -> Components -> Components

@@ -6,7 +6,7 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
 import Vector2
-import World exposing (World)
+import World exposing (..)
 
 
 type alias Components =
@@ -18,58 +18,32 @@ type alias Components =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
-    Maybe.withDefault world <|
-        Maybe.map4
-            (\position velocity attack animation ->
-                let
-                    components =
-                        velocityAttack entityId (Components position velocity attack animation)
-                in
-                { world
-                    | positionComponents = insertComponent entityId components.position world.positionComponents
-                    , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
-                    , attackComponents = insertComponent entityId components.attack world.attackComponents
-                    , animationComponents = insertComponent entityId components.animation world.animationComponents
-                }
-            )
-            (getComponent entityId world.positionComponents)
-            (getComponent entityId world.velocityComponents)
-            (getComponent entityId world.attackComponents)
-            (getComponent entityId world.animationComponents)
+updateEntity =
+    update4Components velocityAttack
+        Components
+        positionComponent
+        velocityComponent
+        attackComponent
+        animationComponent
 
 
 velocityAttack : EntityId -> Components -> Components
-velocityAttack _ components =
-    if components.velocity /= ComponentVelocity.identity then
-        { position = components.position
-        , velocity = components.velocity
-        , attack =
-            if components.velocity /= ComponentVelocity.identity then
-                Just
-                    { from = components.position.currentPos
-                    , to = Vector2.add components.position.currentPos components.velocity
-                    }
+velocityAttack _ { position, velocity, attack, animation } =
+    { position = position
+    , velocity = velocity
+    , attack =
+        if velocity /= ComponentVelocity.identity then
+            Just
+                { from = position.currentPos
+                , to = Vector2.add position.currentPos velocity
+                }
 
-            else
-                Nothing
-        , animation = components.animation
-        }
-
-    else
-        { position = components.position
-        , velocity = components.velocity
-        , attack = Nothing
-        , animation = components.animation
-        }
+        else
+            Nothing
+    , animation = animation
+    }
 
 
 clear : EntityId -> World -> World
 clear entityId world =
-    { world
-        | attackComponents =
-            updateComponent
-                entityId
-                Nothing
-                world.attackComponents
-    }
+    { world | attackComponents = updateComponent entityId Nothing world.attackComponents }

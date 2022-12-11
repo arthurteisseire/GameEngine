@@ -35,7 +35,6 @@ init =
         entities3
     , keyboardInputComponents =
         emptyTable
-            |> insertComponent playerId ComponentKeyboardInput.identity
     , positionComponents =
         emptyTable
             |> insertComponent playerId (ComponentPosition.init { x = 6, y = 6 })

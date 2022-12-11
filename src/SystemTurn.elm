@@ -2,7 +2,7 @@ module SystemTurn exposing (..)
 
 import ComponentTurn exposing (ComponentTurn)
 import EntityTable exposing (..)
-import World exposing (World)
+import World exposing (..)
 
 
 type alias Components =
@@ -11,29 +11,20 @@ type alias Components =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
-    Maybe.withDefault world <|
-        Maybe.map
-            (\turn ->
-                let
-                    components =
-                        playTurn entityId (Components turn)
-                in
-                { world
-                    | turnComponents = insertComponent entityId components.turn world.turnComponents
-                }
-            )
-            (getComponent entityId world.turnComponents)
+updateEntity =
+    update1Component playTurn
+        Components
+        turnComponent
 
 
 playTurn : EntityId -> Components -> Components
-playTurn _ components =
-    let
-        turn =
-            components.turn
-    in
-    if components.turn.remainingTurns == 0 then
-        { components | turn = { turn | remainingTurns = components.turn.turnsToPlay } }
+playTurn _ { turn } =
+    if turn.remainingTurns == 0 then
+        { turn =
+            { turn | remainingTurns = turn.turnsToPlay }
+        }
 
     else
-        { components | turn = { turn | remainingTurns = components.turn.remainingTurns - 1 } }
+        { turn =
+            { turn | remainingTurns = turn.remainingTurns - 1 }
+        }

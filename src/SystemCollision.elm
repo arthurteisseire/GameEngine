@@ -4,7 +4,7 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import EntityTable exposing (..)
 import Vector2
-import World exposing (World)
+import World exposing (..)
 
 
 type alias InputComponents =
@@ -54,16 +54,16 @@ updateEntity entityId world =
         Maybe.map2
             (\position velocity ->
                 let
-                    inputComponents =
-                        (InputComponents
-                            |> from world.positionComponents
-                            |> join world.velocityComponents
-                        )
-                            world.entities
-                            |> removeInTable entityId
-
                     ( hasMoved, components ) =
-                        collide entityId inputComponents (OutputComponents position velocity)
+                        collide
+                            (InputComponents
+                                |> using world.entities
+                                |> remove entityId
+                                |> andFrom world.positionComponents
+                                |> andFrom world.velocityComponents
+                            )
+                            entityId
+                            (OutputComponents position velocity)
                 in
                 ( hasMoved
                 , { world
@@ -76,8 +76,8 @@ updateEntity entityId world =
             (getComponent entityId world.velocityComponents)
 
 
-collide : EntityId -> Table InputComponents -> OutputComponents -> ( Bool, OutputComponents )
-collide _ otherComponents components =
+collide : Table InputComponents -> EntityId -> OutputComponents -> ( Bool, OutputComponents )
+collide otherComponents _ components =
     let
         otherPositions =
             mapTable
@@ -98,3 +98,53 @@ collide _ otherComponents components =
           , velocity = components.velocity
           }
         )
+
+
+
+-- Simpler but not fully functional. Kept to test performance
+
+
+updateEntitiesSimple : EntitySet -> World -> World
+updateEntitiesSimple entitySet world =
+    foldlEntitySet
+        updateEntitySimple
+        world
+        entitySet
+
+
+updateEntitySimple : EntityId -> World -> World
+updateEntitySimple entityId world =
+    update2Components
+        (collideSimple
+            (select InputComponents
+                |> using world.entities
+                |> remove entityId
+                |> andFrom world.positionComponents
+                |> andFrom world.velocityComponents
+            )
+        )
+        OutputComponents
+        positionComponent
+        velocityComponent
+        entityId
+        world
+
+
+collideSimple : Table InputComponents -> EntityId -> OutputComponents -> OutputComponents
+collideSimple otherComponents _ components =
+    let
+        otherPositions =
+            mapTable
+                (\_ { position, velocity } -> position.currentPos)
+                otherComponents
+
+        nextPosition =
+            Vector2.add components.position.currentPos components.velocity
+    in
+    if components.velocity == Vector2.identity || hasValueInTable nextPosition otherPositions then
+        components
+
+    else
+        { position = ComponentPosition.init nextPosition
+        , velocity = components.velocity
+        }

@@ -3,7 +3,7 @@ module SystemLife exposing (..)
 import ComponentDamage exposing (ComponentDamage)
 import ComponentLife exposing (ComponentLife)
 import EntityTable exposing (..)
-import World exposing (World)
+import World exposing (..)
 
 
 type alias Components =
@@ -13,21 +13,11 @@ type alias Components =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
-    Maybe.withDefault world <|
-        Maybe.map2
-            (\damage life ->
-                let
-                    components =
-                        takeDamage entityId (Components damage life)
-                in
-                { world
-                    | damageComponents = insertComponent entityId components.damage world.damageComponents
-                    , lifeComponents = insertComponent entityId components.life world.lifeComponents
-                }
-            )
-            (getComponent entityId world.damageComponents)
-            (getComponent entityId world.lifeComponents)
+updateEntity =
+    update2Components takeDamage
+        Components
+        damageComponent
+        lifeComponent
 
 
 takeDamage : EntityId -> Components -> Components

@@ -6,10 +6,7 @@ import Event exposing (Msg(..))
 import Svg exposing (Svg)
 
 
-visualToSvg :
-    Table ComponentVisual
-    -> EntitySet
-    -> List (Svg Msg)
+visualToSvg : Table ComponentVisual -> EntitySet -> List (Svg Msg)
 visualToSvg visualTable entitySet =
     mapEntities (\entityId visual -> toSvg entityId visual) visualTable entitySet
         |> valuesTable

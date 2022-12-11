@@ -5,7 +5,7 @@ import ComponentDamage exposing (ComponentDamage)
 import ComponentPosition exposing (ComponentPosition)
 import EntityTable exposing (..)
 import Vector2
-import World exposing (World)
+import World exposing (..)
 
 
 type alias InputComponents =
@@ -21,31 +21,23 @@ type alias OutputComponents =
 
 updateEntity : EntityId -> World -> World
 updateEntity entityId world =
-    Maybe.withDefault world <|
-        Maybe.map2
-            (\position life ->
-                let
-                    inputComponents =
-                        (InputComponents
-                            |> from world.attackComponents
-                        )
-                            world.entities
-                            |> removeInTable entityId
-
-                    components =
-                        takeDamage entityId inputComponents (OutputComponents position life)
-                in
-                { world
-                    | positionComponents = insertComponent entityId components.position world.positionComponents
-                    , damageComponents = insertComponent entityId components.damage world.damageComponents
-                }
+    update2Components
+        (takeDamage
+            (select InputComponents
+                |> using world.entities
+                |> remove entityId
+                |> andFrom world.attackComponents
             )
-            (getComponent entityId world.positionComponents)
-            (getComponent entityId world.damageComponents)
+        )
+        OutputComponents
+        positionComponent
+        damageComponent
+        entityId
+        world
 
 
-takeDamage : EntityId -> Table InputComponents -> OutputComponents -> OutputComponents
-takeDamage _ attackTable { position, damage } =
+takeDamage : Table InputComponents -> EntityId -> OutputComponents -> OutputComponents
+takeDamage attackTable _ { position, damage } =
     let
         updatedDamage =
             foldlTable
