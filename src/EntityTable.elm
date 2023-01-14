@@ -119,16 +119,34 @@ andMap =
 -- Get Components
 
 
-getComponents : a -> EntityId -> db -> Maybe a
-getComponents a _ _ =
+toInputComponents : a -> EntityId -> db -> Maybe a
+toInputComponents a _ _ =
     Just a
 
 
-andWith : (db -> Table a) -> (EntityId -> db -> Maybe (a -> b)) -> EntityId -> db -> Maybe b
-andWith getTable nestedFunc entityId db =
-    Maybe.andThen
-        (\func -> mapComponent func entityId (getTable db))
-        (nestedFunc entityId db)
+withInput : (db -> Table a) -> (EntityId -> db -> Maybe (a -> b)) -> EntityId -> db -> Maybe b
+withInput getTable nestedFunc entityId db =
+    nestedFunc entityId db
+        |> Maybe.andThen
+            (\func -> mapComponent func entityId (getTable db))
+
+
+toOutputComponents : b -> EntityId -> db -> db
+toOutputComponents _ _ db =
+    db
+
+
+withOutput :
+    ( Modifier (Table a) db, b -> a )
+    -> (b -> EntityId -> db -> db)
+    -> b
+    -> EntityId
+    -> db
+    -> db
+withOutput ( tableA, getA ) func outputComponents entityId world =
+    world
+        |> func outputComponents entityId
+        |> tableA.map (updateComponent entityId (getA outputComponents))
 
 
 update1Component :

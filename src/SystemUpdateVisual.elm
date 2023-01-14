@@ -22,12 +22,12 @@ updateEntity =
     updateComponentsNewTest
         { func = updateVisual
         , inputComponents =
-            getComponents InputComponents
-                |> andIn .visualComponents
-                |> andIn .positionComponents
+            toInputComponents InputComponents
+                |> withInput .visualComponents
+                |> withInput .positionComponents
         , output =
-            update1ComponentNew
-                visualComponent
+            toOutputComponents
+                |> withOutput visualComponent
         }
 
 
