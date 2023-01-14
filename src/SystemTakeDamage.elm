@@ -24,7 +24,7 @@ type alias OtherComponents =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
+updateEntity =
     updateComponentsWithOthers
         { func = takeDamage
         , inputComponents =
@@ -32,15 +32,12 @@ updateEntity entityId world =
                 |> withInput .positionComponents
         , otherComponents =
             select OtherComponents
-                |> using world.entities
-                |> remove entityId
-                |> andFrom world.attackComponents
+                |> using .entities
+                |> andFrom .attackComponents
         , output =
             toOutputComponents
                 |> withOutput damageComponent
         }
-        entityId
-        world
 
 
 takeDamage : Table OtherComponents -> InputComponents -> OutputComponents

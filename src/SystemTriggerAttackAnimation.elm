@@ -30,9 +30,8 @@ updateEntity entityId world =
                 |> withInput .animationComponents
         , otherComponents =
             select OtherComponents
-                |> using world.entities
-                |> remove entityId
-                |> andFrom world.damageComponents
+                |> using .entities
+                |> andFrom .damageComponents
         , output =
             toOutputComponents
                 |> withOutput animationComponent

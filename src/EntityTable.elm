@@ -51,18 +51,20 @@ updateComponents { func, inputComponents, output } entityId db =
 updateComponentsWithOthers :
     { func : Table others -> inputs -> outputs
     , inputComponents : EntityId -> db -> Maybe inputs
-    , otherComponents : Table others
+    , otherComponents : db -> Table others
     , output : outputs -> EntityId -> db -> db
     }
     -> EntityId
     -> db
     -> db
-updateComponentsWithOthers { func, inputComponents, otherComponents, output } =
+updateComponentsWithOthers { func, inputComponents, otherComponents, output } entityId db =
     updateComponents
-        { func = func otherComponents
+        { func = func (otherComponents db |> remove entityId)
         , inputComponents = inputComponents
         , output = output
         }
+        entityId
+        db
 
 
 
@@ -93,10 +95,15 @@ withOutput :
     -> EntityId
     -> db
     -> db
-withOutput ( tableA, getA ) func outputComponents entityId world =
+withOutput modifier previousUpdater outputComponents entityId world =
     world
-        |> func outputComponents entityId
-        |> tableA.map (updateComponent entityId (getA outputComponents))
+        |> previousUpdater outputComponents entityId
+        |> updateComponentInTable modifier outputComponents entityId
+
+
+updateComponentInTable : ( Modifier (Table a) db, b -> a ) -> b -> EntityId -> db -> db
+updateComponentInTable ( tableA, getA ) outputComponents entityId =
+    tableA.map (updateComponent entityId (getA outputComponents))
 
 
 
@@ -205,16 +212,21 @@ select =
     identity
 
 
-using : EntitySet -> a -> Table a
-using entities func =
+using : (db -> EntitySet) -> a -> db -> Table a
+using toEntities func world =
     foldlEntitySet
         (\entityId table -> updateComponent entityId func table)
         emptyTable
-        entities
+        (toEntities world)
 
 
-andFrom : Table a -> Table (a -> result) -> Table result
-andFrom =
+andFrom : (db -> Table a) -> (db -> Table (a -> result)) -> db -> Table result
+andFrom getTable getNextTable world =
+    andMapTable (getTable world) (getNextTable world)
+
+
+andMapTable : Table a -> Table (a -> result) -> Table result
+andMapTable =
     mapTable2 (|>)
 
 

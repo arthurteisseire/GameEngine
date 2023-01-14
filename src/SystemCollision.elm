@@ -62,13 +62,13 @@ updateEntity entityId world =
                 let
                     ( hasMoved, components ) =
                         collide
-                            (InputComponents
-                                |> using world.entities
-                                |> remove entityId
-                                |> andFrom world.positionComponents
-                                |> andFrom world.velocityComponents
+                            ((InputComponents
+                                |> using .entities
+                                |> andFrom .positionComponents
+                                |> andFrom .velocityComponents
+                             )
+                                world
                             )
-                            entityId
                             (OutputComponents position velocity)
                 in
                 ( hasMoved
@@ -82,8 +82,8 @@ updateEntity entityId world =
             (getComponent entityId world.velocityComponents)
 
 
-collide : Table InputComponents -> EntityId -> OutputComponents -> ( Bool, OutputComponents )
-collide otherComponents _ components =
+collide : Table InputComponents -> OutputComponents -> ( Bool, OutputComponents )
+collide otherComponents components =
     let
         otherPositions =
             mapTable
@@ -128,10 +128,9 @@ updateEntitySimple entityId world =
                 |> withInput .velocityComponents
         , otherComponents =
             select OtherComponents
-                |> using world.entities
-                |> remove entityId
-                |> andFrom world.positionComponents
-                |> andFrom world.velocityComponents
+                |> using .entities
+                |> andFrom .positionComponents
+                |> andFrom .velocityComponents
         , output =
             toOutputComponents
                 |> withOutput positionComponent

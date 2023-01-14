@@ -38,10 +38,9 @@ updateEntity entityId world =
                 |> withInput .positionComponents
         , otherComponents =
             select OtherComponents
-                |> using world.entities
-                |> remove entityId
-                |> andFrom world.playerComponents
-                |> andFrom world.positionComponents
+                |> using .entities
+                |> andFrom .playerComponents
+                |> andFrom .positionComponents
         , output =
             toOutputComponents
                 |> withOutput velocityComponent
