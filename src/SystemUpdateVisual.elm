@@ -17,51 +17,18 @@ type alias InputComponents =
     }
 
 
-toPair : InputComponents -> ( ComponentVisual, ComponentPosition )
-toPair inputComponents =
-    ( inputComponents.visual, inputComponents.position )
-
-
-
--- TODO: updateEntity point-free
-
-
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
+updateEntity =
     updateComponentsNewTest
-        { db = world
-        , entityId = entityId
-        , func = updateVisual
+        { func = updateVisual
         , inputComponents =
             getComponents InputComponents
-                |> andIn world.visualComponents
-                |> andIn world.positionComponents
+                |> andIn .visualComponents
+                |> andIn .positionComponents
         , output =
             update1ComponentNew
                 visualComponent
         }
-
-
-getComponents :
-    (ComponentVisual -> ComponentPosition -> InputComponents)
-    -> EntityId
-    -> Maybe (ComponentVisual -> ComponentPosition -> InputComponents)
-getComponents func _ =
-    Just func
-
-
-andIn : Table a -> (EntityId -> Maybe (a -> b)) -> EntityId -> Maybe b
-andIn table nestedFunc entityId =
-    Maybe.andThen
-        (\func -> getNextComponent table func entityId)
-        (nestedFunc entityId)
-
-
-getNextComponent : Table a -> (a -> b) -> EntityId -> Maybe b
-getNextComponent table func entityId =
-    Maybe.map
-        (\a -> func a)
-        (getComponent entityId table)
 
 
 updateVisual : InputComponents -> OutputComponents

@@ -49,17 +49,17 @@ updateComponentsNew { db, entityId, func, inputComponents, output } =
 
 
 updateComponentsNewTest :
-    { db : db
-    , entityId : EntityId
-    , func : inputs -> outputs
-    , inputComponents : EntityId -> Maybe inputs
+    { func : inputs -> outputs
+    , inputComponents : EntityId -> db -> Maybe inputs
     , output : outputs -> EntityId -> db -> db
     }
+    -> EntityId
     -> db
-updateComponentsNewTest { db, entityId, func, inputComponents, output } =
+    -> db
+updateComponentsNewTest { func, inputComponents, output } entityId db =
     Maybe.map
         (\components -> output (func components) entityId db)
-        (inputComponents entityId)
+        (inputComponents entityId db)
         |> Maybe.withDefault db
 
 
@@ -119,26 +119,23 @@ andMap =
 -- Get Components
 
 
-getComponents : a -> EntityId -> Maybe ( EntityId, a )
-getComponents func entityId =
-    Just ( entityId, func )
+getComponents : a -> EntityId -> db -> Maybe a
+getComponents a _ _ =
+    Just a
 
 
-andIn : Table a -> Maybe ( EntityId, a -> b ) -> Maybe ( EntityId, b )
-andIn table =
-    Maybe.andThen (getNextComponent table)
+andIn : (db -> Table a) -> (EntityId -> db -> Maybe (a -> b)) -> EntityId -> db -> Maybe b
+andIn getTable nestedFunc entityId db =
+    Maybe.andThen
+        (\func -> getNextComponent (getTable db) func entityId)
+        (nestedFunc entityId db)
 
 
-getNextComponent : Table a -> ( EntityId, a -> b ) -> Maybe ( EntityId, b )
-getNextComponent table ( entityId, func ) =
+getNextComponent : Table a -> (a -> b) -> EntityId -> Maybe b
+getNextComponent table func entityId =
     Maybe.map
-        (\a -> ( entityId, func a ))
+        (\a -> func a)
         (getComponent entityId table)
-
-
-done : Maybe ( EntityId, b ) -> Maybe b
-done =
-    Maybe.map Tuple.second
 
 
 update1Component :
