@@ -7,7 +7,13 @@ import EntityTable exposing (..)
 import World exposing (..)
 
 
-type alias Components =
+type alias OutputComponents =
+    { visual : ComponentVisual
+    , animation : ComponentAnimation
+    }
+
+
+type alias InputComponents =
     { visual : ComponentVisual
     , animation : ComponentAnimation
     , position : ComponentPosition
@@ -15,16 +21,24 @@ type alias Components =
 
 
 updateEntity : Float -> EntityId -> World -> World
-updateEntity dt =
-    update3Components
-        (animate dt)
-        Components
-        visualComponent
-        animationComponent
-        positionComponent
+updateEntity dt entityId world =
+    updateComponentsNew
+        { db = world
+        , entityId = entityId
+        , func = animate dt entityId
+        , inputComponents =
+            Just InputComponents
+                |> withComponent entityId world.visualComponents
+                |> withComponent entityId world.animationComponents
+                |> withComponent entityId world.positionComponents
+        , output =
+            update2ComponentsNew
+                visualComponent
+                animationComponent
+        }
 
 
-animate : Float -> EntityId -> Components -> Components
+animate : Float -> EntityId -> InputComponents -> OutputComponents
 animate dt _ { visual, animation, position } =
     case animation of
         Just anim ->
@@ -46,17 +60,14 @@ animate dt _ { visual, animation, position } =
                         , timeLeft = timeLeft
                         , offset = anim.offset
                         }
-                , position = position
                 }
 
             else
-                { visual = { visual | position = position.currentPos }
+                { visual = visual
                 , animation = Nothing
-                , position = position
                 }
 
         Nothing ->
-            { visual = { visual | position = position.currentPos }
+            { visual = visual
             , animation = animation
-            , position = position
             }

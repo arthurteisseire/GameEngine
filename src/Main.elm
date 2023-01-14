@@ -22,6 +22,7 @@ import SystemLife
 import SystemTakeDamage
 import SystemTriggerAttackAnimation
 import SystemTurn
+import SystemUpdateVisual
 import World exposing (World)
 
 
@@ -40,7 +41,12 @@ main =
 
 init : () -> ( World, Cmd Msg )
 init _ =
-    ( Level1.init
+    let
+        level1 =
+            Level1.init
+    in
+    --( applySystem SystemUpdateVisual.updateEntity level1.entities level1
+    ( level1
     , Cmd.none
     )
 
@@ -68,7 +74,7 @@ update msg world =
 
         Tick dt ->
             ( world
-                |> applyTickSystems dt world.entities
+                --|> applyTickSystems dt world.entities
             , Cmd.none
             )
 
@@ -123,6 +129,7 @@ confront playingEntities world =
     world
         |> applySystem SystemAttack.updateEntity playingEntities
         |> SystemCollision.updateEntities world.entities
+        |> applySystem SystemUpdateVisual.updateEntity playingEntities
         |> applySystem SystemTakeDamage.updateEntity world.entities
         |> applySystem SystemLife.updateEntity world.entities
         |> applySystem SystemTriggerAttackAnimation.updateEntity world.entities
@@ -135,7 +142,10 @@ confront playingEntities world =
 applyTickSystems : Float -> EntitySet -> World -> World
 applyTickSystems dt entitySet world =
     world
-        |> applySystem (SystemAnimation.updateEntity dt) entitySet
+
+
+
+--|> applySystem (SystemAnimation.updateEntity dt) entitySet
 
 
 applySystem : (EntityId -> World -> World) -> EntitySet -> World -> World

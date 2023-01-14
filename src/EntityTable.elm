@@ -33,6 +33,114 @@ embellishedModifier modifier =
     }
 
 
+updateComponentsNew :
+    { db : db
+    , entityId : EntityId
+    , func : inputs -> outputs
+    , inputComponents : Maybe inputs
+    , output : outputs -> EntityId -> db -> db
+    }
+    -> db
+updateComponentsNew { db, entityId, func, inputComponents, output } =
+    Maybe.map
+        (\components -> output (func components) entityId db)
+        inputComponents
+        |> Maybe.withDefault db
+
+
+updateComponentsNewTest :
+    { db : db
+    , entityId : EntityId
+    , func : inputs -> outputs
+    , inputComponents : EntityId -> Maybe inputs
+    , output : outputs -> EntityId -> db -> db
+    }
+    -> db
+updateComponentsNewTest { db, entityId, func, inputComponents, output } =
+    Maybe.map
+        (\components -> output (func components) entityId db)
+        (inputComponents entityId)
+        |> Maybe.withDefault db
+
+
+updateComponentsWithOthersNew :
+    { db : db
+    , entityId : EntityId
+    , func : Table others -> inputs -> outputs
+    , inputComponents : Maybe inputs
+    , otherComponents : Table others
+    , output : outputs -> EntityId -> db -> db
+    }
+    -> db
+updateComponentsWithOthersNew { db, entityId, func, inputComponents, otherComponents, output } =
+    Maybe.map
+        (\components -> output (func otherComponents components) entityId db)
+        inputComponents
+        |> Maybe.withDefault db
+
+
+update1ComponentNew : ( Modifier (Table a) db, b -> a ) -> b -> EntityId -> db -> db
+update1ComponentNew ( tableA, getA ) outputComponents entityId world =
+    tableA.map (updateComponent entityId (getA outputComponents)) world
+
+
+update2ComponentsNew :
+    ( Modifier (Table a) db, components -> a )
+    -> ( Modifier (Table b) db, components -> b )
+    -> components
+    -> EntityId
+    -> db
+    -> db
+update2ComponentsNew modifierA modifierB outputComponents entityId db =
+    db
+        |> update1ComponentNew modifierA outputComponents entityId
+        |> update1ComponentNew modifierB outputComponents entityId
+
+
+
+--andMapComponent : EntityId -> Table a -> Maybe (( EntityId, a ) -> b) -> Maybe ( EntityId, b )
+--andMapComponent entityId table maybeFunc =
+--    case
+--    andMap (getComponent entityId table) maybeFunc
+--        |> Maybe.map (\component -> ( entityId, component ))
+
+
+withComponent : EntityId -> Table a -> Maybe (a -> b) -> Maybe b
+withComponent entityId table =
+    andMap (getComponent entityId table)
+
+
+andMap : Maybe a -> Maybe (a -> b) -> Maybe b
+andMap =
+    Maybe.map2 (|>)
+
+
+
+-- Get Components
+
+
+getComponents : a -> EntityId -> Maybe ( EntityId, a )
+getComponents func entityId =
+    Just ( entityId, func )
+
+
+andIn : Table a -> Maybe ( EntityId, a -> b ) -> Maybe ( EntityId, b )
+andIn table =
+    Maybe.andThen (getNextComponent table)
+
+
+getNextComponent : Table a -> ( EntityId, a -> b ) -> Maybe ( EntityId, b )
+getNextComponent table ( entityId, func ) =
+    Maybe.map
+        (\a -> ( entityId, func a ))
+        (getComponent entityId table)
+
+
+done : Maybe ( EntityId, b ) -> Maybe b
+done =
+    Maybe.map Tuple.second
+
+
 update1Component :
     (EntityId -> components -> components)
     -> (a -> components)

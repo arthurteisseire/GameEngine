@@ -9,29 +9,38 @@ import Vector2
 import World exposing (..)
 
 
-type alias Components =
+type alias OutputComponents =
+    { attack : ComponentAttack
+    }
+
+
+type alias InputComponents =
     { position : ComponentPosition
     , velocity : ComponentVelocity
-    , attack : ComponentAttack
     , animation : ComponentAnimation
     }
 
 
 updateEntity : EntityId -> World -> World
-updateEntity =
-    update4Components velocityAttack
-        Components
-        positionComponent
-        velocityComponent
-        attackComponent
-        animationComponent
+updateEntity entityId world =
+    updateComponentsNew
+        { db = world
+        , entityId = entityId
+        , func = velocityAttack entityId
+        , inputComponents =
+            Just InputComponents
+                |> withComponent entityId world.positionComponents
+                |> withComponent entityId world.velocityComponents
+                |> withComponent entityId world.animationComponents
+        , output =
+            update1ComponentNew
+                attackComponent
+        }
 
 
-velocityAttack : EntityId -> Components -> Components
-velocityAttack _ { position, velocity, attack, animation } =
-    { position = position
-    , velocity = velocity
-    , attack =
+velocityAttack : EntityId -> InputComponents -> OutputComponents
+velocityAttack _ { position, velocity, animation } =
+    { attack =
         if velocity /= ComponentVelocity.identity then
             Just
                 { from = position.currentPos
@@ -40,7 +49,6 @@ velocityAttack _ { position, velocity, attack, animation } =
 
         else
             Nothing
-    , animation = animation
     }
 
 

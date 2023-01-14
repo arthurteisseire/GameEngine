@@ -9,40 +9,49 @@ import Vector2
 import World exposing (..)
 
 
-type alias InputComponents =
-    { player : ComponentPlayer
-    , position : ComponentPosition
+type alias OutputComponents =
+    { velocity : ComponentVelocity
     }
 
 
-type alias OutputComponents =
+type alias InputComponents =
     { turn : ComponentTurn
     , velocity : ComponentVelocity
     , position : ComponentPosition
     }
 
 
+type alias OtherComponents =
+    { player : ComponentPlayer
+    , position : ComponentPosition
+    }
+
+
 updateEntity : EntityId -> World -> World
 updateEntity entityId world =
-    update3Components
-        (updateAIVelocity
-            (select InputComponents
+    updateComponentsWithOthersNew
+        { db = world
+        , entityId = entityId
+        , func = updateAIVelocity entityId
+        , inputComponents =
+            Just InputComponents
+                |> withComponent entityId world.turnComponents
+                |> withComponent entityId world.velocityComponents
+                |> withComponent entityId world.positionComponents
+        , otherComponents =
+            select OtherComponents
                 |> using world.entities
                 |> remove entityId
                 |> andFrom world.playerComponents
                 |> andFrom world.positionComponents
-            )
-        )
-        OutputComponents
-        turnComponent
-        velocityComponent
-        positionComponent
-        entityId
-        world
+        , output =
+            update1ComponentNew
+                velocityComponent
+        }
 
 
-updateAIVelocity : Table InputComponents -> EntityId -> OutputComponents -> OutputComponents
-updateAIVelocity inputTable _ { turn, velocity, position } =
+updateAIVelocity : EntityId -> Table OtherComponents -> InputComponents -> OutputComponents
+updateAIVelocity _ inputTable { turn, velocity, position } =
     let
         playerPos =
             Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))
@@ -65,13 +74,9 @@ updateAIVelocity inputTable _ { turn, velocity, position } =
                 { x = 0, y = diff.y / abs diff.y }
     in
     if turn.remainingTurns <= 0 then
-        { turn = turn
-        , velocity = nextVelocity
-        , position = position
+        { velocity = nextVelocity
         }
 
     else
-        { turn = turn
-        , velocity = velocity
-        , position = position
+        { velocity = velocity
         }

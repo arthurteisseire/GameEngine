@@ -7,7 +7,13 @@ import KeyboardInput exposing (Key)
 import World exposing (..)
 
 
-type alias Components =
+type alias OutputComponents =
+    { keyboardInput : ComponentKeyboardInput
+    , velocity : ComponentVelocity
+    }
+
+
+type alias InputComponents =
     { keyboardInput : ComponentKeyboardInput
     , velocity : ComponentVelocity
     }
@@ -19,17 +25,25 @@ clearVelocity entityId world =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity =
-    update2Components
-        updatePlayerVelocity
-        Components
-        keyboardInputComponent
-        velocityComponent
+updateEntity entityId world =
+    updateComponentsNew
+        { db = world
+        , entityId = entityId
+        , func = updatePlayerVelocity entityId
+        , inputComponents =
+            Just InputComponents
+                |> withComponent entityId world.keyboardInputComponents
+                |> withComponent entityId world.velocityComponents
+        , output =
+            update2ComponentsNew
+                keyboardInputComponent
+                velocityComponent
+        }
 
 
-updatePlayerVelocity : EntityId -> Components -> Components
+updatePlayerVelocity : EntityId -> InputComponents -> OutputComponents
 updatePlayerVelocity _ components =
-    { keyboardInput = components.keyboardInput
+    { keyboardInput = ComponentKeyboardInput.identity
     , velocity =
         case components.keyboardInput.key of
             Just key ->
