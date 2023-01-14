@@ -127,15 +127,8 @@ getComponents a _ _ =
 andIn : (db -> Table a) -> (EntityId -> db -> Maybe (a -> b)) -> EntityId -> db -> Maybe b
 andIn getTable nestedFunc entityId db =
     Maybe.andThen
-        (\func -> getNextComponent (getTable db) func entityId)
+        (\func -> mapComponent func entityId (getTable db))
         (nestedFunc entityId db)
-
-
-getNextComponent : Table a -> (a -> b) -> EntityId -> Maybe b
-getNextComponent table func entityId =
-    Maybe.map
-        (\a -> func a)
-        (getComponent entityId table)
 
 
 update1Component :
@@ -493,14 +486,9 @@ getComponent (EntityId id) (Table dict) =
     Dict.get id dict
 
 
-mapComponent : (a -> a) -> EntityId -> Table a -> Table a
+mapComponent : (a -> b) -> EntityId -> Table a -> Maybe b
 mapComponent func entityId table =
-    case getComponent entityId table of
-        Just component ->
-            updateComponent entityId (func component) table
-
-        Nothing ->
-            table
+    Maybe.map func (getComponent entityId table)
 
 
 
