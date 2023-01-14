@@ -33,6 +33,19 @@ embellishedModifier modifier =
     }
 
 
+mapComponents :
+    { func : inputs -> result
+    , inputComponents : EntityId -> db -> Maybe inputs
+    }
+    -> EntityId
+    -> db
+    -> Maybe result
+mapComponents { func, inputComponents } entityId db =
+    Maybe.map
+        func
+        (inputComponents entityId db)
+
+
 updateComponents :
     { func : inputs -> outputs
     , inputComponents : EntityId -> db -> Maybe inputs
@@ -42,9 +55,12 @@ updateComponents :
     -> db
     -> db
 updateComponents { func, inputComponents, output } entityId db =
-    Maybe.map
-        (\components -> output (func components) entityId db)
-        (inputComponents entityId db)
+    mapComponents
+        { func = \components -> output (func components) entityId db
+        , inputComponents = inputComponents
+        }
+        entityId
+        db
         |> Maybe.withDefault db
 
 

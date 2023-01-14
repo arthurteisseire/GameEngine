@@ -6,7 +6,8 @@ import ComponentAttack
 import ComponentDamage
 import ComponentKeyboardInput
 import ComponentPlayer
-import ComponentPosition
+import ComponentPosition exposing (ComponentPosition)
+import ComponentTerrain exposing (ComponentTerrain)
 import ComponentVelocity
 import ComponentVisual
 import EntityTable exposing (EntityId, Table, addEntity, addNEntities, emptyEntitySet, emptyTable, getComponent, insertComponent, mapEntitySet)
@@ -104,6 +105,12 @@ insertComponentForEntities entities component table =
         (\entity accTable -> insertComponent entity component accTable)
         table
         entities
+
+
+type alias InputComponents =
+    { terrain : ComponentTerrain
+    , position : ComponentPosition
+    }
 
 
 visual : World -> Html Msg

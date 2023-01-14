@@ -8,6 +8,7 @@ import ComponentKeyboardInput
 import ComponentLife
 import ComponentPlayer
 import ComponentPosition
+import ComponentTerrain
 import ComponentTurn
 import ComponentVelocity
 import ComponentVisual
@@ -60,6 +61,7 @@ displayDebug world entityId =
             , componentToHtml world.damageComponents ComponentDamage.toString
             , componentToHtml world.animationComponents ComponentAnimation.toString
             , componentToHtml world.turnComponents ComponentTurn.toString
+            , componentToHtml world.terrainComponents ComponentTerrain.toString
             , componentToHtml world.aiComponents ComponentAI.toString
             , componentToHtml world.playerComponents ComponentPlayer.toString
             ]
