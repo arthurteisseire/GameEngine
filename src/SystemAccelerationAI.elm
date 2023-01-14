@@ -29,15 +29,13 @@ type alias OtherComponents =
 
 updateEntity : EntityId -> World -> World
 updateEntity entityId world =
-    updateComponentsWithOthersNew
-        { db = world
-        , entityId = entityId
-        , func = updateAIVelocity entityId
+    updateComponentsWithOthers
+        { func = updateAIVelocity
         , inputComponents =
-            Just InputComponents
-                |> withComponent entityId world.turnComponents
-                |> withComponent entityId world.velocityComponents
-                |> withComponent entityId world.positionComponents
+            toInputComponents InputComponents
+                |> withInput .turnComponents
+                |> withInput .velocityComponents
+                |> withInput .positionComponents
         , otherComponents =
             select OtherComponents
                 |> using world.entities
@@ -45,13 +43,15 @@ updateEntity entityId world =
                 |> andFrom world.playerComponents
                 |> andFrom world.positionComponents
         , output =
-            update1ComponentNew
-                velocityComponent
+            toOutputComponents
+                |> withOutput velocityComponent
         }
+        entityId
+        world
 
 
-updateAIVelocity : EntityId -> Table OtherComponents -> InputComponents -> OutputComponents
-updateAIVelocity _ inputTable { turn, velocity, position } =
+updateAIVelocity : Table OtherComponents -> InputComponents -> OutputComponents
+updateAIVelocity inputTable { turn, velocity, position } =
     let
         playerPos =
             Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))

@@ -22,24 +22,22 @@ type alias InputComponents =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
-    updateComponentsNew
-        { db = world
-        , entityId = entityId
-        , func = velocityAttack entityId
+updateEntity =
+    updateComponents
+        { func = velocityAttack
         , inputComponents =
-            Just InputComponents
-                |> withComponent entityId world.positionComponents
-                |> withComponent entityId world.velocityComponents
-                |> withComponent entityId world.animationComponents
+            toInputComponents InputComponents
+                |> withInput .positionComponents
+                |> withInput .velocityComponents
+                |> withInput .animationComponents
         , output =
-            update1ComponentNew
-                attackComponent
+            toOutputComponents
+                |> withOutput attackComponent
         }
 
 
-velocityAttack : EntityId -> InputComponents -> OutputComponents
-velocityAttack _ { position, velocity, animation } =
+velocityAttack : InputComponents -> OutputComponents
+velocityAttack { position, velocity, animation } =
     { attack =
         if velocity /= ComponentVelocity.identity then
             Just

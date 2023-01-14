@@ -19,7 +19,7 @@ type alias InputComponents =
 
 updateEntity : EntityId -> World -> World
 updateEntity =
-    updateComponentsNewTest
+    updateComponents
         { func = updateVisual
         , inputComponents =
             toInputComponents InputComponents

@@ -21,25 +21,23 @@ type alias InputComponents =
 
 
 updateEntity : Float -> EntityId -> World -> World
-updateEntity dt entityId world =
-    updateComponentsNew
-        { db = world
-        , entityId = entityId
-        , func = animate dt entityId
+updateEntity dt =
+    updateComponents
+        { func = animate dt
         , inputComponents =
-            Just InputComponents
-                |> withComponent entityId world.visualComponents
-                |> withComponent entityId world.animationComponents
-                |> withComponent entityId world.positionComponents
+            toInputComponents InputComponents
+                |> withInput .visualComponents
+                |> withInput .animationComponents
+                |> withInput .positionComponents
         , output =
-            update2ComponentsNew
-                visualComponent
-                animationComponent
+            toOutputComponents
+                |> withOutput visualComponent
+                |> withOutput animationComponent
         }
 
 
-animate : Float -> EntityId -> InputComponents -> OutputComponents
-animate dt _ { visual, animation, position } =
+animate : Float -> InputComponents -> OutputComponents
+animate dt { visual, animation, position } =
     case animation of
         Just anim ->
             let

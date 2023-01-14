@@ -7,13 +7,19 @@ import Vector2
 import World exposing (..)
 
 
+type alias OutputComponents =
+    { position : ComponentPosition
+    , velocity : ComponentVelocity
+    }
+
+
 type alias InputComponents =
     { position : ComponentPosition
     , velocity : ComponentVelocity
     }
 
 
-type alias OutputComponents =
+type alias OtherComponents =
     { position : ComponentPosition
     , velocity : ComponentVelocity
     }
@@ -114,24 +120,29 @@ updateEntitiesSimple entitySet world =
 
 updateEntitySimple : EntityId -> World -> World
 updateEntitySimple entityId world =
-    update2Components
-        (collideSimple
-            (select InputComponents
+    updateComponentsWithOthers
+        { func = collideSimple
+        , inputComponents =
+            toInputComponents InputComponents
+                |> withInput .positionComponents
+                |> withInput .velocityComponents
+        , otherComponents =
+            select OtherComponents
                 |> using world.entities
                 |> remove entityId
                 |> andFrom world.positionComponents
                 |> andFrom world.velocityComponents
-            )
-        )
-        OutputComponents
-        positionComponent
-        velocityComponent
+        , output =
+            toOutputComponents
+                |> withOutput positionComponent
+                |> withOutput velocityComponent
+        }
         entityId
         world
 
 
-collideSimple : Table InputComponents -> EntityId -> OutputComponents -> OutputComponents
-collideSimple otherComponents _ components =
+collideSimple : Table OtherComponents -> InputComponents -> OutputComponents
+collideSimple otherComponents components =
     let
         otherPositions =
             mapTable

@@ -6,34 +6,43 @@ import EntityTable exposing (..)
 import World exposing (..)
 
 
-type alias InputComponents =
-    { damage : ComponentDamage
-    }
-
-
 type alias OutputComponents =
     { animation : ComponentAnimation
     }
 
 
+type alias InputComponents =
+    { animation : ComponentAnimation
+    }
+
+
+type alias OtherComponents =
+    { damage : ComponentDamage
+    }
+
+
 updateEntity : EntityId -> World -> World
 updateEntity entityId world =
-    update1Component
-        (triggerAnimation
-            (select InputComponents
+    updateComponentsWithOthers
+        { func = triggerAnimation entityId
+        , inputComponents =
+            toInputComponents InputComponents
+                |> withInput .animationComponents
+        , otherComponents =
+            select OtherComponents
                 |> using world.entities
                 |> remove entityId
                 |> andFrom world.damageComponents
-            )
-        )
-        OutputComponents
-        animationComponent
+        , output =
+            toOutputComponents
+                |> withOutput animationComponent
+        }
         entityId
         world
 
 
-triggerAnimation : Table InputComponents -> EntityId -> OutputComponents -> OutputComponents
-triggerAnimation damageTable entityId { animation } =
+triggerAnimation : EntityId -> Table OtherComponents -> InputComponents -> OutputComponents
+triggerAnimation entityId damageTable { animation } =
     let
         allAnimations =
             foldlTable

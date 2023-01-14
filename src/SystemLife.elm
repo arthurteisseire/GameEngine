@@ -6,26 +6,36 @@ import EntityTable exposing (..)
 import World exposing (..)
 
 
-type alias Components =
-    { damage : ComponentDamage
-    , life : ComponentLife
+type alias OutputComponents =
+    { life : ComponentLife
+    }
+
+
+type alias InputComponents =
+    { life : ComponentLife
+    , damage : ComponentDamage
     }
 
 
 updateEntity : EntityId -> World -> World
 updateEntity =
-    update2Components takeDamage
-        Components
-        damageComponent
-        lifeComponent
+    updateComponents
+        { func = takeDamage
+        , inputComponents =
+            toInputComponents InputComponents
+                |> withInput .lifeComponents
+                |> withInput .damageComponents
+        , output =
+            toOutputComponents
+                |> withOutput lifeComponent
+        }
 
 
-takeDamage : EntityId -> Components -> Components
-takeDamage _ { damage, life } =
+takeDamage : InputComponents -> OutputComponents
+takeDamage { damage, life } =
     let
         damages =
             List.foldl (\dam sum -> sum + dam.points) 0 damage
     in
-    { damage = damage
-    , life = { life | healPoints = life.healPoints - damages }
+    { life = { life | healPoints = life.healPoints - damages }
     }

@@ -33,22 +33,7 @@ embellishedModifier modifier =
     }
 
 
-updateComponentsNew :
-    { db : db
-    , entityId : EntityId
-    , func : inputs -> outputs
-    , inputComponents : Maybe inputs
-    , output : outputs -> EntityId -> db -> db
-    }
-    -> db
-updateComponentsNew { db, entityId, func, inputComponents, output } =
-    Maybe.map
-        (\components -> output (func components) entityId db)
-        inputComponents
-        |> Maybe.withDefault db
-
-
-updateComponentsNewTest :
+updateComponents :
     { func : inputs -> outputs
     , inputComponents : EntityId -> db -> Maybe inputs
     , output : outputs -> EntityId -> db -> db
@@ -56,58 +41,28 @@ updateComponentsNewTest :
     -> EntityId
     -> db
     -> db
-updateComponentsNewTest { func, inputComponents, output } entityId db =
+updateComponents { func, inputComponents, output } entityId db =
     Maybe.map
         (\components -> output (func components) entityId db)
         (inputComponents entityId db)
         |> Maybe.withDefault db
 
 
-updateComponentsWithOthersNew :
-    { db : db
-    , entityId : EntityId
-    , func : Table others -> inputs -> outputs
-    , inputComponents : Maybe inputs
+updateComponentsWithOthers :
+    { func : Table others -> inputs -> outputs
+    , inputComponents : EntityId -> db -> Maybe inputs
     , otherComponents : Table others
     , output : outputs -> EntityId -> db -> db
     }
-    -> db
-updateComponentsWithOthersNew { db, entityId, func, inputComponents, otherComponents, output } =
-    Maybe.map
-        (\components -> output (func otherComponents components) entityId db)
-        inputComponents
-        |> Maybe.withDefault db
-
-
-update1ComponentNew : ( Modifier (Table a) db, b -> a ) -> b -> EntityId -> db -> db
-update1ComponentNew ( tableA, getA ) outputComponents entityId world =
-    tableA.map (updateComponent entityId (getA outputComponents)) world
-
-
-update2ComponentsNew :
-    ( Modifier (Table a) db, components -> a )
-    -> ( Modifier (Table b) db, components -> b )
-    -> components
     -> EntityId
     -> db
     -> db
-update2ComponentsNew modifierA modifierB outputComponents entityId db =
-    db
-        |> update1ComponentNew modifierA outputComponents entityId
-        |> update1ComponentNew modifierB outputComponents entityId
-
-
-
---andMapComponent : EntityId -> Table a -> Maybe (( EntityId, a ) -> b) -> Maybe ( EntityId, b )
---andMapComponent entityId table maybeFunc =
---    case
---    andMap (getComponent entityId table) maybeFunc
---        |> Maybe.map (\component -> ( entityId, component ))
-
-
-withComponent : EntityId -> Table a -> Maybe (a -> b) -> Maybe b
-withComponent entityId table =
-    andMap (getComponent entityId table)
+updateComponentsWithOthers { func, inputComponents, otherComponents, output } =
+    updateComponents
+        { func = func otherComponents
+        , inputComponents = inputComponents
+        , output = output
+        }
 
 
 andMap : Maybe a -> Maybe (a -> b) -> Maybe b
@@ -147,116 +102,6 @@ withOutput ( tableA, getA ) func outputComponents entityId world =
     world
         |> func outputComponents entityId
         |> tableA.map (updateComponent entityId (getA outputComponents))
-
-
-update1Component :
-    (EntityId -> components -> components)
-    -> (a -> components)
-    -> ( Modifier (Table a) db, components -> a )
-    -> EntityId
-    -> db
-    -> db
-update1Component updateComponents toComponents ( tableA, getA ) entityId world =
-    Maybe.map
-        toComponents
-        (getComponent entityId (tableA.get world))
-        |> Maybe.map
-            (\components ->
-                let
-                    updatedComponents =
-                        updateComponents entityId components
-                in
-                world
-                    |> tableA.map (updateComponent entityId (getA updatedComponents))
-            )
-        |> Maybe.withDefault world
-
-
-update2Components :
-    (EntityId -> components -> components)
-    -> (a -> b -> components)
-    -> ( Modifier (Table a) db, components -> a )
-    -> ( Modifier (Table b) db, components -> b )
-    -> EntityId
-    -> db
-    -> db
-update2Components updateComponents toComponents ( tableA, getA ) ( tableB, getB ) entityId world =
-    Maybe.map2
-        toComponents
-        (getComponent entityId (tableA.get world))
-        (getComponent entityId (tableB.get world))
-        |> Maybe.map
-            (\components ->
-                let
-                    updatedComponents =
-                        updateComponents entityId components
-                in
-                world
-                    |> tableA.map (updateComponent entityId (getA updatedComponents))
-                    |> tableB.map (updateComponent entityId (getB updatedComponents))
-            )
-        |> Maybe.withDefault world
-
-
-update3Components :
-    (EntityId -> components -> components)
-    -> (a -> b -> c -> components)
-    -> ( Modifier (Table a) db, components -> a )
-    -> ( Modifier (Table b) db, components -> b )
-    -> ( Modifier (Table c) db, components -> c )
-    -> EntityId
-    -> db
-    -> db
-update3Components updateComponents toComponents ( tableA, getA ) ( tableB, getB ) ( tableC, getC ) entityId world =
-    Maybe.map3
-        toComponents
-        (getComponent entityId (tableA.get world))
-        (getComponent entityId (tableB.get world))
-        (getComponent entityId (tableC.get world))
-        |> Maybe.map
-            (\components ->
-                let
-                    updatedComponents =
-                        updateComponents entityId components
-                in
-                world
-                    |> tableA.map (updateComponent entityId (getA updatedComponents))
-                    |> tableB.map (updateComponent entityId (getB updatedComponents))
-                    |> tableC.map (updateComponent entityId (getC updatedComponents))
-            )
-        |> Maybe.withDefault world
-
-
-update4Components :
-    (EntityId -> components -> components)
-    -> (a -> b -> c -> d -> components)
-    -> ( Modifier (Table a) db, components -> a )
-    -> ( Modifier (Table b) db, components -> b )
-    -> ( Modifier (Table c) db, components -> c )
-    -> ( Modifier (Table d) db, components -> d )
-    -> EntityId
-    -> db
-    -> db
-update4Components updateComponents toComponents ( tableA, getA ) ( tableB, getB ) ( tableC, getC ) ( tableD, getD ) entityId world =
-    Maybe.map4
-        toComponents
-        (getComponent entityId (tableA.get world))
-        (getComponent entityId (tableB.get world))
-        (getComponent entityId (tableC.get world))
-        (getComponent entityId (tableD.get world))
-        |> Maybe.map
-            (\components ->
-                let
-                    updatedComponents =
-                        updateComponents entityId components
-                in
-                world
-                    |> tableA.map (updateComponent entityId (getA updatedComponents))
-                    |> tableB.map (updateComponent entityId (getB updatedComponents))
-                    |> tableC.map (updateComponent entityId (getC updatedComponents))
-                    |> tableD.map (updateComponent entityId (getD updatedComponents))
-            )
-        |> Maybe.withDefault world
 
 
 

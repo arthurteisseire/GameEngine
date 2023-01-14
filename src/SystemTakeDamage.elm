@@ -8,36 +8,43 @@ import Vector2
 import World exposing (..)
 
 
-type alias InputComponents =
-    { attack : ComponentAttack
+type alias OutputComponents =
+    { damage : ComponentDamage
     }
 
 
-type alias OutputComponents =
+type alias InputComponents =
     { position : ComponentPosition
-    , damage : ComponentDamage
+    }
+
+
+type alias OtherComponents =
+    { attack : ComponentAttack
     }
 
 
 updateEntity : EntityId -> World -> World
 updateEntity entityId world =
-    update2Components
-        (takeDamage
-            (select InputComponents
+    updateComponentsWithOthers
+        { func = takeDamage
+        , inputComponents =
+            toInputComponents InputComponents
+                |> withInput .positionComponents
+        , otherComponents =
+            select OtherComponents
                 |> using world.entities
                 |> remove entityId
                 |> andFrom world.attackComponents
-            )
-        )
-        OutputComponents
-        positionComponent
-        damageComponent
+        , output =
+            toOutputComponents
+                |> withOutput damageComponent
+        }
         entityId
         world
 
 
-takeDamage : Table InputComponents -> EntityId -> OutputComponents -> OutputComponents
-takeDamage attackTable _ { position, damage } =
+takeDamage : Table OtherComponents -> InputComponents -> OutputComponents
+takeDamage attackTable { position } =
     let
         updatedDamage =
             foldlTable
@@ -64,6 +71,5 @@ takeDamage attackTable _ { position, damage } =
                 []
                 attackTable
     in
-    { position = position
-    , damage = updatedDamage
+    { damage = updatedDamage
     }

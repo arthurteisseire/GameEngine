@@ -12,13 +12,19 @@ type alias Components =
 
 updateEntity : EntityId -> World -> World
 updateEntity =
-    update1Component playTurn
-        Components
-        turnComponent
+    updateComponents
+        { func = playTurn
+        , inputComponents =
+            toInputComponents Components
+                |> withInput .turnComponents
+        , output =
+            toOutputComponents
+                |> withOutput turnComponent
+        }
 
 
-playTurn : EntityId -> Components -> Components
-playTurn _ { turn } =
+playTurn : Components -> Components
+playTurn { turn } =
     if turn.remainingTurns == 0 then
         { turn =
             { turn | remainingTurns = turn.turnsToPlay }

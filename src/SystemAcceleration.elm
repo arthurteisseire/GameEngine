@@ -25,24 +25,22 @@ clearVelocity entityId world =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
-    updateComponentsNew
-        { db = world
-        , entityId = entityId
-        , func = updatePlayerVelocity entityId
+updateEntity =
+    updateComponents
+        { func = updatePlayerVelocity
         , inputComponents =
-            Just InputComponents
-                |> withComponent entityId world.keyboardInputComponents
-                |> withComponent entityId world.velocityComponents
+            toInputComponents InputComponents
+                |> withInput .keyboardInputComponents
+                |> withInput .velocityComponents
         , output =
-            update2ComponentsNew
-                keyboardInputComponent
-                velocityComponent
+            toOutputComponents
+                |> withOutput keyboardInputComponent
+                |> withOutput velocityComponent
         }
 
 
-updatePlayerVelocity : EntityId -> InputComponents -> OutputComponents
-updatePlayerVelocity _ components =
+updatePlayerVelocity : InputComponents -> OutputComponents
+updatePlayerVelocity components =
     { keyboardInput = ComponentKeyboardInput.identity
     , velocity =
         case components.keyboardInput.key of
