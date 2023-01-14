@@ -65,11 +65,6 @@ updateComponentsWithOthers { func, inputComponents, otherComponents, output } =
         }
 
 
-andMap : Maybe a -> Maybe (a -> b) -> Maybe b
-andMap =
-    Maybe.map2 (|>)
-
-
 
 -- Get Components
 
@@ -294,49 +289,6 @@ foldlTable2Full func result tableA tableB =
         )
         result
         tableA
-
-
-foldlEntities2 :
-    (EntityId -> a -> b -> result -> result)
-    -> result
-    -> Table a
-    -> Table b
-    -> EntitySet
-    -> result
-foldlEntities2 func result tableA tableB entityTable =
-    foldlEntitySet
-        (\entityId accResult ->
-            Maybe.map2
-                (\a b -> func entityId a b accResult)
-                (getComponent entityId tableA)
-                (getComponent entityId tableB)
-                |> Maybe.withDefault accResult
-        )
-        result
-        entityTable
-
-
-foldlEntities2Full :
-    (EntityId -> Maybe a -> b -> result -> result)
-    -> result
-    -> Table a
-    -> Table b
-    -> EntitySet
-    -> result
-foldlEntities2Full func result tableA tableB entityTable =
-    foldlEntitySet
-        (\entityId accResult ->
-            (case getComponent entityId tableB of
-                Just b ->
-                    Just <| func entityId (getComponent entityId tableA) b accResult
-
-                Nothing ->
-                    Nothing
-            )
-                |> Maybe.withDefault accResult
-        )
-        result
-        entityTable
 
 
 insertComponent : EntityId -> a -> Table a -> Table a
