@@ -124,8 +124,8 @@ getComponents a _ _ =
     Just a
 
 
-andIn : (db -> Table a) -> (EntityId -> db -> Maybe (a -> b)) -> EntityId -> db -> Maybe b
-andIn getTable nestedFunc entityId db =
+andWith : (db -> Table a) -> (EntityId -> db -> Maybe (a -> b)) -> EntityId -> db -> Maybe b
+andWith getTable nestedFunc entityId db =
     Maybe.andThen
         (\func -> mapComponent func entityId (getTable db))
         (nestedFunc entityId db)
