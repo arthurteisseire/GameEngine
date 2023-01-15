@@ -125,9 +125,9 @@ visual world =
                                 Svg.svg
                                     [ SA.transform <|
                                         "translate("
-                                            ++ String.fromFloat position.currentPos.x
+                                            ++ String.fromFloat position.x
                                             ++ ", "
-                                            ++ String.fromFloat position.currentPos.y
+                                            ++ String.fromFloat position.y
                                             ++ ")"
                                     , SA.width <| String.fromInt (terrain.dimensions.x * terrain.sizeFactor)
                                     , SA.height <| String.fromInt (terrain.dimensions.y * terrain.sizeFactor)

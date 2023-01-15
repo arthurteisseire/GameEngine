@@ -36,8 +36,8 @@ updateVisual { visual, position } =
     { visual =
         { visual
             | position =
-                { x = position.currentPos.x
-                , y = position.currentPos.y
+                { x = position.x
+                , y = position.y
                 }
         }
     }

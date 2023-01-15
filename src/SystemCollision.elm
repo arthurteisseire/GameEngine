@@ -87,11 +87,11 @@ collide otherComponents components =
     let
         otherPositions =
             mapTable
-                (\_ { position, velocity } -> position.currentPos)
+                (\_ { position, velocity } -> position)
                 otherComponents
 
         nextPosition =
-            Vector2.add components.position.currentPos components.velocity
+            Vector2.add components.position components.velocity
     in
     if components.velocity == Vector2.identity || hasValueInTable nextPosition otherPositions then
         ( False
@@ -145,11 +145,11 @@ collideSimple otherComponents components =
     let
         otherPositions =
             mapTable
-                (\_ { position, velocity } -> position.currentPos)
+                (\_ { position, velocity } -> position)
                 otherComponents
 
         nextPosition =
-            Vector2.add components.position.currentPos components.velocity
+            Vector2.add components.position components.velocity
     in
     if components.velocity == Vector2.identity || hasValueInTable nextPosition otherPositions then
         components

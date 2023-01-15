@@ -56,7 +56,7 @@ updateAIVelocity inputTable { turn, velocity, position } =
             Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))
 
         diff =
-            Vector2.sub playerPos.currentPos position.currentPos
+            Vector2.sub playerPos position
 
         nextVelocity =
             if abs diff.x > abs diff.y then
