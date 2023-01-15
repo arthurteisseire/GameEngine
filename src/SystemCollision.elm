@@ -7,13 +7,7 @@ import Vector2
 import World exposing (..)
 
 
-type alias OutputComponents =
-    { position : ComponentPosition
-    , velocity : ComponentVelocity
-    }
-
-
-type alias InputComponents =
+type alias Components =
     { position : ComponentPosition
     , velocity : ComponentVelocity
     }
@@ -21,140 +15,89 @@ type alias InputComponents =
 
 type alias OtherComponents =
     { position : ComponentPosition
-    , velocity : ComponentVelocity
     }
 
 
 updateEntities : EntitySet -> World -> World
 updateEntities entitySet world =
+    collideEachEntityRecursively
+        ((select OtherComponents
+            |> using .entities
+            |> andFrom .positionComponents
+         )
+            world
+        )
+        entitySet
+        world
+
+
+collideEachEntityRecursively : Table OtherComponents -> EntitySet -> World -> World
+collideEachEntityRecursively others entitySet world =
     let
-        ( entitiesWhoDidntMoved, newWorld ) =
-            foldlEntitySet
-                (\entityId ( currentEntitiesWhoDidntMoved, currentWorld ) ->
-                    let
-                        ( thisEntityMoved, newCurrentWorld ) =
-                            updateEntity entityId currentWorld
+        current =
+            (select Components
+                |> using (\_ -> entitySet)
+                |> andFrom .positionComponents
+                |> andFrom .velocityComponents
+            )
+                world
 
-                        newEntitiesWhoDidntMoved =
-                            if thisEntityMoved then
-                                filterEntities (\id -> entityId /= id) currentEntitiesWhoDidntMoved
-
-                            else
-                                currentEntitiesWhoDidntMoved
-                    in
-                    ( newEntitiesWhoDidntMoved, newCurrentWorld )
-                )
-                ( entitySet, world )
-                entitySet
+        updatedComponents =
+            collideEachEntity others current
     in
-    if entitiesWhoDidntMoved /= entitySet then
-        updateEntities entitiesWhoDidntMoved newWorld
+    if updatedComponents == emptyTable then
+        world
 
     else
-        newWorld
-
-
-updateEntity : EntityId -> World -> ( Bool, World )
-updateEntity entityId world =
-    Maybe.withDefault ( False, world ) <|
-        Maybe.map2
-            (\position velocity ->
-                let
-                    ( hasMoved, components ) =
-                        collide
-                            ((InputComponents
-                                |> using .entities
-                                |> andFrom .positionComponents
-                                |> andFrom .velocityComponents
-                             )
-                                world
-                            )
-                            (OutputComponents position velocity)
-                in
-                ( hasMoved
-                , { world
-                    | positionComponents = insertComponent entityId components.position world.positionComponents
-                    , velocityComponents = insertComponent entityId components.velocity world.velocityComponents
-                  }
-                )
+        updateEntities
+            (filterEntities
+                (\entityId -> not <| List.member entityId (keysTable updatedComponents))
+                entitySet
             )
-            (getComponent entityId world.positionComponents)
-            (getComponent entityId world.velocityComponents)
+            (updateComponentsInTable updatedComponents world)
 
 
-collide : Table InputComponents -> OutputComponents -> ( Bool, OutputComponents )
+collideEachEntity : Table OtherComponents -> Table Components -> Table Components
+collideEachEntity others current =
+    foldlTable
+        (\entityId components table ->
+            case collide others components of
+                Just updatedComponents ->
+                    insertComponent entityId updatedComponents table
+
+                Nothing ->
+                    table
+        )
+        emptyTable
+        current
+
+
+collide : Table OtherComponents -> Components -> Maybe Components
 collide otherComponents components =
     let
         otherPositions =
-            mapTable
-                (\_ { position, velocity } -> position)
-                otherComponents
+            mapTable (\_ { position } -> position) otherComponents
 
         nextPosition =
             Vector2.add components.position components.velocity
     in
     if components.velocity == Vector2.identity || hasValueInTable nextPosition otherPositions then
-        ( False
-        , components
-        )
+        Nothing
 
     else
-        ( True
-        , { position = nextPosition
-          , velocity = components.velocity
-          }
+        Just
+            { position = nextPosition
+            , velocity = components.velocity
+            }
+
+
+updateComponentsInTable : Table Components -> World -> World
+updateComponentsInTable table world =
+    foldlTable
+        (\entityId components currentWorld ->
+            currentWorld
+                |> updateComponentInTable positionComponent components entityId
+                |> updateComponentInTable velocityComponent components entityId
         )
-
-
-
--- Simpler but not fully functional. Kept to test performance
-
-
-updateEntitiesSimple : EntitySet -> World -> World
-updateEntitiesSimple entitySet world =
-    foldlEntitySet
-        updateEntitySimple
         world
-        entitySet
-
-
-updateEntitySimple : EntityId -> World -> World
-updateEntitySimple entityId world =
-    updateComponentsWithOthers
-        { func = collideSimple
-        , inputComponents =
-            toInputComponents InputComponents
-                |> withInput .positionComponents
-                |> withInput .velocityComponents
-        , otherComponents =
-            select OtherComponents
-                |> using .entities
-                |> andFrom .positionComponents
-                |> andFrom .velocityComponents
-        , output =
-            toOutputComponents
-                |> withOutput positionComponent
-                |> withOutput velocityComponent
-        }
-        entityId
-        world
-
-
-collideSimple : Table OtherComponents -> InputComponents -> OutputComponents
-collideSimple otherComponents components =
-    let
-        otherPositions =
-            mapTable
-                (\_ { position, velocity } -> position)
-                otherComponents
-
-        nextPosition =
-            Vector2.add components.position components.velocity
-    in
-    if components.velocity == Vector2.identity || hasValueInTable nextPosition otherPositions then
-        components
-
-    else
-        { position = nextPosition
-        , velocity = components.velocity
-        }
+        table

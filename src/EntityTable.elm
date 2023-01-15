@@ -386,6 +386,11 @@ foldlTable func acc (Table dict) =
     Dict.foldl (\id a b -> func (EntityId id) a b) acc dict
 
 
+keysTable : Table a -> List EntityId
+keysTable (Table dict) =
+    List.map EntityId (Dict.keys dict)
+
+
 valuesTable : Table a -> List a
 valuesTable (Table dict) =
     Dict.values dict
