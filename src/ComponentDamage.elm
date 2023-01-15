@@ -6,8 +6,7 @@ import Vector2 exposing (Vector2)
 
 type alias ComponentDamage =
     List
-        { fromEntity : EntityId
-        , fromDirection : Vector2 Float
+        { fromDirection : Vector2 Float
         , points : Int
         }
 
@@ -23,9 +22,7 @@ toString damage =
         ++ List.foldl
             (\dam finalString ->
                 finalString
-                    ++ "fromEntity="
-                    ++ entityIdToString dam.fromEntity
-                    ++ ", fromDirection="
+                    ++ "fromDirection="
                     ++ Vector2.vectorFloatToString dam.fromDirection
                     ++ ", points="
                     ++ String.fromInt dam.points

@@ -61,7 +61,7 @@ animate dt { visual, animation, position } =
                 }
 
             else
-                { visual = visual
+                { visual = { visual | position = position }
                 , animation = Nothing
                 }
 

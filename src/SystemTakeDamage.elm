@@ -53,8 +53,7 @@ takeDamage attackTable { position } =
                                     Vector2.sub attack.to position
                             in
                             if Vector2.isNull fromDirection then
-                                { fromEntity = entityId
-                                , fromDirection = Vector2.sub attack.to attack.from
+                                { fromDirection = Vector2.sub attack.to attack.from
                                 , points = 1
                                 }
                                     :: damages

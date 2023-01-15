@@ -20,7 +20,7 @@ attackAnimation : Vector2 Float -> ComponentAnimation
 attackAnimation offset =
     let
         duration =
-            0.05
+            0.1
     in
     Just
         { duration = duration

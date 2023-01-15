@@ -415,7 +415,7 @@ hasValueInTable =
     hasValueInTableIf (==)
 
 
-hasValueInTableIf : (a -> a -> Bool) -> a -> Table a -> Bool
+hasValueInTableIf : (a -> b -> Bool) -> a -> Table b -> Bool
 hasValueInTableIf predicate a table =
     filterTable
         (\_ value -> predicate a value)

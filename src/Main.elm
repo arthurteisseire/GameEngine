@@ -20,7 +20,6 @@ import SystemDisplayDebug
 import SystemKeyboardInput
 import SystemLife
 import SystemTakeDamage
-import SystemTriggerAttackAnimation
 import SystemTurn
 import SystemUpdateVisual
 import World exposing (World)
@@ -73,7 +72,7 @@ update msg world =
 
         Tick dt ->
             ( world
-                --|> applyTickSystems dt world.entities
+                |> applyTickSystems dt world.entities
             , Cmd.none
             )
 
@@ -118,20 +117,19 @@ playTurn world =
     world
         |> applySystem SystemTurn.updateEntity world.entities
         |> applySystem SystemAcceleration.updateEntity players
-        |> confront players
+        |> play players
         |> applySystem SystemAccelerationAI.updateEntity ais
-        |> confront ais
+        |> play ais
 
 
-confront : EntitySet -> World -> World
-confront playingEntities world =
+play : EntitySet -> World -> World
+play playingEntities world =
     world
         |> applySystem SystemAttack.updateEntity playingEntities
         |> SystemCollision.updateEntities world.entities
         |> applySystem SystemUpdateVisual.updateEntity playingEntities
         |> applySystem SystemTakeDamage.updateEntity world.entities
         |> applySystem SystemLife.updateEntity world.entities
-        |> applySystem SystemTriggerAttackAnimation.updateEntity world.entities
         |> applySystem SystemKeyboardInput.clear playingEntities
         |> applySystem SystemAcceleration.clearVelocity playingEntities
         |> applySystem SystemAttack.clear playingEntities
@@ -141,10 +139,7 @@ confront playingEntities world =
 applyTickSystems : Float -> EntitySet -> World -> World
 applyTickSystems dt entitySet world =
     world
-
-
-
---|> applySystem (SystemAnimation.updateEntity dt) entitySet
+        |> applySystem (SystemAnimation.updateEntity dt) entitySet
 
 
 applySystem : (EntityId -> World -> World) -> EntitySet -> World -> World
