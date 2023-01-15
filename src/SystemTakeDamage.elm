@@ -45,7 +45,7 @@ takeDamage attackTable { position } =
     let
         updatedDamage =
             foldlTable
-                (\entityId input damages ->
+                (\_ input damages ->
                     case input.attack of
                         Just attack ->
                             let

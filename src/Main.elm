@@ -6,7 +6,6 @@ import EntityTable exposing (..)
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
-import Html.Events as HE
 import Json.Decode
 import KeyboardInput exposing (Key, keyDecoder)
 import Level1
