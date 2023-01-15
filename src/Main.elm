@@ -45,8 +45,7 @@ init _ =
         level1 =
             Level1.init
     in
-    --( applySystem SystemUpdateVisual.updateEntity level1.entities level1
-    ( level1
+    ( applySystem SystemUpdateVisual.updateEntity level1.entities level1
     , Cmd.none
     )
 

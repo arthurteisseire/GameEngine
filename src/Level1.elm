@@ -39,7 +39,7 @@ init =
     , positionComponents =
         emptyTable
             |> insertComponent playerId (ComponentPosition.init { x = 6, y = 6 })
-            |> insertComponent terrain (ComponentPosition.init { x = 100, y = 100 })
+            |> insertComponent terrain (ComponentPosition.init { x = 0, y = 0 })
             |> (\posTable ->
                     List.foldl
                         (\( entityId, pos ) table -> insertComponent entityId (ComponentPosition.init pos) table)
@@ -116,37 +116,34 @@ type alias InputComponents =
 visual : World -> Html Msg
 visual world =
     let
-        terrains =
-            mapEntitySet
-                (\entityId ->
-                    Maybe.withDefault (Html.text "") <|
-                        Maybe.map2
-                            (\terrain position ->
-                                Svg.svg
-                                    [ SA.transform <|
-                                        "translate("
-                                            ++ String.fromFloat position.x
-                                            ++ ", "
-                                            ++ String.fromFloat position.y
-                                            ++ ")"
-                                    , SA.width <| String.fromInt (terrain.dimensions.x * terrain.sizeFactor)
-                                    , SA.height <| String.fromInt (terrain.dimensions.y * terrain.sizeFactor)
-                                    , SA.viewBox
-                                        ("0 0 "
-                                            ++ String.fromInt terrain.dimensions.x
-                                            ++ " "
-                                            ++ String.fromInt terrain.dimensions.y
-                                        )
-                                    ]
-                                    (SystemDraw.visualToSvg world.visualComponents world.entities)
-                            )
-                            (getComponent entityId world.terrainComponents)
-                            (getComponent entityId world.positionComponents)
-                )
-                world.entities
+        dimensions =
+            { x = 16, y = 16 }
+
+        sizeFactor =
+            50
+
+        screen =
+            Svg.svg
+                [ SA.transform <|
+                    "translate("
+                        ++ String.fromFloat 100
+                        ++ ", "
+                        ++ String.fromFloat 100
+                        ++ ")"
+                , SA.width <| String.fromInt (dimensions.x * sizeFactor)
+                , SA.height <| String.fromInt (dimensions.y * sizeFactor)
+                , SA.viewBox
+                    ("0 0 "
+                        ++ String.fromInt dimensions.x
+                        ++ " "
+                        ++ String.fromInt dimensions.y
+                    )
+                ]
+                (SystemDraw.visualToSvg world.visualComponents world.entities)
     in
     Html.div
         [ HA.id "Level1"
         , HA.style "float" "left"
         ]
-        terrains
+        [ screen
+        ]
