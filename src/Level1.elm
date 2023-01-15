@@ -37,11 +37,11 @@ init =
         emptyTable
     , positionComponents =
         emptyTable
-            |> insertComponent playerId (ComponentPosition.init { x = 6, y = 6 })
-            |> insertComponent terrain (ComponentPosition.init { x = 0, y = 0 })
+            |> insertComponent playerId { x = 6, y = 6 }
+            |> insertComponent terrain { x = 0, y = 0 }
             |> (\posTable ->
                     List.foldl
-                        (\( entityId, pos ) table -> insertComponent entityId (ComponentPosition.init pos) table)
+                        (\( entityId, pos ) table -> insertComponent entityId pos table)
                         posTable
                         (List.indexedMap
                             (\idx entityId -> ( entityId, { x = toFloat (modBy 5 idx), y = toFloat (idx // 5) } ))

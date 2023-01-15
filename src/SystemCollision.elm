@@ -100,7 +100,7 @@ collide otherComponents components =
 
     else
         ( True
-        , { position = ComponentPosition.init nextPosition
+        , { position = nextPosition
           , velocity = components.velocity
           }
         )
@@ -155,6 +155,6 @@ collideSimple otherComponents components =
         components
 
     else
-        { position = ComponentPosition.init nextPosition
+        { position = nextPosition
         , velocity = components.velocity
         }

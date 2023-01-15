@@ -9,12 +9,7 @@ type alias ComponentPosition =
 
 identity : ComponentPosition
 identity =
-    init Vector2.identity
-
-
-init : Vector2 Float -> ComponentPosition
-init vec =
-    vec
+    Vector2.identity
 
 
 toString : ComponentPosition -> String
