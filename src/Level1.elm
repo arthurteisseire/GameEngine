@@ -4,13 +4,12 @@ import ComponentAI
 import ComponentAnimation
 import ComponentAttack
 import ComponentDamage
-import ComponentKeyboardInput
 import ComponentPlayer
 import ComponentPosition exposing (ComponentPosition)
 import ComponentTerrain exposing (ComponentTerrain)
 import ComponentVelocity
 import ComponentVisual
-import EntityTable exposing (EntityId, Table, addEntity, addNEntities, emptyEntitySet, emptyTable, getComponent, insertComponent, mapEntitySet)
+import EntityTable exposing (..)
 import Event exposing (Msg)
 import Html exposing (Html)
 import Html.Attributes as HA
