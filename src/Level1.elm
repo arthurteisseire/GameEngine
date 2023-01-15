@@ -116,6 +116,9 @@ type alias InputComponents =
 visual : World -> Html Msg
 visual world =
     let
+        screenPosition =
+            { x = 100, y = 100 }
+
         dimensions =
             { x = 16, y = 16 }
 
@@ -126,9 +129,9 @@ visual world =
             Svg.svg
                 [ SA.transform <|
                     "translate("
-                        ++ String.fromFloat 100
+                        ++ String.fromFloat screenPosition.x
                         ++ ", "
-                        ++ String.fromFloat 100
+                        ++ String.fromFloat screenPosition.y
                         ++ ")"
                 , SA.width <| String.fromInt (dimensions.x * sizeFactor)
                 , SA.height <| String.fromInt (dimensions.y * sizeFactor)
