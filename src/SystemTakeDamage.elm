@@ -3,7 +3,11 @@ module SystemTakeDamage exposing (..)
 import ComponentAttack exposing (ComponentAttack)
 import ComponentDamage exposing (ComponentDamage)
 import ComponentPosition exposing (ComponentPosition)
-import EntityTable exposing (..)
+import Core.Component as Component
+import Core.Database as Db
+import Core.EntityId exposing (EntityId)
+import Core.Modifier as Modifier
+import Core.Table as Table exposing (Table)
 import Vector2
 import World exposing (..)
 
@@ -25,18 +29,18 @@ type alias OtherComponents =
 
 updateEntity : EntityId -> World -> World
 updateEntity =
-    updateComponentsWithOthers
+    Db.updateComponentsWithOthers
         { func = takeDamage
         , inputComponents =
-            toInputComponents InputComponents
-                |> withInput .positionComponents
+            Component.select InputComponents
+                |> Component.join .positionComponents
         , otherComponents =
-            select OtherComponents
-                |> using .entities
-                |> andFrom .attackComponents
+            Db.select OtherComponents
+                |> Db.fromEntities .entities
+                |> Db.innerJoin .attackComponents
         , output =
-            toOutputComponents
-                |> withOutput damageComponent
+            Modifier.select
+                |> Modifier.join damageComponent
         }
 
 
@@ -44,7 +48,7 @@ takeDamage : Table OtherComponents -> InputComponents -> OutputComponents
 takeDamage attackTable { position } =
     let
         updatedDamage =
-            foldlTable
+            Table.foldl
                 (\_ input damages ->
                     case input.attack of
                         Just attack ->

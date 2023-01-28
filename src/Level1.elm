@@ -9,7 +9,9 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentTerrain exposing (ComponentTerrain)
 import ComponentVelocity
 import ComponentVisual
-import EntityTable exposing (..)
+import Core.EntityId exposing (EntityId)
+import Core.EntitySet as EntitySet
+import Core.Table as Table exposing (Table)
 import Event exposing (Msg)
 import Html exposing (Html)
 import Html.Attributes as HA
@@ -23,25 +25,25 @@ init : World
 init =
     let
         ( entities1, playerId ) =
-            addEntity emptyEntitySet
+            EntitySet.addEntity EntitySet.empty
 
         ( entities2, terrain ) =
-            addEntity entities1
+            EntitySet.addEntity entities1
 
         ( entities3, enemies ) =
-            addNEntities 20 entities2
+            EntitySet.addNEntities 20 entities2
     in
     { entities =
         entities3
     , keyboardInputComponents =
-        emptyTable
+        Table.empty
     , positionComponents =
-        emptyTable
-            |> insertComponent playerId { x = 6, y = 6 }
-            |> insertComponent terrain { x = 0, y = 0 }
+        Table.empty
+            |> Table.insert playerId { x = 6, y = 6 }
+            |> Table.insert terrain { x = 0, y = 0 }
             |> (\posTable ->
                     List.foldl
-                        (\( entityId, pos ) table -> insertComponent entityId pos table)
+                        (\( entityId, pos ) table -> Table.insert entityId pos table)
                         posTable
                         (List.indexedMap
                             (\idx entityId -> ( entityId, { x = toFloat (modBy 5 idx), y = toFloat (idx // 5) } ))
@@ -49,48 +51,48 @@ init =
                         )
                )
     , velocityComponents =
-        emptyTable
-            |> insertComponent playerId ComponentVelocity.identity
+        Table.empty
+            |> Table.insert playerId ComponentVelocity.identity
             |> insertComponentForEntities enemies ComponentVelocity.identity
     , lifeComponents =
-        emptyTable
-            |> insertComponent playerId { healPoints = 1 }
+        Table.empty
+            |> Table.insert playerId { healPoints = 1 }
             |> insertComponentForEntities enemies { healPoints = 5 }
     , visualComponents =
-        emptyTable
-            |> insertComponent playerId ComponentVisual.defaultRect
+        Table.empty
+            |> Table.insert playerId ComponentVisual.defaultRect
             |> (\visualTable ->
                     List.foldl
-                        (\entityId table -> insertComponent entityId (ComponentVisual.circle "orange") table)
+                        (\entityId table -> Table.insert entityId (ComponentVisual.circle "orange") table)
                         visualTable
                         enemies
                )
-            |> insertComponent terrain ComponentVisual.terrain
+            |> Table.insert terrain ComponentVisual.terrain
     , attackComponents =
-        emptyTable
-            |> insertComponent playerId ComponentAttack.identity
+        Table.empty
+            |> Table.insert playerId ComponentAttack.identity
             |> insertComponentForEntities enemies ComponentAttack.identity
     , damageComponents =
-        emptyTable
-            |> insertComponent playerId ComponentDamage.identity
+        Table.empty
+            |> Table.insert playerId ComponentDamage.identity
             |> insertComponentForEntities enemies ComponentDamage.identity
     , animationComponents =
-        emptyTable
-            |> insertComponent playerId ComponentAnimation.identity
+        Table.empty
+            |> Table.insert playerId ComponentAnimation.identity
             |> insertComponentForEntities enemies ComponentAnimation.identity
     , turnComponents =
-        emptyTable
-            |> insertComponent playerId { turnsToPlay = 0, remainingTurns = 0 }
+        Table.empty
+            |> Table.insert playerId { turnsToPlay = 0, remainingTurns = 0 }
             |> insertComponentForEntities enemies { turnsToPlay = 3, remainingTurns = 3 }
     , aiComponents =
-        emptyTable
+        Table.empty
             |> insertComponentForEntities enemies ComponentAI.identity
     , playerComponents =
-        emptyTable
-            |> insertComponent playerId ComponentPlayer.identity
+        Table.empty
+            |> Table.insert playerId ComponentPlayer.identity
     , terrainComponents =
-        emptyTable
-            |> insertComponent terrain { dimensions = { x = 16, y = 16 }, sizeFactor = 50 }
+        Table.empty
+            |> Table.insert terrain { dimensions = { x = 16, y = 16 }, sizeFactor = 50 }
     , entityIdDebug =
         Just playerId
     , isPause =
@@ -101,7 +103,7 @@ init =
 insertComponentForEntities : List EntityId -> a -> Table a -> Table a
 insertComponentForEntities entities component table =
     List.foldl
-        (\entity accTable -> insertComponent entity component accTable)
+        (\entity accTable -> Table.insert entity component accTable)
         table
         entities
 

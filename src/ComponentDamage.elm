@@ -1,6 +1,5 @@
 module ComponentDamage exposing (..)
 
-import EntityTable exposing (EntityId, entityIdToString)
 import Vector2 exposing (Vector2)
 
 

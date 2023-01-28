@@ -1,6 +1,6 @@
 module Event exposing (..)
 
-import EntityTable exposing (EntityId)
+import Core.EntityId exposing (EntityId)
 import KeyboardInput exposing (Key)
 
 

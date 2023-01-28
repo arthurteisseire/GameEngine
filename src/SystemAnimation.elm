@@ -3,7 +3,10 @@ module SystemAnimation exposing (..)
 import ComponentAnimation exposing (ComponentAnimation)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVisual exposing (ComponentVisual)
-import EntityTable exposing (..)
+import Core.Component as Component
+import Core.Database as Db
+import Core.EntityId exposing (EntityId)
+import Core.Modifier as Modifier
 import World exposing (..)
 
 
@@ -22,17 +25,17 @@ type alias InputComponents =
 
 updateEntity : Float -> EntityId -> World -> World
 updateEntity dt =
-    updateComponents
+    Db.updateComponents
         { func = animate dt
         , inputComponents =
-            toInputComponents InputComponents
-                |> withInput .visualComponents
-                |> withInput .animationComponents
-                |> withInput .positionComponents
+            Component.select InputComponents
+                |> Component.join .visualComponents
+                |> Component.join .animationComponents
+                |> Component.join .positionComponents
         , output =
-            toOutputComponents
-                |> withOutput visualComponent
-                |> withOutput animationComponent
+            Modifier.select
+                |> Modifier.join visualComponent
+                |> Modifier.join animationComponent
         }
 
 

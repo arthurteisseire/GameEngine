@@ -2,7 +2,12 @@ module SystemLife exposing (..)
 
 import ComponentDamage exposing (ComponentDamage)
 import ComponentLife exposing (ComponentLife)
-import EntityTable exposing (..)
+import Core.Component as Component
+import Core.Database as Db
+import Core.EntityId exposing (EntityId)
+import Core.EntitySet as EntitySet exposing (EntitySet)
+import Core.Modifier as Modifier
+import Core.Table as Table exposing (Table)
 import World exposing (..)
 
 
@@ -19,15 +24,15 @@ type alias InputComponents =
 
 updateEntity : EntityId -> World -> World
 updateEntity =
-    updateComponents
+    Db.updateComponents
         { func = takeDamage
         , inputComponents =
-            toInputComponents InputComponents
-                |> withInput .lifeComponents
-                |> withInput .damageComponents
+            Component.select InputComponents
+                |> Component.join .lifeComponents
+                |> Component.join .damageComponents
         , output =
-            toOutputComponents
-                |> withOutput lifeComponent
+            Modifier.select
+                |> Modifier.join lifeComponent
         }
 
 

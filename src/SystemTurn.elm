@@ -1,7 +1,10 @@
 module SystemTurn exposing (..)
 
 import ComponentTurn exposing (ComponentTurn)
-import EntityTable exposing (..)
+import Core.Component as Component
+import Core.Database as Db
+import Core.EntityId exposing (EntityId)
+import Core.Modifier as Modifier
 import World exposing (..)
 
 
@@ -12,14 +15,14 @@ type alias Components =
 
 updateEntity : EntityId -> World -> World
 updateEntity =
-    updateComponents
+    Db.updateComponents
         { func = playTurn
         , inputComponents =
-            toInputComponents Components
-                |> withInput .turnComponents
+            Component.select Components
+                |> Component.join .turnComponents
         , output =
-            toOutputComponents
-                |> withOutput turnComponent
+            Modifier.select
+                |> Modifier.join turnComponent
         }
 
 

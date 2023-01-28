@@ -2,7 +2,12 @@ module SystemCollision exposing (..)
 
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
-import EntityTable exposing (..)
+import Core.Component as Component
+import Core.Database as Db
+import Core.EntityId exposing (EntityId)
+import Core.EntitySet as EntitySet exposing (EntitySet)
+import Core.Modifier as Modifier
+import Core.Table as Table exposing (Table)
 import Vector2
 import World exposing (..)
 
@@ -21,9 +26,9 @@ type alias OtherComponents =
 updateEntities : EntitySet -> World -> World
 updateEntities entitySet world =
     collideEachEntityRecursively
-        ((select OtherComponents
-            |> using .entities
-            |> andFrom .positionComponents
+        ((Db.select OtherComponents
+            |> Db.fromEntities .entities
+            |> Db.innerJoin .positionComponents
          )
             world
         )
@@ -35,23 +40,23 @@ collideEachEntityRecursively : Table OtherComponents -> EntitySet -> World -> Wo
 collideEachEntityRecursively others entitySet world =
     let
         current =
-            (select Components
-                |> using (\_ -> entitySet)
-                |> andFrom .positionComponents
-                |> andFrom .velocityComponents
+            (Db.select Components
+                |> Db.fromEntities (\_ -> entitySet)
+                |> Db.innerJoin .positionComponents
+                |> Db.innerJoin .velocityComponents
             )
                 world
 
         updatedComponents =
             collideEachEntity others current
     in
-    if updatedComponents == emptyTable then
+    if updatedComponents == Table.empty then
         world
 
     else
         updateEntities
-            (filterEntities
-                (\entityId -> not <| List.member entityId (keysTable updatedComponents))
+            (EntitySet.filter
+                (\entityId -> not <| List.member entityId (Table.keys updatedComponents))
                 entitySet
             )
             (updateComponentsInTable updatedComponents world)
@@ -59,16 +64,16 @@ collideEachEntityRecursively others entitySet world =
 
 collideEachEntity : Table OtherComponents -> Table Components -> Table Components
 collideEachEntity others current =
-    foldlTable
+    Table.foldl
         (\entityId components table ->
             case collide others components of
                 Just updatedComponents ->
-                    insertComponent entityId updatedComponents table
+                    Table.insert entityId updatedComponents table
 
                 Nothing ->
                     table
         )
-        emptyTable
+        Table.empty
         current
 
 
@@ -76,12 +81,12 @@ collide : Table OtherComponents -> Components -> Maybe Components
 collide otherComponents components =
     let
         otherPositions =
-            mapTable (\_ { position } -> position) otherComponents
+            Table.map (\_ { position } -> position) otherComponents
 
         nextPosition =
             Vector2.add components.position components.velocity
     in
-    if components.velocity == Vector2.identity || hasValueInTable nextPosition otherPositions then
+    if components.velocity == Vector2.identity || Table.hasValue nextPosition otherPositions then
         Nothing
 
     else
@@ -93,11 +98,11 @@ collide otherComponents components =
 
 updateComponentsInTable : Table Components -> World -> World
 updateComponentsInTable table world =
-    foldlTable
+    Table.foldl
         (\entityId components currentWorld ->
             currentWorld
-                |> updateComponentInTable positionComponent components entityId
-                |> updateComponentInTable velocityComponent components entityId
+                |> Modifier.updateComponentInTable positionComponent components entityId
+                |> Modifier.updateComponentInTable velocityComponent components entityId
         )
         world
         table

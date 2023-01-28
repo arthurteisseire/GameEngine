@@ -12,7 +12,10 @@ import ComponentTerrain exposing (ComponentTerrain)
 import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
-import EntityTable exposing (..)
+import Core.EntityId exposing (EntityId)
+import Core.EntitySet exposing (EntitySet)
+import Core.Modifier as Modifier
+import Core.Table exposing (Table)
 
 
 type alias World =
@@ -34,8 +37,12 @@ type alias World =
     }
 
 
+
+-- Below are a way to link (Tables to World, Component to Table)
+
+
 keyboardInputComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .keyboardInputComponents
         , set = \table world -> { world | keyboardInputComponents = table }
         }
@@ -44,7 +51,7 @@ keyboardInputComponent =
 
 
 positionComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .positionComponents
         , set = \table world -> { world | positionComponents = table }
         }
@@ -53,7 +60,7 @@ positionComponent =
 
 
 velocityComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .velocityComponents
         , set = \table world -> { world | velocityComponents = table }
         }
@@ -62,7 +69,7 @@ velocityComponent =
 
 
 lifeComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .lifeComponents
         , set = \table world -> { world | lifeComponents = table }
         }
@@ -71,7 +78,7 @@ lifeComponent =
 
 
 visualComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .visualComponents
         , set = \table world -> { world | visualComponents = table }
         }
@@ -80,7 +87,7 @@ visualComponent =
 
 
 attackComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .attackComponents
         , set = \table world -> { world | attackComponents = table }
         }
@@ -89,7 +96,7 @@ attackComponent =
 
 
 damageComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .damageComponents
         , set = \table world -> { world | damageComponents = table }
         }
@@ -98,7 +105,7 @@ damageComponent =
 
 
 animationComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .animationComponents
         , set = \table world -> { world | animationComponents = table }
         }
@@ -107,7 +114,7 @@ animationComponent =
 
 
 turnComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .turnComponents
         , set = \table world -> { world | turnComponents = table }
         }
@@ -116,7 +123,7 @@ turnComponent =
 
 
 terrainComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .terrainComponents
         , set = \table world -> { world | terrainComponents = table }
         }
@@ -125,7 +132,7 @@ terrainComponent =
 
 
 aiComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .aiComponents
         , set = \table world -> { world | aiComponents = table }
         }
@@ -134,7 +141,7 @@ aiComponent =
 
 
 playerComponent =
-    ( tableModifier
+    ( Modifier.tableModifier
         { get = .playerComponents
         , set = \table world -> { world | playerComponents = table }
         }

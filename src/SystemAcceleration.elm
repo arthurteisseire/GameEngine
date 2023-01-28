@@ -2,7 +2,11 @@ module SystemAcceleration exposing (..)
 
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
-import EntityTable exposing (..)
+import Core.Component as Component
+import Core.Database as Db
+import Core.EntityId exposing (EntityId)
+import Core.Modifier as Modifier
+import Core.Table as Table exposing (Table)
 import KeyboardInput exposing (Key)
 import World exposing (..)
 
@@ -21,21 +25,21 @@ type alias InputComponents =
 
 clearVelocity : EntityId -> World -> World
 clearVelocity entityId world =
-    { world | velocityComponents = insertComponent entityId ComponentVelocity.identity world.velocityComponents }
+    { world | velocityComponents = Table.insert entityId ComponentVelocity.identity world.velocityComponents }
 
 
 updateEntity : EntityId -> World -> World
 updateEntity =
-    updateComponents
+    Db.updateComponents
         { func = updatePlayerVelocity
         , inputComponents =
-            toInputComponents InputComponents
-                |> withInput .keyboardInputComponents
-                |> withInput .velocityComponents
+            Component.select InputComponents
+                |> Component.join .keyboardInputComponents
+                |> Component.join .velocityComponents
         , output =
-            toOutputComponents
-                |> withOutput keyboardInputComponent
-                |> withOutput velocityComponent
+            Modifier.select
+                |> Modifier.join keyboardInputComponent
+                |> Modifier.join velocityComponent
         }
 
 

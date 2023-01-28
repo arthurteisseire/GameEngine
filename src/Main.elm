@@ -2,7 +2,9 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events
-import EntityTable exposing (..)
+import Core.EntityId exposing (EntityId)
+import Core.EntitySet as EntitySet exposing (EntitySet)
+import Core.Table as Table exposing (Table)
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
@@ -143,7 +145,7 @@ applyTickSystems dt entitySet world =
 
 applySystem : (EntityId -> World -> World) -> EntitySet -> World -> World
 applySystem updateEntity entitySet world =
-    foldlEntitySet
+    EntitySet.foldl
         updateEntity
         world
         entitySet
@@ -151,15 +153,15 @@ applySystem updateEntity entitySet world =
 
 getPlayers : World -> EntitySet
 getPlayers world =
-    filterEntities
-        (\entityId -> getComponent entityId world.playerComponents /= Nothing)
+    EntitySet.filter
+        (\entityId -> Table.get entityId world.playerComponents /= Nothing)
         world.entities
 
 
 getAis : World -> EntitySet
 getAis world =
-    filterEntities
-        (\entityId -> getComponent entityId world.aiComponents /= Nothing)
+    EntitySet.filter
+        (\entityId -> Table.get entityId world.aiComponents /= Nothing)
         world.entities
 
 

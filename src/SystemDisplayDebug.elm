@@ -12,7 +12,8 @@ import ComponentTerrain
 import ComponentTurn
 import ComponentVelocity
 import ComponentVisual
-import EntityTable exposing (EntityId, Table, entityIdToString, getComponent)
+import Core.EntityId as EntityId exposing (EntityId)
+import Core.Table as Table exposing (Table)
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
@@ -43,7 +44,7 @@ displayDebug world entityId =
 
         componentToHtml : Table a -> (a -> String) -> Html Msg
         componentToHtml table toStr =
-            case getComponent entityId table of
+            case Table.get entityId table of
                 Just comp ->
                     Html.text (toStr comp)
 
@@ -51,7 +52,7 @@ displayDebug world entityId =
                     Html.text ""
 
         componentsDebug =
-            [ Html.text ("EntityId(" ++ entityIdToString entityId ++ ")")
+            [ Html.text ("EntityId(" ++ EntityId.toString entityId ++ ")")
             , componentToHtml world.keyboardInputComponents ComponentKeyboardInput.toString
             , componentToHtml world.visualComponents ComponentVisual.toString
             , componentToHtml world.positionComponents ComponentPosition.toString

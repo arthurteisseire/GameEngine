@@ -4,7 +4,11 @@ import ComponentAnimation exposing (ComponentAnimation)
 import ComponentAttack exposing (ComponentAttack)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
-import EntityTable exposing (..)
+import Core.Component as Component
+import Core.Database as Db
+import Core.EntityId exposing (EntityId)
+import Core.Modifier as Modifier
+import Core.Table as Table exposing (Table)
 import Vector2
 import World exposing (..)
 
@@ -29,21 +33,21 @@ type alias OtherComponents =
 
 updateEntity : EntityId -> World -> World
 updateEntity =
-    updateComponentsWithOthers
+    Db.updateComponentsWithOthers
         { func = velocityAttack
         , inputComponents =
-            toInputComponents InputComponents
-                |> withInput .positionComponents
-                |> withInput .velocityComponents
-                |> withInput .animationComponents
+            Component.select InputComponents
+                |> Component.join .positionComponents
+                |> Component.join .velocityComponents
+                |> Component.join .animationComponents
         , otherComponents =
-            select OtherComponents
-                |> using .entities
-                |> andFrom .positionComponents
+            Db.select OtherComponents
+                |> Db.fromEntities .entities
+                |> Db.innerJoin .positionComponents
         , output =
-            toOutputComponents
-                |> withOutput attackComponent
-                |> withOutput animationComponent
+            Modifier.select
+                |> Modifier.join attackComponent
+                |> Modifier.join animationComponent
         }
 
 
@@ -53,7 +57,7 @@ velocityAttack others { position, velocity, animation } =
         attackPos =
             Vector2.add position velocity
     in
-    if velocity /= ComponentVelocity.identity && hasValueInTableIf (\pos other -> pos == other.position) attackPos others then
+    if velocity /= ComponentVelocity.identity && Table.hasValueIf (\pos other -> pos == other.position) attackPos others then
         { attack =
             Just
                 { from = position
@@ -71,4 +75,4 @@ velocityAttack others { position, velocity, animation } =
 
 clear : EntityId -> World -> World
 clear entityId world =
-    { world | attackComponents = updateComponent entityId Nothing world.attackComponents }
+    { world | attackComponents = Table.insert entityId Nothing world.attackComponents }

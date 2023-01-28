@@ -4,7 +4,11 @@ import ComponentPlayer exposing (ComponentPlayer)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
-import EntityTable exposing (..)
+import Core.Component as Component
+import Core.Database as Db
+import Core.EntityId exposing (EntityId)
+import Core.Modifier as Modifier
+import Core.Table as Table exposing (Table)
 import Vector2
 import World exposing (..)
 
@@ -28,32 +32,30 @@ type alias OtherComponents =
 
 
 updateEntity : EntityId -> World -> World
-updateEntity entityId world =
-    updateComponentsWithOthers
+updateEntity =
+    Db.updateComponentsWithOthers
         { func = updateAIVelocity
         , inputComponents =
-            toInputComponents InputComponents
-                |> withInput .turnComponents
-                |> withInput .velocityComponents
-                |> withInput .positionComponents
+            Component.select InputComponents
+                |> Component.join .turnComponents
+                |> Component.join .velocityComponents
+                |> Component.join .positionComponents
         , otherComponents =
-            select OtherComponents
-                |> using .entities
-                |> andFrom .playerComponents
-                |> andFrom .positionComponents
+            Db.select OtherComponents
+                |> Db.fromEntities .entities
+                |> Db.innerJoin .playerComponents
+                |> Db.innerJoin .positionComponents
         , output =
-            toOutputComponents
-                |> withOutput velocityComponent
+            Modifier.select
+                |> Modifier.join velocityComponent
         }
-        entityId
-        world
 
 
 updateAIVelocity : Table OtherComponents -> InputComponents -> OutputComponents
 updateAIVelocity inputTable { turn, velocity, position } =
     let
         playerPos =
-            Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (valuesTable inputTable)))
+            Maybe.withDefault ComponentPosition.identity (List.head (List.map .position (Table.values inputTable)))
 
         diff =
             Vector2.sub playerPos position
