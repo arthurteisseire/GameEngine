@@ -9,11 +9,3 @@ type alias ComponentTerrain =
     }
 
 
-toString : ComponentTerrain -> String
-toString terrain =
-    "Terrain(dimensions="
-        ++ Vector2.toString String.fromInt terrain.dimensions
-        ++ ", "
-        ++ "sizeFactor="
-        ++ String.fromInt terrain.sizeFactor
-        ++ ")"

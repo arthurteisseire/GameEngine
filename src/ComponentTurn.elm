@@ -16,8 +16,3 @@ identity =
     { turnsToPlay = turns
     , remainingTurns = turns
     }
-
-
-toString : ComponentTurn -> String
-toString turn =
-    "ComponentTurn(remainingTurns=" ++ String.fromInt turn.remainingTurns ++ ")"

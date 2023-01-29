@@ -15,9 +15,6 @@ type alias ComponentVisual =
     }
 
 
-toString : ComponentVisual -> String
-toString visual =
-    "Visual(position=(" ++ Vector2.vectorFloatToString visual.position ++ "))"
 
 
 defaultRect : ComponentVisual

@@ -13,17 +13,3 @@ type alias ComponentAttack =
 identity : ComponentAttack
 identity =
     Nothing
-
-
-toString : ComponentAttack -> String
-toString maybeAttack =
-    case maybeAttack of
-        Just attack ->
-            "Attack(from="
-                ++ Vector2.vectorFloatToString attack.from
-                ++ ", to="
-                ++ Vector2.vectorFloatToString attack.to
-                ++ ")"
-
-        Nothing ->
-            "Attack()"

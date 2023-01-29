@@ -9,6 +9,17 @@ import Core.Table as Table exposing (Table)
 -- Update entities
 
 
+mapComponentsFull :
+    { func : inputs -> result
+    , inputComponents : EntityId -> db -> inputs
+    }
+    -> EntityId
+    -> db
+    -> result
+mapComponentsFull { func, inputComponents } entityId db =
+    func (inputComponents entityId db)
+
+
 mapComponents :
     { func : inputs -> result
     , inputComponents : EntityId -> db -> Maybe inputs

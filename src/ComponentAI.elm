@@ -10,8 +10,3 @@ identity : ComponentAI
 identity =
     {
     }
-
-
-toString : ComponentAI -> String
-toString _ =
-    "AI()"

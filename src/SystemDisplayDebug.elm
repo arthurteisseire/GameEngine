@@ -1,25 +1,41 @@
 module SystemDisplayDebug exposing (..)
 
-import ComponentAI
-import ComponentAnimation
-import ComponentAttack
-import ComponentDamage
-import ComponentKeyboardInput
-import ComponentLife
-import ComponentPlayer
-import ComponentPosition
-import ComponentTerrain
-import ComponentTurn
-import ComponentVelocity
-import ComponentVisual
 import Core.EntityId as EntityId exposing (EntityId)
 import Core.Table as Table exposing (Table)
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
+import Showable exposing (Showable)
 import Svg.Attributes as SA
 import Svg.Events as SE
 import World exposing (World)
+
+
+debugComponents : EntityId -> World -> List (Html Msg)
+debugComponents entityId world =
+    let
+        componentToHtml : Showable a -> (World -> Table a) -> List (Html Msg) -> List (Html Msg)
+        componentToHtml showable getTable html =
+            case Table.get entityId (getTable world) of
+                Just comp ->
+                    html ++ [ Html.text (showable.toString comp) ]
+
+                Nothing ->
+                    html
+    in
+    [ Html.text ("EntityId(" ++ EntityId.toString entityId ++ ")") ]
+        |> componentToHtml Showable.keyboardInput .keyboardInputComponents
+        |> componentToHtml Showable.visual .visualComponents
+        |> componentToHtml Showable.position .positionComponents
+        |> componentToHtml Showable.velocity .velocityComponents
+        |> componentToHtml Showable.life .lifeComponents
+        |> componentToHtml Showable.attack .attackComponents
+        |> componentToHtml Showable.damage .damageComponents
+        |> componentToHtml Showable.animation .animationComponents
+        |> componentToHtml Showable.turn .turnComponents
+        |> componentToHtml Showable.terrain .terrainComponents
+        |> componentToHtml Showable.ai .aiComponents
+        |> componentToHtml Showable.player .playerComponents
 
 
 display : World -> Maybe EntityId -> Html Msg
@@ -41,31 +57,6 @@ displayDebug world entityId =
                 , SA.style "background-color: #b3b3b3; border-color: #cccccc;"
                 ]
                 [ Html.text "Hide" ]
-
-        componentToHtml : Table a -> (a -> String) -> Html Msg
-        componentToHtml table toStr =
-            case Table.get entityId table of
-                Just comp ->
-                    Html.text (toStr comp)
-
-                Nothing ->
-                    Html.text ""
-
-        componentsDebug =
-            [ Html.text ("EntityId(" ++ EntityId.toString entityId ++ ")")
-            , componentToHtml world.keyboardInputComponents ComponentKeyboardInput.toString
-            , componentToHtml world.visualComponents ComponentVisual.toString
-            , componentToHtml world.positionComponents ComponentPosition.toString
-            , componentToHtml world.velocityComponents ComponentVelocity.toString
-            , componentToHtml world.lifeComponents ComponentLife.toString
-            , componentToHtml world.attackComponents ComponentAttack.toString
-            , componentToHtml world.damageComponents ComponentDamage.toString
-            , componentToHtml world.animationComponents ComponentAnimation.toString
-            , componentToHtml world.turnComponents ComponentTurn.toString
-            , componentToHtml world.terrainComponents ComponentTerrain.toString
-            , componentToHtml world.aiComponents ComponentAI.toString
-            , componentToHtml world.playerComponents ComponentPlayer.toString
-            ]
     in
     Html.div
         [ HA.id "DisplayDebug"
@@ -93,6 +84,6 @@ displayDebug world entityId =
                         ]
                         [ componentDebug ]
                 )
-                componentsDebug
+                (debugComponents entityId world)
             )
         ]

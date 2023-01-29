@@ -27,22 +27,3 @@ attackAnimation offset =
         , timeLeft = duration
         , offset = offset
         }
-
-
-toString : ComponentAnimation -> String
-toString maybeAnimation =
-    let
-        content =
-            case maybeAnimation of
-                Just animation ->
-                    "duration="
-                        ++ String.fromFloat animation.duration
-                        ++ ", timeLeft="
-                        ++ String.fromFloat animation.timeLeft
-                        ++ ", offset="
-                        ++ Vector2.vectorFloatToString animation.offset
-
-                Nothing ->
-                    ""
-    in
-    "ComponentAnimation(" ++ content ++ ")"

@@ -5,6 +5,12 @@ import Core.EntityId as EntityId exposing (EntityId(..))
 import Dict exposing (Dict)
 
 
+type alias DatabaseTable db a =
+    { get : db -> Table a
+    , set : a -> db -> db
+    }
+
+
 type Table a
     = Table (Dict Int a)
 

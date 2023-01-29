@@ -10,10 +10,3 @@ identity : ComponentLife
 identity =
     { healPoints = 0
     }
-
-
-toString : ComponentLife -> String
-toString life =
-    "Life(healPoints = "
-        ++ String.fromInt life.healPoints
-        ++ ")"

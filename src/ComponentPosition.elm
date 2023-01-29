@@ -10,8 +10,3 @@ type alias ComponentPosition =
 identity : ComponentPosition
 identity =
     Vector2.identity
-
-
-toString : ComponentPosition -> String
-toString position =
-    "Position(" ++ Vector2.vectorFloatToString position ++ ")"

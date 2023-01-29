@@ -15,17 +15,3 @@ identity =
     []
 
 
-toString : ComponentDamage -> String
-toString damage =
-    "ComponentDamage("
-        ++ List.foldl
-            (\dam finalString ->
-                finalString
-                    ++ "fromDirection="
-                    ++ Vector2.vectorFloatToString dam.fromDirection
-                    ++ ", points="
-                    ++ String.fromInt dam.points
-            )
-            ""
-            damage
-        ++ ")"

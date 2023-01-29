@@ -12,13 +12,3 @@ identity : ComponentKeyboardInput
 identity =
     { key = Nothing
     }
-
-
-toString : ComponentKeyboardInput -> String
-toString input =
-    case input.key of
-        Just key ->
-            "KeyboardInput(" ++ KeyboardInput.toString key ++ ")"
-
-        Nothing ->
-            "KeyboardInput()"
