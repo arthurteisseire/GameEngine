@@ -12,6 +12,7 @@ import ComponentTerrain exposing (ComponentTerrain)
 import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
+import Core.EntityId as EntityId exposing (EntityId)
 import Core.Table as Table exposing (Table)
 import KeyboardInput
 import Vector2 exposing (Vector2)
@@ -172,12 +173,27 @@ visual =
     }
 
 
+entityId : Showable EntityId
+entityId =
+    { toString =
+        \entityIdA ->
+            EntityId.toString entityIdA
+    }
+
+
 table : Showable a -> Showable (Table a)
 table showable =
     { toString =
         \tableA ->
             Table.foldl
-                (\_ component finalString -> finalString ++ showable.toString component)
+                (\entityIdA component finalString ->
+                    finalString
+                        ++ "(EntityId="
+                        ++ entityId.toString entityIdA
+                        ++ ", Component="
+                        ++ showable.toString component
+                        ++ ")\n"
+                )
                 ""
                 tableA
     }
