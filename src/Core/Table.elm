@@ -1,8 +1,8 @@
 module Core.Table exposing (..)
 
-import Core.DictHelpers as DictHelpers
 import Core.EntityId as EntityId exposing (EntityId(..))
 import Dict exposing (Dict)
+import Dict.OneToOne
 
 
 type alias DatabaseTable db a =
@@ -53,29 +53,29 @@ mapRow entityId func table =
 
 
 
--- DictHelpers Bindings
+-- Dict.OneToOne Bindings
 
 
 select : a -> a
 select =
-    DictHelpers.select
+    Dict.OneToOne.select
 
 
 from : Table a -> (a -> result) -> Table result
 from (Table dict) func =
-    DictHelpers.from dict func
+    Dict.OneToOne.from dict func
         |> Table
 
 
 innerJoin : Table a -> Table (a -> result) -> Table result
 innerJoin (Table dict) (Table nextDict) =
-    DictHelpers.innerJoin dict nextDict
+    Dict.OneToOne.innerJoin dict nextDict
         |> Table
 
 
 outerLeftJoin : Table a -> Table (Maybe a -> result) -> Table result
 outerLeftJoin (Table dict) (Table nextDict) =
-    DictHelpers.outerLeftJoin dict nextDict
+    Dict.OneToOne.leftOuterJoin dict nextDict
         |> Table
 
 
