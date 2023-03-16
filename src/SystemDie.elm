@@ -22,29 +22,20 @@ updateEntity entityId world =
 
 removeEntity : EntityId -> World -> World
 removeEntity entityId world =
-    { entities = EntitySet.remove entityId world.entities
-    , keyboardInputComponents = Table.remove entityId world.keyboardInputComponents
-    , positionComponents = Table.remove entityId world.positionComponents
-    , velocityComponents = Table.remove entityId world.velocityComponents
-    , lifeComponents = Table.remove entityId world.lifeComponents
-    , visualComponents = Table.remove entityId world.visualComponents
-    , attackComponents = Table.remove entityId world.attackComponents
-    , damageComponents = Table.remove entityId world.damageComponents
-    , animationComponents = Table.remove entityId world.animationComponents
-    , turnComponents = Table.remove entityId world.turnComponents
-    , terrainComponents = Table.remove entityId world.terrainComponents
-    , aiComponents = Table.remove entityId world.aiComponents
-    , playerComponents = Table.remove entityId world.playerComponents
-    , entityIdDebug =
-        case world.entityIdDebug of
-            Just id ->
-                if id == entityId then
+    let
+        newWorld =
+            World.remove entityId world
+    in
+    { newWorld
+        | entityIdDebug =
+            case world.entityIdDebug of
+                Just id ->
+                    if id == entityId then
+                        Nothing
+
+                    else
+                        world.entityIdDebug
+
+                Nothing ->
                     Nothing
-
-                else
-                    world.entityIdDebug
-
-            Nothing ->
-                Nothing
-    , isPause = world.isPause
     }

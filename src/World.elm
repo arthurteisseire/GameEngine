@@ -39,6 +39,39 @@ type alias World =
     }
 
 
+type alias WorldTableOps =
+    { remove : EntityId -> World -> World
+    }
+
+
+toWorldTableOps : Table a -> (Table a -> World -> World) -> WorldTableOps
+toWorldTableOps table worldSetter =
+    { remove = \id world -> worldSetter (Table.remove id table) world
+    }
+
+
+foldl : (WorldTableOps -> result -> result) -> result -> World -> result
+foldl func result world =
+    result
+        |> func (toWorldTableOps world.positionComponents positionModifier.set)
+        |> func (toWorldTableOps world.keyboardInputComponents keyboardInputModifier.set)
+        |> func (toWorldTableOps world.velocityComponents velocityModifier.set)
+        |> func (toWorldTableOps world.lifeComponents lifeModifier.set)
+        |> func (toWorldTableOps world.visualComponents visualModifier.set)
+        |> func (toWorldTableOps world.attackComponents attackModifier.set)
+        |> func (toWorldTableOps world.damageComponents damageModifier.set)
+        |> func (toWorldTableOps world.animationComponents animationModifier.set)
+        |> func (toWorldTableOps world.turnComponents turnModifier.set)
+        |> func (toWorldTableOps world.terrainComponents terrainModifier.set)
+        |> func (toWorldTableOps world.aiComponents aiModifier.set)
+        |> func (toWorldTableOps world.playerComponents playerModifier.set)
+
+
+remove : EntityId -> World -> World
+remove entityId world =
+    foldl (\ops -> ops.remove entityId) world world
+
+
 
 -- Table Modifiers
 
