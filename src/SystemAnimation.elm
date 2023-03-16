@@ -34,8 +34,8 @@ updateEntity dt =
                 |> Component.join .positionComponents
         , output =
             Modifier.select
-                |> Modifier.join visualComponent
-                |> Modifier.join animationComponent
+                |> Modifier.join ( visualModifier, .visual )
+                |> Modifier.join ( animationModifier, .animation )
         }
 
 

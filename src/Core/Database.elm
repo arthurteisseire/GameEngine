@@ -109,3 +109,5 @@ mapEntitiesInTable func table entitySet =
 filterEntitiesInTable : EntitySet -> Table a -> Table a
 filterEntitiesInTable (EntitySet _ entityList) table =
     Table.filter (\entityId _ -> List.member entityId entityList) table
+
+

@@ -47,7 +47,7 @@ updateEntity =
                 |> Db.innerJoin .positionComponents
         , output =
             Modifier.select
-                |> Modifier.join velocityComponent
+                |> Modifier.join ( velocityModifier, .velocity )
         }
 
 

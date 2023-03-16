@@ -22,7 +22,7 @@ updateEntity =
                 |> Component.join .turnComponents
         , output =
             Modifier.select
-                |> Modifier.join turnComponent
+                |> Modifier.join ( turnModifier, .turn )
         }
 
 

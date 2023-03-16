@@ -101,8 +101,8 @@ updateComponentsInTable table world =
     Table.foldl
         (\entityId components currentWorld ->
             currentWorld
-                |> Modifier.updateComponentInTable positionComponent components entityId
-                |> Modifier.updateComponentInTable velocityComponent components entityId
+                |> Modifier.updateComponentInTable ( positionModifier, .position ) components entityId
+                |> Modifier.updateComponentInTable ( velocityModifier, .velocity ) components entityId
         )
         world
         table

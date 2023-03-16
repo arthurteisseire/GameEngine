@@ -32,7 +32,7 @@ updateEntity =
                 |> Component.join .damageComponents
         , output =
             Modifier.select
-                |> Modifier.join lifeComponent
+                |> Modifier.join ( lifeModifier, .life )
         }
 
 

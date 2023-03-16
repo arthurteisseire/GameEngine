@@ -8,16 +8,12 @@ import World exposing (World)
 
 
 read : Key -> EntityId -> World -> World
-read key entityId world =
-    { world
-        | keyboardInputComponents =
-            Table.insert entityId { key = Just key } world.keyboardInputComponents
-    }
+read key entityId =
+    World.keyboardInputModifier.map
+        (Table.insert entityId { key = Just key })
 
 
 clear : EntityId -> World -> World
-clear entityId world =
-    { world
-        | keyboardInputComponents =
-            Table.insert entityId { key = Nothing } world.keyboardInputComponents
-    }
+clear entityId =
+    World.keyboardInputModifier.map
+        (Table.insert entityId { key = Nothing })

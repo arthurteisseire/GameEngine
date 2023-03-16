@@ -40,7 +40,7 @@ updateEntity =
                 |> Db.innerJoin .attackComponents
         , output =
             Modifier.select
-                |> Modifier.join damageComponent
+                |> Modifier.join ( damageModifier, .damage )
         }
 
 

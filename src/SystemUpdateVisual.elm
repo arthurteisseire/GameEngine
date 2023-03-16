@@ -30,7 +30,7 @@ updateEntity =
                 |> Component.join .positionComponents
         , output =
             Modifier.select
-                |> Modifier.join visualComponent
+                |> Modifier.join ( visualModifier, .visual )
         }
 
 

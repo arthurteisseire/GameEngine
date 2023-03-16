@@ -38,8 +38,8 @@ updateEntity =
                 |> Component.join .velocityComponents
         , output =
             Modifier.select
-                |> Modifier.join keyboardInputComponent
-                |> Modifier.join velocityComponent
+                |> Modifier.join ( keyboardInputModifier, .keyboardInput )
+                |> Modifier.join ( velocityModifier, .velocity )
         }
 
 
