@@ -1,7 +1,7 @@
 module Core.Modifier exposing (..)
 
+import Core.ComponentTable as ComponentTable exposing (ComponentTable)
 import Core.EntityId exposing (EntityId)
-import Core.Table as Table exposing (Table)
 
 
 type alias SimpleModifier a b =
@@ -31,18 +31,18 @@ select _ _ db =
 
 
 join :
-    ( Modifier (Table a) db, b -> a )
+    ( (ComponentTable a -> ComponentTable a) -> db -> db, b -> a )
     -> (b -> EntityId -> db -> db)
     -> b
     -> EntityId
     -> db
     -> db
-join modifier previousUpdater outputComponents entityId world =
+join mapTable previousUpdater outputComponents entityId world =
     world
         |> previousUpdater outputComponents entityId
-        |> updateComponentInTable modifier outputComponents entityId
+        |> updateComponentInTable mapTable outputComponents entityId
 
 
-updateComponentInTable : ( Modifier (Table a) db, b -> a ) -> b -> EntityId -> db -> db
-updateComponentInTable ( tableA, getA ) outputComponents entityId =
-    tableA.map (Table.insert entityId (getA outputComponents))
+updateComponentInTable : ( (ComponentTable a -> ComponentTable a) -> db -> db, b -> a ) -> b -> EntityId -> db -> db
+updateComponentInTable ( mapTable, getA ) outputComponents entityId =
+    mapTable (ComponentTable.insert entityId (getA outputComponents))

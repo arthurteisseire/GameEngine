@@ -1,5 +1,6 @@
 module SystemAccelerationAI exposing (updateEntity)
 
+import ComponentAI exposing (ComponentAI)
 import ComponentPlayer exposing (ComponentPlayer)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentTurn exposing (ComponentTurn)
@@ -22,6 +23,7 @@ type alias InputComponents =
     { turn : ComponentTurn
     , velocity : ComponentVelocity
     , position : ComponentPosition
+    , ai : ComponentAI
     }
 
 
@@ -37,17 +39,18 @@ updateEntity =
         { func = updateAIVelocity
         , inputComponents =
             Component.select InputComponents
-                |> Component.join .turnComponents
-                |> Component.join .velocityComponents
-                |> Component.join .positionComponents
+                |> Component.join ComponentTurn.modifier.get
+                |> Component.join ComponentVelocity.modifier.get
+                |> Component.join ComponentPosition.modifier.get
+                |> Component.join ComponentAI.modifier.get
         , otherComponents =
             Db.select OtherComponents
                 |> Db.fromEntities .entities
-                |> Db.innerJoin .playerComponents
-                |> Db.innerJoin .positionComponents
+                |> Db.innerJoin ComponentPlayer.modifier.get
+                |> Db.innerJoin ComponentPosition.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( velocityModifier, .velocity )
+                |> Modifier.join ( ComponentVelocity.modifier.map, .velocity )
         }
 
 

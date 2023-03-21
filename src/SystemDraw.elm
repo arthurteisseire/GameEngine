@@ -1,15 +1,16 @@
 module SystemDraw exposing (..)
 
 import ComponentVisual exposing (ComponentVisual)
+import Core.ComponentTable exposing (ComponentTable)
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet exposing (EntitySet)
-import Core.Table as Table exposing (Table)
+import Core.Table as Table
 import Event exposing (Msg(..))
 import Svg exposing (Svg)
 
 
-visualToSvg : Table ComponentVisual -> EntitySet -> List (Svg Msg)
+visualToSvg : ComponentTable ComponentVisual -> EntitySet -> List (Svg Msg)
 visualToSvg visualTable entitySet =
     Db.mapEntitiesInTable (\entityId visual -> toSvg entityId visual) visualTable entitySet
         |> Table.values

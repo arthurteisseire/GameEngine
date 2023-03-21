@@ -29,13 +29,13 @@ updateEntity dt =
         { func = animate dt
         , inputComponents =
             Component.select InputComponents
-                |> Component.join .visualComponents
-                |> Component.join .animationComponents
-                |> Component.join .positionComponents
+                |> Component.join ComponentVisual.modifier.get
+                |> Component.join ComponentAnimation.modifier.get
+                |> Component.join ComponentPosition.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( visualModifier, .visual )
-                |> Modifier.join ( animationModifier, .animation )
+                |> Modifier.join ( ComponentVisual.modifier.map, .visual )
+                |> Modifier.join ( ComponentAnimation.modifier.map, .animation )
         }
 
 

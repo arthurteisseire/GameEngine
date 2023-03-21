@@ -1,11 +1,9 @@
 module SystemDisplayDebug exposing (..)
 
 import Core.EntityId as EntityId exposing (EntityId)
-import Core.Table as Table exposing (Table)
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
-import Showable exposing (Showable)
 import Svg.Attributes as SA
 import Svg.Events as SE
 import World exposing (World)
@@ -13,29 +11,8 @@ import World exposing (World)
 
 debugComponents : EntityId -> World -> List (Html Msg)
 debugComponents entityId world =
-    let
-        componentToHtml : Showable a -> (World -> Table a) -> List (Html Msg) -> List (Html Msg)
-        componentToHtml showable getTable html =
-            case Table.get entityId (getTable world) of
-                Just comp ->
-                    html ++ [ Html.text (showable.toString comp) ]
-
-                Nothing ->
-                    html
-    in
     [ Html.text ("EntityId(" ++ EntityId.toString entityId ++ ")") ]
-        |> componentToHtml Showable.keyboardInput .keyboardInputComponents
-        |> componentToHtml Showable.visual .visualComponents
-        |> componentToHtml Showable.position .positionComponents
-        |> componentToHtml Showable.velocity .velocityComponents
-        |> componentToHtml Showable.life .lifeComponents
-        |> componentToHtml Showable.attack .attackComponents
-        |> componentToHtml Showable.damage .damageComponents
-        |> componentToHtml Showable.animation .animationComponents
-        |> componentToHtml Showable.turn .turnComponents
-        |> componentToHtml Showable.terrain .terrainComponents
-        |> componentToHtml Showable.ai .aiComponents
-        |> componentToHtml Showable.player .playerComponents
+        ++ List.map Html.text (World.toStrings entityId world)
 
 
 display : World -> Maybe EntityId -> Html Msg

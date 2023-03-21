@@ -37,10 +37,10 @@ updateEntity =
         , otherComponents =
             Db.select OtherComponents
                 |> Db.fromEntities .entities
-                |> Db.innerJoin .attackComponents
+                |> Db.innerJoin ComponentAttack.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( damageModifier, .damage )
+                |> Modifier.join ( ComponentDamage.modifier.map, .damage )
         }
 
 

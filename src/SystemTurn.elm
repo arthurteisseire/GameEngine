@@ -19,10 +19,10 @@ updateEntity =
         { func = playTurn
         , inputComponents =
             Component.select Components
-                |> Component.join .turnComponents
+                |> Component.join ComponentTurn.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( turnModifier, .turn )
+                |> Modifier.join ( ComponentTurn.modifier.map, .turn )
         }
 
 

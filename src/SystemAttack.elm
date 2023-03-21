@@ -5,6 +5,7 @@ import ComponentAttack exposing (ComponentAttack)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import Core.Component as Component
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
@@ -37,17 +38,17 @@ updateEntity =
         { func = velocityAttack
         , inputComponents =
             Component.select InputComponents
-                |> Component.join .positionComponents
-                |> Component.join .velocityComponents
-                |> Component.join .animationComponents
+                |> Component.join ComponentPosition.modifier.get
+                |> Component.join ComponentVelocity.modifier.get
+                |> Component.join ComponentAnimation.modifier.get
         , otherComponents =
             Db.select OtherComponents
                 |> Db.fromEntities .entities
-                |> Db.innerJoin .positionComponents
+                |> Db.innerJoin ComponentPosition.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( attackModifier, .attack )
-                |> Modifier.join ( animationModifier, .animation )
+                |> Modifier.join ( ComponentAttack.modifier.map, .attack )
+                |> Modifier.join ( ComponentAnimation.modifier.map, .animation )
         }
 
 
@@ -75,4 +76,4 @@ velocityAttack others { position, velocity, animation } =
 
 clear : EntityId -> World -> World
 clear entityId world =
-    { world | attackComponents = Table.insert entityId Nothing world.attackComponents }
+    ComponentAttack.modifier.map (ComponentTable.insert entityId Nothing) world

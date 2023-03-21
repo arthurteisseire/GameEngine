@@ -5,9 +5,7 @@ import ComponentLife exposing (ComponentLife)
 import Core.Component as Component
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
-import Core.EntitySet as EntitySet exposing (EntitySet)
 import Core.Modifier as Modifier
-import Core.Table as Table exposing (Table)
 import World exposing (..)
 
 
@@ -28,11 +26,11 @@ updateEntity =
         { func = takeDamage
         , inputComponents =
             Component.select InputComponents
-                |> Component.join .lifeComponents
-                |> Component.join .damageComponents
+                |> Component.join ComponentLife.modifier.get
+                |> Component.join ComponentDamage.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( lifeModifier, .life )
+                |> Modifier.join ( ComponentLife.modifier.map, .life )
         }
 
 

@@ -2,9 +2,11 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events
+import ComponentAI as ComponentAi
+import ComponentPlayer
+import Core.ComponentTable as ComponentTable
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet as EntitySet exposing (EntitySet)
-import Core.Table as Table exposing (Table)
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
@@ -154,14 +156,14 @@ applySystem updateEntity entitySet world =
 getPlayers : World -> EntitySet
 getPlayers world =
     EntitySet.filter
-        (\entityId -> Table.get entityId world.playerComponents /= Nothing)
+        (\entityId -> ComponentTable.get entityId (ComponentPlayer.modifier.get world) /= Nothing)
         world.entities
 
 
 getAis : World -> EntitySet
 getAis world =
     EntitySet.filter
-        (\entityId -> Table.get entityId world.aiComponents /= Nothing)
+        (\entityId -> ComponentTable.get entityId (ComponentAi.modifier.get world) /= Nothing)
         world.entities
 
 

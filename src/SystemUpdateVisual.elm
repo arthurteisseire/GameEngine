@@ -26,11 +26,11 @@ updateEntity =
         { func = updateVisual
         , inputComponents =
             Component.select InputComponents
-                |> Component.join .visualComponents
-                |> Component.join .positionComponents
+                |> Component.join ComponentVisual.modifier.get
+                |> Component.join ComponentPosition.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( visualModifier, .visual )
+                |> Modifier.join ( ComponentVisual.modifier.map, .visual )
         }
 
 

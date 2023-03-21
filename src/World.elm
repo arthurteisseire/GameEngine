@@ -12,161 +12,80 @@ import ComponentTerrain exposing (ComponentTerrain)
 import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
+import Core.ComponentTable as ComponentTable exposing (ComponentTable)
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet exposing (EntitySet)
-import Core.Modifier as Modifier exposing (Modifier)
-import Core.Table as Table exposing (Table)
-import Event exposing (Msg)
-import Html exposing (Html)
+import Core.Modifier exposing (Modifier)
 
 
 type alias World =
     { entities : EntitySet
-    , keyboardInputComponents : Table ComponentKeyboardInput
-    , positionComponents : Table ComponentPosition
-    , velocityComponents : Table ComponentVelocity
-    , lifeComponents : Table ComponentLife
-    , visualComponents : Table ComponentVisual
-    , attackComponents : Table ComponentAttack
-    , damageComponents : Table ComponentDamage
-    , animationComponents : Table ComponentAnimation
-    , turnComponents : Table ComponentTurn
-    , terrainComponents : Table ComponentTerrain
-    , aiComponents : Table ComponentAI
-    , playerComponents : Table ComponentPlayer
+    , keyboardInputComponents : ComponentTable ComponentKeyboardInput
+    , positionComponents : ComponentTable ComponentPosition
+    , velocityComponents : ComponentTable ComponentVelocity
+    , lifeComponents : ComponentTable ComponentLife
+    , visualComponents : ComponentTable ComponentVisual
+    , attackComponents : ComponentTable ComponentAttack
+    , damageComponents : ComponentTable ComponentDamage
+    , animationComponents : ComponentTable ComponentAnimation
+    , turnComponents : ComponentTable ComponentTurn
+    , terrainComponents : ComponentTable ComponentTerrain
+    , aiComponents : ComponentTable ComponentAI
+    , playerComponents : ComponentTable ComponentPlayer
     , entityIdDebug : Maybe EntityId
     , isPause : Bool
     }
 
 
-type alias WorldTableOps =
-    { remove : EntityId -> World -> World
-    }
-
-
-toWorldTableOps : Table a -> (Table a -> World -> World) -> WorldTableOps
-toWorldTableOps table worldSetter =
-    { remove = \id world -> worldSetter (Table.remove id table) world
-    }
-
-
-foldl : (WorldTableOps -> result -> result) -> result -> World -> result
-foldl func result world =
+foldl : (WorldTableOps -> result -> result) -> result -> result
+foldl func result =
     result
-        |> func (toWorldTableOps world.positionComponents positionModifier.set)
-        |> func (toWorldTableOps world.keyboardInputComponents keyboardInputModifier.set)
-        |> func (toWorldTableOps world.velocityComponents velocityModifier.set)
-        |> func (toWorldTableOps world.lifeComponents lifeModifier.set)
-        |> func (toWorldTableOps world.visualComponents visualModifier.set)
-        |> func (toWorldTableOps world.attackComponents attackModifier.set)
-        |> func (toWorldTableOps world.damageComponents damageModifier.set)
-        |> func (toWorldTableOps world.animationComponents animationModifier.set)
-        |> func (toWorldTableOps world.turnComponents turnModifier.set)
-        |> func (toWorldTableOps world.terrainComponents terrainModifier.set)
-        |> func (toWorldTableOps world.aiComponents aiModifier.set)
-        |> func (toWorldTableOps world.playerComponents playerModifier.set)
+        |> func (toWorldTableOps ComponentPosition.modifier)
+        |> func (toWorldTableOps ComponentKeyboardInput.modifier)
+        |> func (toWorldTableOps ComponentVelocity.modifier)
+        |> func (toWorldTableOps ComponentLife.modifier)
+        |> func (toWorldTableOps ComponentVisual.modifier)
+        |> func (toWorldTableOps ComponentAttack.modifier)
+        |> func (toWorldTableOps ComponentDamage.modifier)
+        |> func (toWorldTableOps ComponentAnimation.modifier)
+        |> func (toWorldTableOps ComponentTurn.modifier)
+        |> func (toWorldTableOps ComponentTerrain.modifier)
+        |> func (toWorldTableOps ComponentAI.modifier)
+        |> func (toWorldTableOps ComponentPlayer.modifier)
+
+
+toStrings : EntityId -> World -> List String
+toStrings entityId world =
+    foldl (\ops -> ops.toString world entityId) []
 
 
 remove : EntityId -> World -> World
 remove entityId world =
-    foldl (\ops -> ops.remove entityId) world world
+    foldl (\ops -> ops.remove entityId) world
 
 
 
--- Table Modifiers
+-- Private
 
 
-keyboardInputModifier : Modifier (Table ComponentKeyboardInput) World
-keyboardInputModifier =
-    Modifier.tableModifier
-        { get = .keyboardInputComponents
-        , set = \table world -> { world | keyboardInputComponents = table }
-        }
+type alias WorldTableOps =
+    { remove : EntityId -> World -> World
+    , toString : World -> EntityId -> List String -> List String
+    }
 
 
-positionModifier : Modifier (Table ComponentPosition) World
-positionModifier =
-    Modifier.tableModifier
-        { get = .positionComponents
-        , set = \table world -> { world | positionComponents = table }
-        }
-
-
-velocityModifier : Modifier (Table ComponentVelocity) World
-velocityModifier =
-    Modifier.tableModifier
-        { get = .velocityComponents
-        , set = \table world -> { world | velocityComponents = table }
-        }
-
-
-lifeModifier : Modifier (Table ComponentLife) World
-lifeModifier =
-    Modifier.tableModifier
-        { get = .lifeComponents
-        , set = \table world -> { world | lifeComponents = table }
-        }
-
-
-visualModifier : Modifier (Table ComponentVisual) World
-visualModifier =
-    Modifier.tableModifier
-        { get = .visualComponents
-        , set = \table world -> { world | visualComponents = table }
-        }
-
-
-attackModifier : Modifier (Table ComponentAttack) World
-attackModifier =
-    Modifier.tableModifier
-        { get = .attackComponents
-        , set = \table world -> { world | attackComponents = table }
-        }
-
-
-damageModifier : Modifier (Table ComponentDamage) World
-damageModifier =
-    Modifier.tableModifier
-        { get = .damageComponents
-        , set = \table world -> { world | damageComponents = table }
-        }
-
-
-animationModifier : Modifier (Table ComponentAnimation) World
-animationModifier =
-    Modifier.tableModifier
-        { get = .animationComponents
-        , set = \table world -> { world | animationComponents = table }
-        }
-
-
-turnModifier : Modifier (Table ComponentTurn) World
-turnModifier =
-    Modifier.tableModifier
-        { get = .turnComponents
-        , set = \table world -> { world | turnComponents = table }
-        }
-
-
-terrainModifier : Modifier (Table ComponentTerrain) World
-terrainModifier =
-    Modifier.tableModifier
-        { get = .terrainComponents
-        , set = \table world -> { world | terrainComponents = table }
-        }
-
-
-aiModifier : Modifier (Table ComponentAI) World
-aiModifier =
-    Modifier.tableModifier
-        { get = .aiComponents
-        , set = \table world -> { world | aiComponents = table }
-        }
-
-
-playerModifier : Modifier (Table ComponentPlayer) World
-playerModifier =
-    Modifier.tableModifier
-        { get = .playerComponents
-        , set = \table world -> { world | playerComponents = table }
-        }
+toWorldTableOps : Modifier (ComponentTable a) World -> WorldTableOps
+toWorldTableOps modifier =
+    { remove =
+        \id currentWorld ->
+            modifier.map (ComponentTable.remove id) currentWorld
+    , toString =
+        \world entityId strings ->
+            strings
+                ++ Maybe.withDefault
+                    []
+                    (Maybe.map
+                        (\comp -> [ (ComponentTable.getOps (modifier.get world)).toString comp ])
+                        (ComponentTable.get entityId (modifier.get world))
+                    )
+    }

@@ -3,10 +3,10 @@ module SystemAcceleration exposing (..)
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
 import Core.Component as Component
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
-import Core.Table as Table exposing (Table)
 import KeyboardInput exposing (Key)
 import World exposing (..)
 
@@ -25,7 +25,7 @@ type alias InputComponents =
 
 clearVelocity : EntityId -> World -> World
 clearVelocity entityId world =
-    { world | velocityComponents = Table.insert entityId ComponentVelocity.identity world.velocityComponents }
+    ComponentVelocity.modifier.map (ComponentTable.insert entityId ComponentVelocity.identity) world
 
 
 updateEntity : EntityId -> World -> World
@@ -34,12 +34,12 @@ updateEntity =
         { func = updatePlayerVelocity
         , inputComponents =
             Component.select InputComponents
-                |> Component.join .keyboardInputComponents
-                |> Component.join .velocityComponents
+                |> Component.join ComponentKeyboardInput.modifier.get
+                |> Component.join ComponentVelocity.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( keyboardInputModifier, .keyboardInput )
-                |> Modifier.join ( velocityModifier, .velocity )
+                |> Modifier.join ( ComponentKeyboardInput.modifier.map, .keyboardInput )
+                |> Modifier.join ( ComponentVelocity.modifier.map, .velocity )
         }
 
 

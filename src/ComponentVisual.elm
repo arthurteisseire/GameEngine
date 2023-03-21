@@ -1,5 +1,7 @@
 module ComponentVisual exposing (..)
 
+import Core.ComponentTable as ComponentTable exposing (ComponentTable)
+import Core.Modifier as Modifier
 import Event exposing (Msg(..))
 import Svg exposing (Svg)
 import Svg.Attributes as SA
@@ -15,6 +17,20 @@ type alias ComponentVisual =
     }
 
 
+emptyTable : ComponentTable ComponentVisual
+emptyTable =
+    ComponentTable.empty
+        { toString =
+            \visualA ->
+                "Visual(position=(" ++ Vector2.vectorFloatToString visualA.position ++ "))"
+        }
+
+
+modifier =
+    Modifier.tableModifier
+        { get = .visualComponents
+        , set = \table world -> { world | visualComponents = table }
+        }
 
 
 defaultRect : ComponentVisual

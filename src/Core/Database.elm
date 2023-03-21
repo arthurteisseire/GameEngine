@@ -1,5 +1,6 @@
 module Core.Database exposing (..)
 
+import Core.ComponentTable as ComponentTable exposing (ComponentTable)
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet as EntitySet exposing (EntitySet(..))
 import Core.Table as Table exposing (Table)
@@ -92,22 +93,20 @@ from getTable func db =
     Table.from (getTable db) func
 
 
-innerJoin : (db -> Table a) -> (db -> Table (a -> result)) -> db -> Table result
+innerJoin : (db -> ComponentTable a) -> (db -> Table (a -> result)) -> db -> Table result
 innerJoin getTable getNextTable db =
-    Table.innerJoin (getTable db) (getNextTable db)
+    ComponentTable.innerJoin (getTable db) (getNextTable db)
 
 
 
 -- Entities
 
 
-mapEntitiesInTable : (EntityId -> a -> result) -> Table a -> EntitySet -> Table result
+mapEntitiesInTable : (EntityId -> a -> result) -> ComponentTable a -> EntitySet -> Table result
 mapEntitiesInTable func table entitySet =
-    Table.map func (filterEntitiesInTable entitySet table)
+    Table.map func (filterEntitiesInTable entitySet (ComponentTable.getTable table))
 
 
 filterEntitiesInTable : EntitySet -> Table a -> Table a
 filterEntitiesInTable (EntitySet _ entityList) table =
     Table.filter (\entityId _ -> List.member entityId entityList) table
-
-
