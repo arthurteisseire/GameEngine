@@ -3,6 +3,7 @@ module SystemUpdateVisual exposing (..)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVisual exposing (ComponentVisual)
 import Core.Component as Component
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
@@ -30,7 +31,7 @@ updateEntity =
                 |> Component.join ComponentPosition.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( ComponentVisual.modifier.map, .visual )
+                |> ComponentTable.joinModifier ( ComponentVisual.modifier.map, .visual )
         }
 
 

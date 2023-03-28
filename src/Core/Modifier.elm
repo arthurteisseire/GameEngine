@@ -1,6 +1,5 @@
 module Core.Modifier exposing (..)
 
-import Core.ComponentTable as ComponentTable exposing (ComponentTable)
 import Core.EntityId exposing (EntityId)
 
 
@@ -28,21 +27,3 @@ tableModifier modifier =
 select : b -> EntityId -> db -> db
 select _ _ db =
     db
-
-
-join :
-    ( (ComponentTable a -> ComponentTable a) -> db -> db, b -> a )
-    -> (b -> EntityId -> db -> db)
-    -> b
-    -> EntityId
-    -> db
-    -> db
-join mapTable previousUpdater outputComponents entityId world =
-    world
-        |> previousUpdater outputComponents entityId
-        |> updateComponentInTable mapTable outputComponents entityId
-
-
-updateComponentInTable : ( (ComponentTable a -> ComponentTable a) -> db -> db, b -> a ) -> b -> EntityId -> db -> db
-updateComponentInTable ( mapTable, getA ) outputComponents entityId =
-    mapTable (ComponentTable.insert entityId (getA outputComponents))

@@ -2,6 +2,7 @@ module SystemTurn exposing (..)
 
 import ComponentTurn exposing (ComponentTurn)
 import Core.Component as Component
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
@@ -22,7 +23,7 @@ updateEntity =
                 |> Component.join ComponentTurn.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( ComponentTurn.modifier.map, .turn )
+                |> ComponentTable.joinModifier ( ComponentTurn.modifier.map, .turn )
         }
 
 

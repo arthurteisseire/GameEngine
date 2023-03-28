@@ -3,6 +3,7 @@ module SystemLife exposing (..)
 import ComponentDamage exposing (ComponentDamage)
 import ComponentLife exposing (ComponentLife)
 import Core.Component as Component
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
@@ -30,7 +31,7 @@ updateEntity =
                 |> Component.join ComponentDamage.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( ComponentLife.modifier.map, .life )
+                |> ComponentTable.joinModifier ( ComponentLife.modifier.map, .life )
         }
 
 

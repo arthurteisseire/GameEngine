@@ -1,6 +1,7 @@
 module Core.ComponentTable exposing (..)
 
 import Core.EntityId as EntityId exposing (EntityId)
+import Core.Modifier exposing (Modifier)
 import Core.Table as Table exposing (Table)
 
 
@@ -10,6 +11,29 @@ type ComponentTable a
 
 type alias ComponentOps a =
     { toString : a -> String
+    }
+
+
+type alias Ops db =
+    { remove : EntityId -> db -> db
+    , toString : db -> EntityId -> List String -> List String
+    }
+
+
+toOps : Modifier (ComponentTable a) db -> Ops db
+toOps modifier =
+    { remove =
+        \id currentWorld ->
+            modifier.map (remove id) currentWorld
+    , toString =
+        \world entityId strings ->
+            strings
+                ++ Maybe.withDefault
+                    []
+                    (Maybe.map
+                        (\comp -> [ (getComponentOps (modifier.get world)).toString comp ])
+                        (get entityId (modifier.get world))
+                    )
     }
 
 
@@ -80,6 +104,28 @@ getTable (ComponentTable table _) =
     table
 
 
-getOps : ComponentTable a -> ComponentOps a
-getOps (ComponentTable _ ops) =
+getComponentOps : ComponentTable a -> ComponentOps a
+getComponentOps (ComponentTable _ ops) =
     ops
+
+
+
+-- Modifier
+
+
+joinModifier :
+    ( (ComponentTable a -> ComponentTable a) -> db -> db, b -> a )
+    -> (b -> EntityId -> db -> db)
+    -> b
+    -> EntityId
+    -> db
+    -> db
+joinModifier mapTable previousUpdater outputComponents entityId world =
+    world
+        |> previousUpdater outputComponents entityId
+        |> updateComponent mapTable outputComponents entityId
+
+
+updateComponent : ( (ComponentTable a -> ComponentTable a) -> db -> db, b -> a ) -> b -> EntityId -> db -> db
+updateComponent ( mapTable, getA ) outputComponents entityId =
+    mapTable (insert entityId (getA outputComponents))

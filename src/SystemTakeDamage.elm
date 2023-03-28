@@ -4,6 +4,7 @@ import ComponentAttack exposing (ComponentAttack)
 import ComponentDamage exposing (ComponentDamage)
 import ComponentPosition exposing (ComponentPosition)
 import Core.Component as Component
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
@@ -40,7 +41,7 @@ updateEntity =
                 |> Db.innerJoin ComponentAttack.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( ComponentDamage.modifier.map, .damage )
+                |> ComponentTable.joinModifier ( ComponentDamage.modifier.map, .damage )
         }
 
 

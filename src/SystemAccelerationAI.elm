@@ -6,6 +6,7 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import Core.Component as Component
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
@@ -50,7 +51,7 @@ updateEntity =
                 |> Db.innerJoin ComponentPosition.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( ComponentVelocity.modifier.map, .velocity )
+                |> ComponentTable.joinModifier ( ComponentVelocity.modifier.map, .velocity )
         }
 
 

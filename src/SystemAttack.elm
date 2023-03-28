@@ -47,8 +47,8 @@ updateEntity =
                 |> Db.innerJoin ComponentPosition.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( ComponentAttack.modifier.map, .attack )
-                |> Modifier.join ( ComponentAnimation.modifier.map, .animation )
+                |> ComponentTable.joinModifier ( ComponentAttack.modifier.map, .attack )
+                |> ComponentTable.joinModifier ( ComponentAnimation.modifier.map, .animation )
         }
 
 

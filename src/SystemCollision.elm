@@ -2,6 +2,7 @@ module SystemCollision exposing (..)
 
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntitySet as EntitySet exposing (EntitySet)
 import Core.Modifier as Modifier
@@ -99,8 +100,8 @@ updateComponentsInTable table world =
     Table.foldl
         (\entityId components currentWorld ->
             currentWorld
-                |> Modifier.updateComponentInTable ( ComponentPosition.modifier.map, .position ) components entityId
-                |> Modifier.updateComponentInTable ( ComponentVelocity.modifier.map, .velocity ) components entityId
+                |> ComponentTable.updateComponent ( ComponentPosition.modifier.map, .position ) components entityId
+                |> ComponentTable.updateComponent ( ComponentVelocity.modifier.map, .velocity ) components entityId
         )
         world
         table

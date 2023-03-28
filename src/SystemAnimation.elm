@@ -4,6 +4,7 @@ import ComponentAnimation exposing (ComponentAnimation)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVisual exposing (ComponentVisual)
 import Core.Component as Component
+import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
@@ -34,8 +35,8 @@ updateEntity dt =
                 |> Component.join ComponentPosition.modifier.get
         , output =
             Modifier.select
-                |> Modifier.join ( ComponentVisual.modifier.map, .visual )
-                |> Modifier.join ( ComponentAnimation.modifier.map, .animation )
+                |> ComponentTable.joinModifier ( ComponentVisual.modifier.map, .visual )
+                |> ComponentTable.joinModifier ( ComponentAnimation.modifier.map, .animation )
         }
 
 
