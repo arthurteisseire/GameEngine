@@ -42,9 +42,9 @@ select =
     Table.select
 
 
-from : Table a -> (a -> result) -> Table result
+from : ComponentTable a -> (a -> result) -> Table result
 from table func =
-    Table.from table func
+    Table.from (getTable table) func
 
 
 innerJoin : ComponentTable a -> Table (a -> result) -> Table result

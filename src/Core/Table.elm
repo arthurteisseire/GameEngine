@@ -136,7 +136,7 @@ union (Table dictHighPriority) (Table dictLowPriority) =
     Table (Dict.union dictHighPriority dictLowPriority)
 
 
-mergeTable :
+merge :
     (EntityId -> a -> result -> result)
     -> (EntityId -> a -> b -> result -> result)
     -> (EntityId -> b -> result -> result)
@@ -144,7 +144,7 @@ mergeTable :
     -> Table b
     -> result
     -> result
-mergeTable leftStep bothStep rightStep (Table leftDict) (Table rightDict) initialResult =
+merge leftStep bothStep rightStep (Table leftDict) (Table rightDict) initialResult =
     Dict.merge
         (\id a t -> leftStep (EntityId.fromInt id) a t)
         (\id a b t -> bothStep (EntityId.fromInt id) a b t)
