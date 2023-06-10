@@ -12,6 +12,16 @@ empty =
     EntitySet 0 []
 
 
+isEmpty : EntitySet -> Bool
+isEmpty entitySet =
+    size entitySet == 0
+
+
+size : EntitySet -> Int
+size (EntitySet nextId _) =
+    nextId - 1
+
+
 addEntity : EntitySet -> ( EntitySet, EntityId )
 addEntity (EntitySet nextId entities) =
     ( EntitySet (nextId + 1) (EntityId.fromInt nextId :: entities)

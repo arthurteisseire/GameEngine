@@ -22,6 +22,7 @@ import SystemDie
 import SystemDisplayDebug
 import SystemKeyboardInput
 import SystemLife
+import SystemMove
 import SystemTakeDamage
 import SystemTurn
 import SystemUpdateVisual
@@ -130,6 +131,7 @@ play playingEntities world =
     world
         |> applySystem SystemAttack.updateEntity playingEntities
         |> SystemCollision.updateEntities world.entities
+        |> applySystem SystemMove.updateEntity world.entities
         |> applySystem SystemUpdateVisual.updateEntity playingEntities
         |> applySystem SystemTakeDamage.updateEntity world.entities
         |> applySystem SystemLife.updateEntity world.entities

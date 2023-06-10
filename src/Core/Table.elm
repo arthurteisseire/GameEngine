@@ -20,6 +20,11 @@ fromList list =
         |> fromDict
 
 
+toList : Table a -> List ( EntityId, a )
+toList table =
+    foldl (\key value list -> ( key, value ) :: list) [] table
+
+
 fromDict : Dict Int a -> Table a
 fromDict dict =
     Dict.foldl
