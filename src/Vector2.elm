@@ -47,6 +47,16 @@ mul =
     apply (*)
 
 
+approxEq : Vector2 Float -> Vector2 Float -> Float -> Bool
+approxEq left right epsilon =
+    length (add left right) < epsilon
+
+
+length : Vector2 Float -> Float
+length v =
+    sqrt ((v.x * v.x) + (v.y * v.y))
+
+
 apply : (number -> number -> number) -> Vector2 number -> Vector2 number -> Vector2 number
 apply func left right =
     { x = func left.x right.x
