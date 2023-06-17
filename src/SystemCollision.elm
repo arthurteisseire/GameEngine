@@ -58,80 +58,28 @@ updateEntities entitySet world =
 
 collideNew : Table Components -> Table Components
 collideNew table =
-    let
-        passOpposite : Table Components
-        passOpposite =
-            passOppositeUpdateVelocityOnTable table
-
-        grouped : List (List EntityId)
-        grouped =
-            groupEntitiesByDestination passOpposite
-
-        filtered : List (List EntityId)
-        filtered =
-            List.filter (\entities -> not <| List.isEmpty entities) grouped
-
-        collidingEntities : List EntityId
-        collidingEntities =
-            List.concat filtered
-    in
-    Table.map
-        (\entityId components ->
-            if List.member entityId collidingEntities then
-                { components | velocity = Vector2.identity }
-
-            else
-                components
-        )
-        table
+    table
+        |> applyPass (applyPassSingle detectOrthogonalIntersection)
+        |> applyPass (applyPassSingle detectOppositeIntersection)
 
 
-groupEntitiesByDestination : Table Components -> List (List EntityId)
-groupEntitiesByDestination table =
-    let
-        groupedList : List ( ( EntityId, Components ), List ( EntityId, Components ) )
-        groupedList =
-            List.gatherWith
-                (\( entityId1, components1 ) ( entityId2, components2 ) ->
-                    Vector2.eq
-                        (Vector2.add components1.position components1.velocity)
-                        (Vector2.add components2.position components2.velocity)
-                )
-                (Table.toList table)
-    in
-    List.foldl
-        (\( ( _, _ ), list ) accList ->
-            List.map
-                (\( entityId, _ ) ->
-                    entityId
-                )
-                list
-                :: accList
-        )
-        []
-        groupedList
+detectOrthogonalIntersection : Line -> Line -> Bool
+detectOrthogonalIntersection line1 line2 =
+    Vector2.approxEq line1.end line2.end 0.1
 
 
-passOppositeUpdateVelocityOnTable : Table Components -> Table Components
-passOppositeUpdateVelocityOnTable table =
-    Table.map
-        (\entityId components ->
-            { components
-                | velocity =
-                    passOppositeUpdateVelocityOnComponents
-                        (Table.remove entityId table)
-                        components
-            }
-        )
-        table
+detectOppositeIntersection : Line -> Line -> Bool
+detectOppositeIntersection v1 v2 =
+    Vector2.approxEq v1.end v2.start 0.1
+        && Vector2.approxEq v2.end v1.start 0.1
 
 
-passOppositeUpdateVelocityOnComponents : Table Components -> Components -> Vector2 Float
-passOppositeUpdateVelocityOnComponents table components =
+applyPassSingle : (Line -> Line -> Bool) -> Table Components -> Components -> Vector2 Float
+applyPassSingle func table components =
     if
         Table.hasValueIf
             (\line tableComponents ->
-                passOppositeDetectIntersection
+                func
                     (componentsToLine tableComponents)
                     line
             )
@@ -144,17 +92,25 @@ passOppositeUpdateVelocityOnComponents table components =
         components.velocity
 
 
+applyPass : (Table Components -> Components -> Vector2 Float) -> Table Components -> Table Components
+applyPass func table =
+    Table.map
+        (\entityId components ->
+            { components
+                | velocity =
+                    func
+                        (Table.remove entityId table)
+                        components
+            }
+        )
+        table
+
+
 componentsToLine : Components -> Line
 componentsToLine components =
     { start = components.position
     , end = Vector2.add components.position components.velocity
     }
-
-
-passOppositeDetectIntersection : Line -> Line -> Bool
-passOppositeDetectIntersection v1 v2 =
-    Vector2.eq v1.end v2.start
-        && Vector2.eq v2.end v1.start
 
 
 detectIntersection : Line -> Line -> Maybe Intersection
