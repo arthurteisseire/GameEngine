@@ -49,7 +49,7 @@ mul =
 
 approxEq : Vector2 Float -> Vector2 Float -> Float -> Bool
 approxEq left right epsilon =
-    length (add left right) < epsilon
+    length (sub left right) < epsilon
 
 
 length : Vector2 Float -> Float
