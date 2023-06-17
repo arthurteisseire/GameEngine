@@ -4,6 +4,7 @@ import Core.EntityId as EntityId exposing (EntityId)
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
+import Html.Events as HE
 import Svg.Attributes as SA
 import Svg.Events as SE
 import World exposing (World)
@@ -28,6 +29,21 @@ display world maybeEntityId =
 displayDebug : World -> EntityId -> Html Msg
 displayDebug world entityId =
     let
+        inputEntity =
+            Html.input
+                [ SA.type_ "float"
+                , HE.onInput
+                    (\str ->
+                        case String.toInt str of
+                            Nothing ->
+                                DiscardMsg
+
+                            Just id ->
+                                DisplayDebug (EntityId.fromInt id)
+                    )
+                ]
+                []
+
         hideButton =
             Html.button
                 [ SE.onClick HideDebug
@@ -43,7 +59,8 @@ displayDebug world entityId =
         , HA.style "border-style" "solid"
         , HA.style "border-width" "1px"
         ]
-        [ hideButton
+        [ inputEntity
+        , hideButton
         , Html.div
             [ HA.id "ComponentsDebug"
             , HA.style "height" "100%"
