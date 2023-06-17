@@ -20,6 +20,11 @@ type alias Components =
     }
 
 
+type alias OutputComponents =
+    { velocity : ComponentVelocity
+    }
+
+
 type alias OtherComponents =
     { position : ComponentPosition
     }
@@ -54,9 +59,13 @@ updateEntities entitySet world =
 collideNew : Table Components -> Table Components
 collideNew table =
     let
+        passOpposite : Table Components
+        passOpposite =
+            passOppositeUpdateVelocityOnTable table
+
         grouped : List (List EntityId)
         grouped =
-            groupEntitiesByDestination table
+            groupEntitiesByDestination passOpposite
 
         filtered : List (List EntityId)
         filtered =
@@ -101,6 +110,51 @@ groupEntitiesByDestination table =
         )
         []
         groupedList
+
+
+passOppositeUpdateVelocityOnTable : Table Components -> Table Components
+passOppositeUpdateVelocityOnTable table =
+    Table.map
+        (\entityId components ->
+            { components
+                | velocity =
+                    passOppositeUpdateVelocityOnComponents
+                        (Table.remove entityId table)
+                        components
+            }
+        )
+        table
+
+
+passOppositeUpdateVelocityOnComponents : Table Components -> Components -> Vector2 Float
+passOppositeUpdateVelocityOnComponents table components =
+    if
+        Table.hasValueIf
+            (\line tableComponents ->
+                passOppositeDetectIntersection
+                    (componentsToLine tableComponents)
+                    line
+            )
+            (componentsToLine components)
+            table
+    then
+        Vector2.identity
+
+    else
+        components.velocity
+
+
+componentsToLine : Components -> Line
+componentsToLine components =
+    { start = components.position
+    , end = Vector2.add components.position components.velocity
+    }
+
+
+passOppositeDetectIntersection : Line -> Line -> Bool
+passOppositeDetectIntersection v1 v2 =
+    Vector2.eq v1.end v2.start
+        && Vector2.eq v2.end v1.start
 
 
 detectIntersection : Line -> Line -> Maybe Intersection
