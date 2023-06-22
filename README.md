@@ -20,3 +20,10 @@ Systems query tables to get the wanted components.
 The simplest one takes components in input, components in output and a function to modify them.
 Each system takes a set of entity it wants to operate on. This allow filtering entities between system in an easy way (for streaming for example).
 
+## Install & Run (todo: simplify with true builds)
+- Install Elm: https://guide.elm-lang.org/install/elm.html.
+- Go to the project directory and run "elm reactor".
+- It will tell you to go to something like localhost:8080.
+- You will be face of a project structure, browse to src/Main.elm.
+- You can now play.
+
