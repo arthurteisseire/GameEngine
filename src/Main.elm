@@ -1,13 +1,12 @@
 module Main exposing (main)
 
 import Browser
-import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
-import WorldLevel1
 import System
 import SystemUpdateVisual
 import World exposing (World)
+import WorldLevel1
 import WorldSystem
 
 
@@ -24,7 +23,7 @@ main =
 -- Init
 
 
-init : () -> ( World, Cmd Msg )
+init : () -> ( World, Cmd World.Msg )
 init _ =
     let
         level1 =
@@ -39,7 +38,7 @@ init _ =
 -- Update
 
 
-update : Msg -> World -> ( World, Cmd Msg )
+update : World.Msg -> World -> ( World, Cmd World.Msg )
 update msg world =
     WorldSystem.ops.update msg world
 
@@ -48,7 +47,7 @@ update msg world =
 -- View
 
 
-view : World -> Browser.Document Msg
+view : World -> Browser.Document World.Msg
 view world =
     { title = "ECS"
     , body =
@@ -68,6 +67,6 @@ view world =
 -- Subscriptions
 
 
-subscriptions : World -> Sub Msg
+subscriptions : World -> Sub World.Msg
 subscriptions world =
     WorldSystem.ops.subscriptions world

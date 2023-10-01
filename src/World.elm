@@ -16,6 +16,7 @@ import Core.ComponentTable as ComponentTable exposing (ComponentTable)
 import Core.Context exposing (ContextOperations)
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet exposing (EntitySet)
+import KeyboardInput exposing (Key)
 
 
 type alias World =
@@ -35,6 +36,16 @@ type alias World =
     , entityIdDebug : Maybe EntityId
     , isPause : Bool
     }
+
+
+type Msg
+    = Tick Float
+    | TogglePause
+    | NextFrame
+    | KeyBoardInput Key
+    | DiscardMsg
+    | DisplayDebug EntityId
+    | HideDebug
 
 
 foldl : (ComponentTable.Ops World -> result -> result) -> result -> result
@@ -69,3 +80,13 @@ toStrings entityId world =
 remove : EntityId -> World -> World
 remove entityId world =
     foldl (\ops -> ops.remove entityId) world
+
+
+visualMsgToWorldMsg : EntityId -> ComponentVisual.VisualMsg -> Msg
+visualMsgToWorldMsg entityId visualMsg =
+    case visualMsg of
+        ComponentVisual.Clicked ->
+            DisplayDebug entityId
+
+        ComponentVisual.None ->
+            DiscardMsg

@@ -6,12 +6,10 @@ import ComponentPlayer
 import Core.ComponentTable as ComponentTable
 import Core.Context exposing (ContextSystem)
 import Core.EntitySet as EntitySet exposing (EntitySet)
-import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
 import Json.Decode
 import KeyboardInput exposing (Key, keyDecoder)
-import WorldLevel1
 import System
 import SystemAcceleration
 import SystemAccelerationAI
@@ -26,7 +24,8 @@ import SystemMove
 import SystemTakeDamage
 import SystemTurn
 import SystemUpdateVisual
-import World exposing (World)
+import World exposing (Msg(..), World)
+import WorldLevel1
 
 
 ops : ContextSystem World Msg
@@ -74,9 +73,6 @@ updateWorld msg world =
 
         HideDebug ->
             { world | entityIdDebug = Nothing }
-
-        Clicked ->
-            world
 
         DiscardMsg ->
             world

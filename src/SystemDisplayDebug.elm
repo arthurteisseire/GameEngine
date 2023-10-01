@@ -1,13 +1,12 @@
 module SystemDisplayDebug exposing (..)
 
 import Core.EntityId as EntityId exposing (EntityId)
-import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Svg.Attributes as SA
 import Svg.Events as SE
-import World exposing (World)
+import World exposing (Msg(..), World)
 
 
 debugComponents contextOperations entityId context =

@@ -6,26 +6,19 @@ import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet exposing (EntitySet)
 import Core.Table as Table
-import Event exposing (Msg(..))
 import Svg exposing (Svg)
 
 
-visualToSvg : ComponentTable ComponentVisual -> EntitySet -> List (Svg Msg)
-visualToSvg visualTable entitySet =
-    Db.mapEntitiesInTable (\entityId visual -> toSvg entityId visual) visualTable entitySet
+visualToSvg : (EntityId -> ComponentVisual.VisualMsg -> msg) -> ComponentTable ComponentVisual -> EntitySet -> List (Svg msg)
+visualToSvg toMsg visualTable entitySet =
+    Db.mapEntitiesInTable (\entityId visual -> toSvg toMsg entityId visual) visualTable entitySet
         |> Table.values
 
 
-toSvg : EntityId -> ComponentVisual -> Svg Msg
-toSvg entityId visual =
+toSvg : (EntityId -> ComponentVisual.VisualMsg -> msg) -> EntityId -> ComponentVisual -> Svg msg
+toSvg toMsg entityId visual =
     Svg.map
-        (\visualMsg ->
-            if visualMsg == Event.Clicked then
-                Event.DisplayDebug entityId
-
-            else
-                DiscardMsg
-        )
+        (toMsg entityId)
         (visual.shape
             (visual.attributes ++ visual.posToAttributes visual.position)
             []

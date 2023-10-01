@@ -11,15 +11,15 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentTerrain exposing (ComponentTerrain)
 import ComponentTurn
 import ComponentVelocity
-import ComponentVisual
+import ComponentVisual exposing (ComponentVisual)
 import Core.ComponentTable as ComponentTable exposing (ComponentTable)
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet as EntitySet
-import Event exposing (Msg)
 import Html exposing (Html)
 import Html.Attributes as HA
 import Svg
 import Svg.Attributes as SA
+import Svg.Events as SE
 import SystemDraw
 import World exposing (World)
 
@@ -30,7 +30,7 @@ init =
         ( entities1, playerId ) =
             EntitySet.addEntity EntitySet.empty
 
-        ( entities2, terrain ) =
+        ( entities2, terrainEntity ) =
             EntitySet.addEntity entities1
 
         ( entities3, enemies ) =
@@ -43,7 +43,7 @@ init =
     , positionComponents =
         ComponentPosition.emptyTable
             |> ComponentTable.insert playerId { x = 6, y = 6 }
-            |> ComponentTable.insert terrain { x = 0, y = 0 }
+            |> ComponentTable.insert terrainEntity { x = 0, y = 0 }
             |> (\posTable ->
                     List.foldl
                         (\( entityId, pos ) table -> ComponentTable.insert entityId pos table)
@@ -63,14 +63,14 @@ init =
             |> insertComponentForEntities enemies { healPoints = 5 }
     , visualComponents =
         ComponentVisual.emptyTable
-            |> ComponentTable.insert playerId ComponentVisual.defaultRect
+            |> ComponentTable.insert playerId defaultRect
             |> (\visualTable ->
                     List.foldl
-                        (\entityId table -> ComponentTable.insert entityId (ComponentVisual.circle "orange") table)
+                        (\entityId table -> ComponentTable.insert entityId (circle "orange") table)
                         visualTable
                         enemies
                )
-            |> ComponentTable.insert terrain ComponentVisual.terrain
+            |> ComponentTable.insert terrainEntity terrain
     , attackComponents =
         ComponentAttack.emptyTable
             |> ComponentTable.insert playerId ComponentAttack.identity
@@ -95,7 +95,7 @@ init =
             |> ComponentTable.insert playerId ComponentPlayer.identity
     , terrainComponents =
         ComponentTerrain.emptyTable
-            |> ComponentTable.insert terrain { dimensions = { x = 16, y = 16 }, sizeFactor = 50 }
+            |> ComponentTable.insert terrainEntity { dimensions = { x = 16, y = 16 }, sizeFactor = 50 }
     , entityIdDebug =
         Just playerId
     , isPause =
@@ -117,7 +117,7 @@ type alias InputComponents =
     }
 
 
-visual : World -> Html Msg
+visual : World -> Html World.Msg
 visual world =
     let
         screenPosition =
@@ -146,7 +146,7 @@ visual world =
                         ++ String.fromInt dimensions.y
                     )
                 ]
-                (SystemDraw.visualToSvg world.visualComponents world.entities)
+                (SystemDraw.visualToSvg World.visualMsgToWorldMsg world.visualComponents world.entities)
     in
     Html.div
         [ HA.id "WorldLevel1"
@@ -154,3 +154,58 @@ visual world =
         ]
         [ screen
         ]
+
+
+defaultRect : ComponentVisual
+defaultRect =
+    { shape = Svg.rect
+    , attributes =
+        [ SA.width "1"
+        , SA.height "1"
+        , SA.fill "blue"
+        , SE.onClick ComponentVisual.Clicked
+        ]
+    , posToAttributes =
+        \v ->
+            [ SA.x <| String.fromFloat v.x
+            , SA.y <| String.fromFloat v.y
+            ]
+    , position = { x = 0, y = 0 }
+    }
+
+
+circle : String -> ComponentVisual
+circle color =
+    { shape = Svg.circle
+    , attributes =
+        [ SA.r "0.5"
+        , SA.fill color
+        , SE.onClick ComponentVisual.Clicked
+        ]
+    , posToAttributes =
+        \v ->
+            [ SA.cx <| String.fromFloat (v.x + 0.5)
+            , SA.cy <| String.fromFloat (v.y + 0.5)
+            ]
+    , position = { x = 0, y = 0 }
+    }
+
+
+terrain : ComponentVisual
+terrain =
+    { shape = Svg.rect
+    , attributes =
+        [ SA.width "100%"
+        , SA.height "100%"
+        , SA.fill "none"
+        , SA.stroke "black"
+        , SA.strokeWidth "0.05"
+        , SE.onClick ComponentVisual.Clicked
+        ]
+    , posToAttributes =
+        \v ->
+            [ SA.x <| String.fromFloat v.x
+            , SA.y <| String.fromFloat v.y
+            ]
+    , position = { x = 0, y = 0 }
+    }
