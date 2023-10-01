@@ -60,54 +60,47 @@ init _ =
 
 update : Msg -> World -> ( World, Cmd Msg )
 update msg world =
+    ( updateWorld msg world, Cmd.none )
+
+
+updateWorld : Msg -> World -> World
+updateWorld msg world =
     case msg of
         KeyBoardInput key ->
             if world.isPause then
-                ( world
+                world
                     |> applySystem (SystemKeyboardInput.read key) world.entities
-                , Cmd.none
-                )
 
             else
-                ( world
+                world
                     |> applySystem (SystemKeyboardInput.read key) world.entities
                     |> playTurn
-                , Cmd.none
-                )
 
         Tick dt ->
-            ( world
+            world
                 |> applyTickSystems dt world.entities
-            , Cmd.none
-            )
 
         TogglePause ->
-            ( { world | isPause = not world.isPause }, Cmd.none )
+            { world | isPause = not world.isPause }
 
         NextFrame ->
             if world.isPause then
-                ( playTurn world
-                , Cmd.none
-                )
+                playTurn world
 
             else
-                ( world, Cmd.none )
+                world
 
         DisplayDebug entityId ->
-            ( { world | entityIdDebug = Just entityId }
-            , Cmd.none
-            )
+            { world | entityIdDebug = Just entityId }
 
         HideDebug ->
-            ( { world | entityIdDebug = Nothing }
-            , Cmd.none
-            )
+            { world | entityIdDebug = Nothing }
 
         Clicked ->
-            ( world, Cmd.none )
+            world
 
         DiscardMsg ->
-            ( world, Cmd.none )
+            world
 
 
 playTurn : World -> World
