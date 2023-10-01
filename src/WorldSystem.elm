@@ -11,7 +11,7 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Json.Decode
 import KeyboardInput exposing (Key, keyDecoder)
-import Level1
+import WorldLevel1
 import System
 import SystemAcceleration
 import SystemAccelerationAI
@@ -148,7 +148,7 @@ view world =
 
           else
             Html.text ""
-        , Level1.visual world
+        , WorldLevel1.visual world
         , SystemDisplayDebug.display World.operations world world.entityIdDebug
         ]
 

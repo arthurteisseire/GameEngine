@@ -1,4 +1,4 @@
-module Level1 exposing (..)
+module WorldLevel1 exposing (..)
 
 import ComponentAI
 import ComponentAnimation
@@ -149,7 +149,7 @@ visual world =
                 (SystemDraw.visualToSvg world.visualComponents world.entities)
     in
     Html.div
-        [ HA.id "Level1"
+        [ HA.id "WorldLevel1"
         , HA.style "float" "left"
         ]
         [ screen

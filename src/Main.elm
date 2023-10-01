@@ -4,7 +4,7 @@ import Browser
 import Event exposing (Msg(..))
 import Html exposing (Html)
 import Html.Attributes as HA
-import Level1
+import WorldLevel1
 import System
 import SystemUpdateVisual
 import World exposing (World)
@@ -28,7 +28,7 @@ init : () -> ( World, Cmd Msg )
 init _ =
     let
         level1 =
-            Level1.init
+            WorldLevel1.init
     in
     ( System.run SystemUpdateVisual.updateEntity level1.entities level1
     , Cmd.none
