@@ -21,7 +21,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .lifeComponents
         , set = \table world -> { world | lifeComponents = table }
         }

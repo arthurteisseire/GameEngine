@@ -16,8 +16,8 @@ type alias Modifier a b =
     }
 
 
-tableModifier : SimpleModifier a b -> Modifier a b
-tableModifier modifier =
+init : SimpleModifier a b -> Modifier a b
+init modifier =
     { get = modifier.get
     , set = modifier.set
     , map = \func b -> modifier.set (func (modifier.get b)) b

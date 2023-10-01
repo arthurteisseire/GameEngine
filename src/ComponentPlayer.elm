@@ -18,7 +18,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .playerComponents
         , set = \table world -> { world | playerComponents = table }
         }

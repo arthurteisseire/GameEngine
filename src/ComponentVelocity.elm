@@ -19,7 +19,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .velocityComponents
         , set = \table world -> { world | velocityComponents = table }
         }

@@ -33,7 +33,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .damageComponents
         , set = \table world -> { world | damageComponents = table }
         }

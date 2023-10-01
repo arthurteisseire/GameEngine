@@ -21,7 +21,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .aiComponents
         , set = \table world -> { world | aiComponents = table }
         }

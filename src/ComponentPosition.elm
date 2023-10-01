@@ -17,7 +17,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .positionComponents
         , set = \table context -> { context | positionComponents = table }
         }

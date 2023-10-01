@@ -25,7 +25,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .keyboardInputComponents
         , set = \table world -> { world | keyboardInputComponents = table }
         }

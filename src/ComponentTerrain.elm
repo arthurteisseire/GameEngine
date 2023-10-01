@@ -26,7 +26,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .terrainComponents
         , set = \table world -> { world | terrainComponents = table }
         }

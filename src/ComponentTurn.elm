@@ -20,7 +20,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .turnComponents
         , set = \table world -> { world | turnComponents = table }
         }

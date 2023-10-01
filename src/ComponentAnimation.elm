@@ -37,7 +37,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .animationComponents
         , set = \table world -> { world | animationComponents = table }
         }

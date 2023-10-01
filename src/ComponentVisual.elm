@@ -29,7 +29,7 @@ emptyTable =
 
 
 modifier =
-    Modifier.tableModifier
+    Modifier.init
         { get = .visualComponents
         , set = \table world -> { world | visualComponents = table }
         }
