@@ -1,6 +1,7 @@
 module Core.ComponentTable exposing (..)
 
 import Core.EntityId as EntityId exposing (EntityId)
+import Core.EntitySet exposing (EntitySet(..))
 import Core.Modifier exposing (Modifier)
 import Core.Table as Table exposing (Table)
 
@@ -129,3 +130,13 @@ joinModifier mapTable previousUpdater outputComponents entityId world =
 updateComponent : ( (ComponentTable a -> ComponentTable a) -> db -> db, b -> a ) -> b -> EntityId -> db -> db
 updateComponent ( mapTable, getA ) outputComponents entityId =
     mapTable (insert entityId (getA outputComponents))
+
+
+mapEntitiesInTable : (EntityId -> a -> result) -> ComponentTable a -> EntitySet -> Table result
+mapEntitiesInTable func table entitySet =
+    Table.map func (filterEntitiesInTable entitySet (getTable table))
+
+
+filterEntitiesInTable : EntitySet -> Table a -> Table a
+filterEntitiesInTable (EntitySet _ entityList) table =
+    Table.filter (\entityId _ -> List.member entityId entityList) table

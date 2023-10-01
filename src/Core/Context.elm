@@ -110,17 +110,3 @@ from getTable func context =
 innerJoin : (context -> ComponentTable a) -> (context -> Table (a -> result)) -> context -> Table result
 innerJoin getTable getNextTable context =
     ComponentTable.innerJoin (getTable context) (getNextTable context)
-
-
-
--- Entities
-
-
-mapEntitiesInTable : (EntityId -> a -> result) -> ComponentTable a -> EntitySet -> Table result
-mapEntitiesInTable func table entitySet =
-    Table.map func (filterEntitiesInTable entitySet (ComponentTable.getTable table))
-
-
-filterEntitiesInTable : EntitySet -> Table a -> Table a
-filterEntitiesInTable (EntitySet _ entityList) table =
-    Table.filter (\entityId _ -> List.member entityId entityList) table
