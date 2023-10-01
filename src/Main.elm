@@ -14,6 +14,7 @@ import Html.Attributes as HA
 import Json.Decode
 import KeyboardInput exposing (Key, keyDecoder)
 import Level1
+import System
 import SystemAcceleration
 import SystemAccelerationAI
 import SystemAnimation
@@ -27,7 +28,6 @@ import SystemMove
 import SystemTakeDamage
 import SystemTurn
 import SystemUpdateVisual
-import Util
 import World exposing (World)
 
 
@@ -50,7 +50,7 @@ init _ =
         level1 =
             Level1.init
     in
-    ( Util.applySystem SystemUpdateVisual.updateEntity level1.entities level1
+    ( System.run SystemUpdateVisual.updateEntity level1.entities level1
     , Cmd.none
     )
 
@@ -70,11 +70,11 @@ updateWorld msg world =
         KeyBoardInput key ->
             if world.isPause then
                 world
-                    |> Util.applySystem (SystemKeyboardInput.read key) world.entities
+                    |> System.run (SystemKeyboardInput.read key) world.entities
 
             else
                 world
-                    |> Util.applySystem (SystemKeyboardInput.read key) world.entities
+                    |> System.run (SystemKeyboardInput.read key) world.entities
                     |> playTurn
 
         Tick dt ->
@@ -114,32 +114,32 @@ playTurn world =
             getAis world
     in
     world
-        |> Util.applySystem SystemTurn.updateEntity world.entities
-        |> Util.applySystem SystemAcceleration.updateEntity players
+        |> System.run SystemTurn.updateEntity world.entities
+        |> System.run SystemAcceleration.updateEntity players
         |> play players
-        |> Util.applySystem SystemAccelerationAI.updateEntity ais
+        |> System.run SystemAccelerationAI.updateEntity ais
         |> play ais
 
 
 play : EntitySet -> World -> World
 play playingEntities world =
     world
-        |> Util.applySystem SystemAttack.updateEntity playingEntities
-        |> SystemCollision.updateEntities world.entities
-        |> Util.applySystem SystemMove.updateEntity world.entities
-        |> Util.applySystem SystemUpdateVisual.updateEntity playingEntities
-        |> Util.applySystem SystemTakeDamage.updateEntity world.entities
-        |> Util.applySystem SystemLife.updateEntity world.entities
-        |> Util.applySystem SystemKeyboardInput.clear playingEntities
-        |> Util.applySystem SystemAcceleration.clearVelocity playingEntities
-        |> Util.applySystem SystemAttack.clear playingEntities
-        |> Util.applySystemWithOperations SystemDie.updateEntity world.entities World.operations
+        |> System.run SystemAttack.updateEntity playingEntities
+        |> SystemCollision.run world.entities
+        |> System.run SystemMove.updateEntity world.entities
+        |> System.run SystemUpdateVisual.updateEntity playingEntities
+        |> System.run SystemTakeDamage.updateEntity world.entities
+        |> System.run SystemLife.updateEntity world.entities
+        |> System.run SystemKeyboardInput.clear playingEntities
+        |> System.run SystemAcceleration.clearVelocity playingEntities
+        |> System.run SystemAttack.clear playingEntities
+        |> System.runWithOps SystemDie.updateEntity world.entities World.operations
 
 
 applyTickSystems : Float -> EntitySet -> World -> World
 applyTickSystems dt entitySet world =
     world
-        |> Util.applySystem (SystemAnimation.updateEntity dt) entitySet
+        |> System.run (SystemAnimation.updateEntity dt) entitySet
 
 
 getPlayers : World -> EntitySet

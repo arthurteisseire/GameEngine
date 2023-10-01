@@ -39,7 +39,7 @@ type alias Intersection =
     Vector2 Float
 
 
-updateEntities entitySet context =
+run entitySet context =
     let
         table : Table Components
         table =
@@ -183,7 +183,7 @@ collideEachEntityRecursively others entitySet context =
         context
 
     else
-        updateEntities
+        run
             (EntitySet.filter
                 (\entityId -> not <| List.member entityId (Table.keys updatedComponents))
                 entitySet

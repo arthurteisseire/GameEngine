@@ -1,16 +1,16 @@
-module Util exposing (..)
+module System exposing (..)
 
 import Core.EntitySet as EntitySet
 
 
-applySystem updateEntity entitySet world =
+run updateEntity entitySet world =
     EntitySet.foldl
         updateEntity
         world
         entitySet
 
 
-applySystemWithOperations updateEntity entitySet contextOperations world =
+runWithOps updateEntity entitySet contextOperations world =
     EntitySet.foldl
         (updateEntity contextOperations)
         world
