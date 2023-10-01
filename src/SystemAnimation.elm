@@ -8,7 +8,6 @@ import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
-import World exposing (..)
 
 
 type alias OutputComponents =
@@ -24,7 +23,6 @@ type alias InputComponents =
     }
 
 
-updateEntity : Float -> EntityId -> World -> World
 updateEntity dt =
     Db.updateComponents
         { func = animate dt

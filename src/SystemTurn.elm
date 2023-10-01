@@ -6,7 +6,6 @@ import Core.ComponentTable as ComponentTable
 import Core.Database as Db
 import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
-import World exposing (..)
 
 
 type alias Components =
@@ -14,7 +13,6 @@ type alias Components =
     }
 
 
-updateEntity : EntityId -> World -> World
 updateEntity =
     Db.updateComponents
         { func = playTurn

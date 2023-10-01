@@ -5,6 +5,7 @@ import Browser.Events
 import ComponentAI as ComponentAi
 import ComponentPlayer
 import Core.ComponentTable as ComponentTable
+import Core.Context exposing (ContextOperations)
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet as EntitySet exposing (EntitySet)
 import Event exposing (Msg(..))
@@ -138,7 +139,7 @@ play playingEntities world =
         |> applySystem SystemKeyboardInput.clear playingEntities
         |> applySystem SystemAcceleration.clearVelocity playingEntities
         |> applySystem SystemAttack.clear playingEntities
-        |> applySystem SystemDie.updateEntity world.entities
+        |> applySystemWithOperations SystemDie.updateEntity world.entities World.operations
 
 
 applyTickSystems : Float -> EntitySet -> World -> World
@@ -151,6 +152,14 @@ applySystem : (EntityId -> World -> World) -> EntitySet -> World -> World
 applySystem updateEntity entitySet world =
     EntitySet.foldl
         updateEntity
+        world
+        entitySet
+
+
+applySystemWithOperations : (ContextOperations World -> EntityId -> World -> World) -> EntitySet -> ContextOperations World -> World -> World
+applySystemWithOperations updateEntity entitySet contextOperations world =
+    EntitySet.foldl
+        (updateEntity contextOperations)
         world
         entitySet
 
@@ -189,7 +198,7 @@ view world =
               else
                 Html.text ""
             , Level1.visual world
-            , SystemDisplayDebug.display world world.entityIdDebug
+            , SystemDisplayDebug.display World.operations world world.entityIdDebug
             ]
         ]
     }

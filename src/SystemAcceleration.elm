@@ -23,12 +23,10 @@ type alias InputComponents =
     }
 
 
-clearVelocity : EntityId -> World -> World
-clearVelocity entityId world =
-    ComponentVelocity.modifier.map (ComponentTable.insert entityId ComponentVelocity.identity) world
+clearVelocity entityId context =
+    ComponentVelocity.modifier.map (ComponentTable.insert entityId ComponentVelocity.identity) context
 
 
-updateEntity : EntityId -> World -> World
 updateEntity =
     Db.updateComponents
         { func = updatePlayerVelocity

@@ -10,24 +10,21 @@ import Svg.Events as SE
 import World exposing (World)
 
 
-debugComponents : EntityId -> World -> List (Html Msg)
-debugComponents entityId world =
+debugComponents contextOperations entityId context =
     [ Html.text ("EntityId(" ++ EntityId.toString entityId ++ ")") ]
-        ++ List.map Html.text (World.toStrings entityId world)
+        ++ List.map Html.text (contextOperations.toStrings entityId context)
 
 
-display : World -> Maybe EntityId -> Html Msg
-display world maybeEntityId =
+display contextOperations context maybeEntityId =
     case maybeEntityId of
         Just entityId ->
-            displayDebug world entityId
+            displayDebug contextOperations context entityId
 
         Nothing ->
             Html.text ""
 
 
-displayDebug : World -> EntityId -> Html Msg
-displayDebug world entityId =
+displayDebug contextOperations context entityId =
     let
         inputEntity =
             Html.input
@@ -78,6 +75,6 @@ displayDebug world entityId =
                         ]
                         [ componentDebug ]
                 )
-                (debugComponents entityId world)
+                (debugComponents contextOperations entityId context)
             )
         ]

@@ -19,7 +19,7 @@ emptyTable =
 modifier =
     Modifier.tableModifier
         { get = .positionComponents
-        , set = \table world -> { world | positionComponents = table }
+        , set = \table context -> { context | positionComponents = table }
         }
 
 

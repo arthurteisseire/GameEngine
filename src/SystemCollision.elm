@@ -11,7 +11,6 @@ import Core.Table as Table exposing (Table)
 import Dict exposing (Dict)
 import List.Extra as List
 import Vector2 exposing (Vector2)
-import World exposing (..)
 
 
 type alias Components =
@@ -40,20 +39,19 @@ type alias Intersection =
     Vector2 Float
 
 
-updateEntities : EntitySet -> World -> World
-updateEntities entitySet world =
+updateEntities entitySet context =
     let
         table : Table Components
         table =
             ComponentTable.select Components
-                |> ComponentTable.from world.positionComponents
-                |> ComponentTable.innerJoin world.velocityComponents
+                |> ComponentTable.from context.positionComponents
+                |> ComponentTable.innerJoin context.velocityComponents
 
         collidedTable : Table Components
         collidedTable =
             collideNew table
     in
-    updateComponentsInTable collidedTable world
+    updateComponentsInTable collidedTable context
 
 
 collideNew : Table Components -> Table Components
@@ -156,21 +154,19 @@ detectIntersection line1 line2 =
             Nothing
 
 
-updateEntitiesOld : EntitySet -> World -> World
-updateEntitiesOld entitySet world =
+updateEntitiesOld entitySet context =
     collideEachEntityRecursively
         ((Db.select OtherComponents
             |> Db.fromEntities .entities
             |> Db.innerJoin .positionComponents
          )
-            world
+            context
         )
         entitySet
-        world
+        context
 
 
-collideEachEntityRecursively : Table OtherComponents -> EntitySet -> World -> World
-collideEachEntityRecursively others entitySet world =
+collideEachEntityRecursively others entitySet context =
     let
         current =
             (Db.select Components
@@ -178,13 +174,13 @@ collideEachEntityRecursively others entitySet world =
                 |> Db.innerJoin .positionComponents
                 |> Db.innerJoin .velocityComponents
             )
-                world
+                context
 
         updatedComponents =
             collideEachEntity others current
     in
     if updatedComponents == Table.empty then
-        world
+        context
 
     else
         updateEntities
@@ -192,7 +188,7 @@ collideEachEntityRecursively others entitySet world =
                 (\entityId -> not <| List.member entityId (Table.keys updatedComponents))
                 entitySet
             )
-            (updateComponentsInTable updatedComponents world)
+            (updateComponentsInTable updatedComponents context)
 
 
 collideEachEntity : Table OtherComponents -> Table Components -> Table Components
@@ -229,13 +225,12 @@ collide otherComponents components =
             }
 
 
-updateComponentsInTable : Table Components -> World -> World
-updateComponentsInTable table world =
+updateComponentsInTable table context =
     Table.foldl
         (\entityId components currentWorld ->
             currentWorld
                 |> ComponentTable.updateComponent ( ComponentPosition.modifier.map, .position ) components entityId
                 |> ComponentTable.updateComponent ( ComponentVelocity.modifier.map, .velocity ) components entityId
         )
-        world
+        context
         table

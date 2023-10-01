@@ -11,7 +11,6 @@ import Core.EntityId exposing (EntityId)
 import Core.Modifier as Modifier
 import Core.Table as Table exposing (Table)
 import Vector2
-import World exposing (..)
 
 
 type alias OutputComponents =
@@ -32,7 +31,6 @@ type alias OtherComponents =
     }
 
 
-updateEntity : EntityId -> World -> World
 updateEntity =
     Db.updateComponentsWithOthers
         { func = velocityAttack
@@ -74,6 +72,5 @@ velocityAttack others { position, velocity, animation } =
         }
 
 
-clear : EntityId -> World -> World
-clear entityId world =
-    ComponentAttack.modifier.map (ComponentTable.insert entityId Nothing) world
+clear entityId context =
+    ComponentAttack.modifier.map (ComponentTable.insert entityId Nothing) context

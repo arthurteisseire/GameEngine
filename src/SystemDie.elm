@@ -3,38 +3,35 @@ module SystemDie exposing (..)
 import Core.ComponentTable as ComponentTable
 import Core.EntityId exposing (EntityId)
 import Core.Table as Table exposing (Table)
-import World exposing (World)
 
 
-updateEntity : EntityId -> World -> World
-updateEntity entityId world =
-    case Table.get entityId (ComponentTable.getTable world.lifeComponents) of
+updateEntity contextOperations entityId context =
+    case Table.get entityId (ComponentTable.getTable context.lifeComponents) of
         Just life ->
             if life.healPoints <= 0 then
-                removeEntity entityId world
+                removeEntity contextOperations entityId context
 
             else
-                world
+                context
 
         Nothing ->
-            world
+            context
 
 
-removeEntity : EntityId -> World -> World
-removeEntity entityId world =
+removeEntity contextOperations entityId context =
     let
         newWorld =
-            World.remove entityId world
+            contextOperations.remove entityId context
     in
     { newWorld
         | entityIdDebug =
-            case world.entityIdDebug of
+            case context.entityIdDebug of
                 Just id ->
                     if id == entityId then
                         Nothing
 
                     else
-                        world.entityIdDebug
+                        context.entityIdDebug
 
                 Nothing ->
                     Nothing

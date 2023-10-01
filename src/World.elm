@@ -13,6 +13,7 @@ import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import ComponentVisual exposing (ComponentVisual)
 import Core.ComponentTable as ComponentTable exposing (ComponentTable)
+import Core.Context exposing (ContextOperations)
 import Core.EntityId exposing (EntityId)
 import Core.EntitySet exposing (EntitySet)
 
@@ -51,6 +52,13 @@ foldl func result =
         |> func (ComponentTable.toOps ComponentTerrain.modifier)
         |> func (ComponentTable.toOps ComponentAI.modifier)
         |> func (ComponentTable.toOps ComponentPlayer.modifier)
+
+
+operations : ContextOperations World
+operations =
+    { toStrings = \entityId world -> foldl (\ops -> ops.toString world entityId) []
+    , remove = \entityId world -> foldl (\ops -> ops.remove entityId) world
+    }
 
 
 toStrings : EntityId -> World -> List String
