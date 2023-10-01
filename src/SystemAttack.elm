@@ -6,8 +6,7 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import Core.Component as Component
 import Core.ComponentTable as ComponentTable
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.Modifier as Modifier
 import Core.Table as Table exposing (Table)
 import Vector2
@@ -32,7 +31,7 @@ type alias OtherComponents =
 
 
 updateEntity =
-    Db.updateComponentsWithOthers
+    Context.updateComponentsWithOthers
         { func = velocityAttack
         , inputComponents =
             Component.select InputComponents
@@ -40,9 +39,9 @@ updateEntity =
                 |> Component.join ComponentVelocity.modifier.get
                 |> Component.join ComponentAnimation.modifier.get
         , otherComponents =
-            Db.select OtherComponents
-                |> Db.fromEntities .entities
-                |> Db.innerJoin ComponentPosition.modifier.get
+            Context.select OtherComponents
+                |> Context.fromEntities .entities
+                |> Context.innerJoin ComponentPosition.modifier.get
         , output =
             Modifier.select
                 |> ComponentTable.joinModifier ( ComponentAttack.modifier.map, .attack )

@@ -7,8 +7,7 @@ import ComponentTurn exposing (ComponentTurn)
 import ComponentVelocity exposing (ComponentVelocity)
 import Core.Component as Component
 import Core.ComponentTable as ComponentTable
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.Modifier as Modifier
 import Core.Table as Table exposing (Table)
 import Vector2
@@ -34,7 +33,7 @@ type alias OtherComponents =
 
 
 updateEntity =
-    Db.updateComponentsWithOthers
+    Context.updateComponentsWithOthers
         { func = updateAIVelocity
         , inputComponents =
             Component.select InputComponents
@@ -43,10 +42,10 @@ updateEntity =
                 |> Component.join ComponentPosition.modifier.get
                 |> Component.join ComponentAI.modifier.get
         , otherComponents =
-            Db.select OtherComponents
-                |> Db.fromEntities .entities
-                |> Db.innerJoin ComponentPlayer.modifier.get
-                |> Db.innerJoin ComponentPosition.modifier.get
+            Context.select OtherComponents
+                |> Context.fromEntities .entities
+                |> Context.innerJoin ComponentPlayer.modifier.get
+                |> Context.innerJoin ComponentPosition.modifier.get
         , output =
             Modifier.select
                 |> ComponentTable.joinModifier ( ComponentVelocity.modifier.map, .velocity )

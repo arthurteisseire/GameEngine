@@ -1,7 +1,6 @@
 module SystemDie exposing (..)
 
 import Core.ComponentTable as ComponentTable
-import Core.EntityId exposing (EntityId)
 import Core.Table as Table exposing (Table)
 
 

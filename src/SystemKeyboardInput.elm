@@ -2,8 +2,6 @@ module SystemKeyboardInput exposing (..)
 
 import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import Core.ComponentTable as ComponentTable
-import Core.EntityId exposing (EntityId)
-import KeyboardInput exposing (Key)
 
 
 read key entityId =

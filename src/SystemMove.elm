@@ -4,8 +4,7 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import Core.Component as Component
 import Core.ComponentTable as ComponentTable exposing (ComponentTable)
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.Modifier as Modifier
 import Vector2
 
@@ -22,7 +21,7 @@ type alias OutputComponents =
 
 
 updateEntity =
-    Db.updateComponents
+    Context.updateComponents
         { func = move
         , inputComponents =
             Component.select InputComponents

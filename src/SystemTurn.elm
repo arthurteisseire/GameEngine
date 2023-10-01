@@ -3,8 +3,7 @@ module SystemTurn exposing (..)
 import ComponentTurn exposing (ComponentTurn)
 import Core.Component as Component
 import Core.ComponentTable as ComponentTable
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.Modifier as Modifier
 
 
@@ -14,7 +13,7 @@ type alias Components =
 
 
 updateEntity =
-    Db.updateComponents
+    Context.updateComponents
         { func = playTurn
         , inputComponents =
             Component.select Components

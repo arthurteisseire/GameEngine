@@ -4,8 +4,7 @@ import ComponentDamage exposing (ComponentDamage)
 import ComponentLife exposing (ComponentLife)
 import Core.Component as Component
 import Core.ComponentTable as ComponentTable
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.Modifier as Modifier
 
 
@@ -21,7 +20,7 @@ type alias InputComponents =
 
 
 updateEntity =
-    Db.updateComponents
+    Context.updateComponents
         { func = takeDamage
         , inputComponents =
             Component.select InputComponents

@@ -5,8 +5,7 @@ import ComponentPosition exposing (ComponentPosition)
 import ComponentVisual exposing (ComponentVisual)
 import Core.Component as Component
 import Core.ComponentTable as ComponentTable
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.Modifier as Modifier
 
 
@@ -24,7 +23,7 @@ type alias InputComponents =
 
 
 updateEntity dt =
-    Db.updateComponents
+    Context.updateComponents
         { func = animate dt
         , inputComponents =
             Component.select InputComponents

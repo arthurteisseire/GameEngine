@@ -3,13 +3,10 @@ module SystemCollision exposing (..)
 import ComponentPosition exposing (ComponentPosition)
 import ComponentVelocity exposing (ComponentVelocity)
 import Core.ComponentTable as ComponentTable
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.EntitySet as EntitySet exposing (EntitySet)
-import Core.Modifier as Modifier
+import Core.Modifier
 import Core.Table as Table exposing (Table)
-import Dict exposing (Dict)
-import List.Extra as List
 import Vector2 exposing (Vector2)
 
 
@@ -156,9 +153,9 @@ detectIntersection line1 line2 =
 
 updateEntitiesOld entitySet context =
     collideEachEntityRecursively
-        ((Db.select OtherComponents
-            |> Db.fromEntities .entities
-            |> Db.innerJoin .positionComponents
+        ((Context.select OtherComponents
+            |> Context.fromEntities .entities
+            |> Context.innerJoin .positionComponents
          )
             context
         )
@@ -169,10 +166,10 @@ updateEntitiesOld entitySet context =
 collideEachEntityRecursively others entitySet context =
     let
         current =
-            (Db.select Components
-                |> Db.fromEntities (\_ -> entitySet)
-                |> Db.innerJoin .positionComponents
-                |> Db.innerJoin .velocityComponents
+            (Context.select Components
+                |> Context.fromEntities (\_ -> entitySet)
+                |> Context.innerJoin .positionComponents
+                |> Context.innerJoin .velocityComponents
             )
                 context
 

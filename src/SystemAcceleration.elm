@@ -4,11 +4,9 @@ import ComponentKeyboardInput exposing (ComponentKeyboardInput)
 import ComponentVelocity exposing (ComponentVelocity)
 import Core.Component as Component
 import Core.ComponentTable as ComponentTable
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.Modifier as Modifier
 import KeyboardInput exposing (Key)
-import World exposing (..)
 
 
 type alias OutputComponents =
@@ -28,7 +26,7 @@ clearVelocity entityId context =
 
 
 updateEntity =
-    Db.updateComponents
+    Context.updateComponents
         { func = updatePlayerVelocity
         , inputComponents =
             Component.select InputComponents

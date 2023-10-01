@@ -5,8 +5,7 @@ import ComponentDamage exposing (ComponentDamage)
 import ComponentPosition exposing (ComponentPosition)
 import Core.Component as Component
 import Core.ComponentTable as ComponentTable
-import Core.Database as Db
-import Core.EntityId exposing (EntityId)
+import Core.Context as Context
 import Core.Modifier as Modifier
 import Core.Table as Table exposing (Table)
 import Vector2
@@ -28,15 +27,15 @@ type alias OtherComponents =
 
 
 updateEntity =
-    Db.updateComponentsWithOthers
+    Context.updateComponentsWithOthers
         { func = takeDamage
         , inputComponents =
             Component.select InputComponents
                 |> Component.join .positionComponents
         , otherComponents =
-            Db.select OtherComponents
-                |> Db.fromEntities .entities
-                |> Db.innerJoin ComponentAttack.modifier.get
+            Context.select OtherComponents
+                |> Context.fromEntities .entities
+                |> Context.innerJoin ComponentAttack.modifier.get
         , output =
             Modifier.select
                 |> ComponentTable.joinModifier ( ComponentDamage.modifier.map, .damage )
